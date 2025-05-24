@@ -1,0 +1,26 @@
+{
+	"name": "fokke/pw-json-api",
+	"type": "library",
+	"description": "JSON API for ProcessWire",
+	"license": "MIT",
+	"keywords": [
+		"json",
+		"api"
+	],
+	"authors": [
+		{
+			"name": "Ville Fokke Saarivaara",
+			"homepage": "https://fokke.fi",
+			"email": "ville.saarivaara@gmail.com"
+		}
+	],
+	"autoload": {
+		"classmap": [
+			"src/"
+		]
+	},
+	"require": {
+		"php": ">=8.1",
+		"processwire/processwire": ">=3.0.173"
+	}
+}

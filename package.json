@@ -1,0 +1,14 @@
+{
+	"name": "pw-json-api",
+	"version": "1.0.0",
+	"description": "JSON API for ProcessWire",
+	"license": "MIT",
+	"author": "Ville Fokke Saarivaara",
+	"scripts": {
+		"format": "prettier --write src/"
+	},
+	"devDependencies": {
+		"@prettier/plugin-php": "0.22.4",
+		"prettier": "3.5.3"
+	}
+}

@@ -1,0 +1,71 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "f5ccfa7decde3a4519c7d2da89f6424c",
+    "packages": [
+        {
+            "name": "processwire/processwire",
+            "version": "3.0.246",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/processwire/processwire.git",
+                "reference": "44fcf13ea2d7f14a04eed54c29afcc79eb46ec45"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/processwire/processwire/zipball/44fcf13ea2d7f14a04eed54c29afcc79eb46ec45",
+                "reference": "44fcf13ea2d7f14a04eed54c29afcc79eb46ec45",
+                "shasum": ""
+            },
+            "require": {
+                "ext-gd": "*",
+                "php": ">=7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "wire/core/ProcessWire.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MPL-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Ryan Cramer",
+                    "email": "ryan@processwire.com",
+                    "homepage": "https://processwire.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "ProcessWire CMS/CMF",
+            "homepage": "https://processwire.com",
+            "keywords": [
+                "Content management system",
+                "cmf",
+                "cms",
+                "processwire"
+            ],
+            "support": {
+                "issues": "https://github.com/processwire/processwire/issues",
+                "source": "https://github.com/processwire/processwire/tree/3.0.246"
+            },
+            "time": "2025-02-14T15:10:03+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=8.1"
+    },
+    "platform-dev": [],
+    "plugin-api-version": "2.6.0"
+}
