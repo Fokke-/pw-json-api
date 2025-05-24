@@ -7,6 +7,6 @@ namespace PwJsonApi;
  */
 enum HookTiming
 {
-	case Before;
-	case After;
+  case Before;
+  case After;
 }

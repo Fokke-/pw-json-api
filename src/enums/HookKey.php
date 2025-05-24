@@ -7,45 +7,45 @@ namespace PwJsonApi;
  */
 enum HookKey
 {
-	/** Before any request */
-	case Before;
+  /** Before any request */
+  case Before;
 
-	/** After any request */
-	case After;
+  /** After any request */
+  case After;
 
-	/** Before GET request */
-	case BeforeGet;
+  /** Before GET request */
+  case BeforeGet;
 
-	/** After GET request */
-	case AfterGet;
+  /** After GET request */
+  case AfterGet;
 
-	/** Before POST request */
-	case BeforePost;
+  /** Before POST request */
+  case BeforePost;
 
-	/** After POST request */
-	case AfterPost;
+  /** After POST request */
+  case AfterPost;
 
-	/** Before HEAD request */
-	case BeforeHead;
+  /** Before HEAD request */
+  case BeforeHead;
 
-	/** After HEAD request */
-	case AfterHead;
+  /** After HEAD request */
+  case AfterHead;
 
-	/** Before PUT request */
-	case BeforePut;
+  /** Before PUT request */
+  case BeforePut;
 
-	/** After PUT request */
-	case AfterPut;
+  /** After PUT request */
+  case AfterPut;
 
-	/** Before DELETE request */
-	case BeforeDelete;
+  /** Before DELETE request */
+  case BeforeDelete;
 
-	/** After DELETE request */
-	case AfterDelete;
+  /** After DELETE request */
+  case AfterDelete;
 
-	/** Before OPTIONS request */
-	case BeforeOptions;
+  /** Before OPTIONS request */
+  case BeforeOptions;
 
-	/** After OPTIONS request */
-	case AfterOptions;
+  /** After OPTIONS request */
+  case AfterOptions;
 }

@@ -4,10 +4,10 @@ namespace PwJsonApi;
 
 class HookReturnBefore extends HookReturn
 {
-	/*
-	 * Request handler
-	 *
-	 * @var callable
-	 */
-	public $handler;
+  /*
+   * Request handler
+   *
+   * @var callable
+   */
+  public $handler;
 }

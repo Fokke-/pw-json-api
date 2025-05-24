@@ -4,50 +4,50 @@ namespace PwJsonApi;
 
 class Hooks
 {
-	/**
-	 * Hooks
-	 *
-	 * @var array<string, array>
-	 */
-	private array $items = [];
+  /**
+   * Hooks
+   *
+   * @var array<string, array>
+   */
+  private array $items = [];
 
-	/**
-	 * Constructor
-	 */
-	public function __construct()
-	{
-		$this->items = array_reduce(
-			HookKey::cases(),
-			function ($acc, $item) {
-				$acc[$item->name] = [];
-				return $acc;
-			},
-			[]
-		);
-	}
+  /**
+   * Constructor
+   */
+  public function __construct()
+  {
+    $this->items = array_reduce(
+      HookKey::cases(),
+      function ($acc, $item) {
+        $acc[$item->name] = [];
+        return $acc;
+      },
+      []
+    );
+  }
 
-	/**
-	 * Get hooks by key
-	 */
-	public function get(HookKey $key): array
-	{
-		return $this->items[$key->name];
-	}
+  /**
+   * Get hooks by key
+   */
+  public function get(HookKey $key): array
+  {
+    return $this->items[$key->name];
+  }
 
-	/**
-	 * Add a new hook
-	 */
-	public function add(HookKey $key, callable $handler)
-	{
-		$this->items[$key->name][] = $handler;
-	}
+  /**
+   * Add a new hook
+   */
+  public function add(HookKey $key, callable $handler)
+  {
+    $this->items[$key->name][] = $handler;
+  }
 
-	/**
-	 * Find hooks by timing and request method
-	 */
-	public function find(HookTiming $order, RequestMethod|null $requestMethod = null): array
-	{
-		$key = $order->name . ($requestMethod ? $requestMethod->name : '');
-		return $this->items[$key];
-	}
+  /**
+   * Find hooks by timing and request method
+   */
+  public function find(HookTiming $order, RequestMethod|null $requestMethod = null): array
+  {
+    $key = $order->name . ($requestMethod ? $requestMethod->name : '');
+    return $this->items[$key];
+  }
 }

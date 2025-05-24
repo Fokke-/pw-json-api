@@ -7,11 +7,11 @@ namespace PwJsonApi;
  */
 enum Config
 {
-	/**
-	 * Enable debug mode?
-	 *
-	 * In debug mode:
-	 * - Resulting JSON is pretty printed
-	 */
-	case Debug;
+  /**
+   * Enable debug mode?
+   *
+   * In debug mode:
+   * - Resulting JSON is pretty printed
+   */
+  case Debug;
 }

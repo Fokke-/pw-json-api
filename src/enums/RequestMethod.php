@@ -7,10 +7,10 @@ namespace PwJsonApi;
  */
 enum RequestMethod: string
 {
-	case Get = 'GET';
-	case Post = 'POST';
-	case Head = 'HEAD';
-	case Put = 'PUT';
-	case Delete = 'DELETE';
-	case Options = 'OPTIONS';
+  case Get = 'GET';
+  case Post = 'POST';
+  case Head = 'HEAD';
+  case Put = 'PUT';
+  case Delete = 'DELETE';
+  case Options = 'OPTIONS';
 }

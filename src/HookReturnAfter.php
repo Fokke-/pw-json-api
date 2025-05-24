@@ -4,6 +4,6 @@ namespace PwJsonApi;
 
 class HookReturnAfter extends HookReturn
 {
-	/** Request response */
-	public Response $response;
+  /** Request response */
+  public Response $response;
 }

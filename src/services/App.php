@@ -7,8 +7,8 @@ namespace PwJsonApi;
  */
 class App extends Service
 {
-	public function __construct()
-	{
-		parent::__construct();
-	}
+  public function __construct()
+  {
+    parent::__construct();
+  }
 }
