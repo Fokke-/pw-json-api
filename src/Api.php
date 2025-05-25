@@ -4,7 +4,6 @@ namespace PwJsonApi;
 
 use function ProcessWire\wire;
 
-// TODO: add Api404Exception
 class Api
 {
   use Utils;
