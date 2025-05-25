@@ -4,6 +4,7 @@ namespace PwJsonApi;
 
 use function ProcessWire\wire;
 
+// TODO: add Api404Exception
 class Api
 {
   use Utils;
@@ -106,11 +107,20 @@ class Api
               call_user_func($hookFn, $hookReturnBefore);
             }
 
-            $response = call_user_func($handler, $event);
-            if (!($response instanceof Response)) {
-              // TODO: throw critical exception
-              throw new ApiException('Malformed result', 500);
-            }
+            // Get response from endpoint
+            $response = (function () use ($handler, $event) {
+              $out = call_user_func($handler, $event);
+              if (empty($out)) {
+                return new Response();
+              }
+
+              if (!($out instanceof Response)) {
+                // TODO: throw critical exception
+                throw new ApiException('Malformed result', 500);
+              }
+
+              return $out;
+            })();
 
             // Payload for after hooks
             $hookReturnAfter = new HookReturnAfter();
