@@ -7,7 +7,7 @@ class Hooks
   /**
    * Hooks
    *
-   * @var array<string, array>
+   * @var array<string, callable[]>
    */
   private array $items = [];
 

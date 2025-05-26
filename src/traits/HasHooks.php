@@ -27,7 +27,9 @@ trait HasHooks
     return $this->hooks;
   }
 
-  /**	Find hooks by timing and request method */
+  /**
+   * Find hooks by timing and request method
+   */
   public function findHooks(HookTiming $order, RequestMethod|null $requestMethod = null): array
   {
     return $this->initHooks()->find($order, $requestMethod);
