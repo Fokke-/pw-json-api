@@ -158,7 +158,7 @@ class Api
         } catch (ApiException $e) {
           // Output error
           http_response_code($e->getCode());
-          echo $e->toResponse()->toJson($jsonFlags);
+          echo $e->toResponse()->toJson($jsonFlags, false);
         }
 
         die();

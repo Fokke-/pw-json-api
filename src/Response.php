@@ -35,9 +35,9 @@ class Response
   /**
    * Return response as an array
    */
-  public function toArray(bool $withData = true): array
+  public function toArray(bool $withData = true): ?array
   {
-    return [
+    $out = [
       ...(function () use ($withData) {
         if ($withData === false) {
           return [];
@@ -59,13 +59,20 @@ class Response
         []
       ),
     ];
+
+    return !empty($out) ? $out : null;
   }
 
   /**
    * Return response as JSON
    */
-  public function toJson(int $jsonOptions = 0, bool $withData = true): string
+  public function toJson(int $jsonOptions = 0, bool $withData = true): ?string
   {
+    $data = $this->toArray($withData);
+    if (empty($data)) {
+      return null;
+    }
+
     return json_encode($this->toArray($withData), $jsonOptions);
   }
 }
