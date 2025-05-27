@@ -27,6 +27,11 @@ trait HasHooks
     return $this->hooks;
   }
 
+  public function getHooks(): Hooks
+  {
+    return $this->initHooks();
+  }
+
   /**
    * Find hooks by timing and request method
    */
@@ -40,7 +45,7 @@ trait HasHooks
    *
    * @param callable(HookReturnBefore): void $handler
    */
-  public function before(callable $handler): static
+  public function hookBefore(callable $handler): static
   {
     $this->initHooks()->add(HookKey::Before, $handler);
     return $this;
@@ -51,7 +56,7 @@ trait HasHooks
    *
    * @param callable(HookReturnBefore): void $handler
    */
-  public function beforeGet(callable $handler): static
+  public function hookGeforeGet(callable $handler): static
   {
     $this->initHooks()->add(HookKey::BeforeGet, $handler);
     return $this;
@@ -62,7 +67,7 @@ trait HasHooks
    *
    * @param callable(HookReturnBefore): void $handler
    */
-  public function beforePost(callable $handler): static
+  public function hookBeforePost(callable $handler): static
   {
     $this->initHooks()->add(HookKey::BeforePost, $handler);
     return $this;
@@ -73,7 +78,7 @@ trait HasHooks
    *
    * @param callable(HookReturnBefore): void $handler
    */
-  public function beforeHead(callable $handler): static
+  public function hookBeforeHead(callable $handler): static
   {
     $this->initHooks()->add(HookKey::BeforeHead, $handler);
     return $this;
@@ -84,7 +89,7 @@ trait HasHooks
    *
    * @param callable(HookReturnBefore): void $handler
    */
-  public function beforePut(callable $handler): static
+  public function hookBeforePut(callable $handler): static
   {
     $this->initHooks()->add(HookKey::BeforePut, $handler);
     return $this;
@@ -95,7 +100,7 @@ trait HasHooks
    *
    * @param callable(HookReturnBefore): void $handler
    */
-  public function beforeDelete(callable $handler): static
+  public function hookBeforeDelete(callable $handler): static
   {
     $this->initHooks()->add(HookKey::BeforeDelete, $handler);
     return $this;
@@ -106,7 +111,7 @@ trait HasHooks
    *
    * @param callable(HookReturnBefore): void $handler
    */
-  public function beforeOptions(callable $handler): static
+  public function hookBeforeOptions(callable $handler): static
   {
     $this->initHooks()->add(HookKey::BeforeOptions, $handler);
     return $this;
@@ -117,7 +122,7 @@ trait HasHooks
    *
    * @param callable(HookReturnAfter): void $handler
    */
-  public function after(callable $handler): static
+  public function hookAfter(callable $handler): static
   {
     $this->initHooks()->add(HookKey::After, $handler);
     return $this;
@@ -128,7 +133,7 @@ trait HasHooks
    *
    * @param callable(HookReturnAfter): void $handler
    */
-  public function afterGet(callable $handler): static
+  public function hookAfterGet(callable $handler): static
   {
     $this->initHooks()->add(HookKey::AfterGet, $handler);
     return $this;
@@ -139,7 +144,7 @@ trait HasHooks
    *
    * @param callable(HookReturnAfter): void $handler
    */
-  public function afterPost(callable $handler): static
+  public function hookAfterPost(callable $handler): static
   {
     $this->initHooks()->add(HookKey::AfterPost, $handler);
     return $this;
@@ -150,7 +155,7 @@ trait HasHooks
    *
    * @param callable(HookReturnAfter): void $handler
    */
-  public function afterHead(callable $handler): static
+  public function hookAfterHead(callable $handler): static
   {
     $this->initHooks()->add(HookKey::AfterHead, $handler);
     return $this;
@@ -161,7 +166,7 @@ trait HasHooks
    *
    * @param callable(HookReturnAfter): void $handler
    */
-  public function afterPut(callable $handler): static
+  public function hookAfterPut(callable $handler): static
   {
     $this->initHooks()->add(HookKey::AfterPut, $handler);
     return $this;
@@ -172,7 +177,7 @@ trait HasHooks
    *
    * @param callable(HookReturnAfter): void $handler
    */
-  public function afterDelete(callable $handler): static
+  public function hookAfterDelete(callable $handler): static
   {
     $this->initHooks()->add(HookKey::AfterDelete, $handler);
     return $this;
@@ -183,7 +188,7 @@ trait HasHooks
    *
    * @param callable(HookReturnAfter): void $handler
    */
-  public function afterOptions(callable $handler): static
+  public function hookAfterOptions(callable $handler): static
   {
     $this->initHooks()->add(HookKey::AfterOptions, $handler);
     return $this;

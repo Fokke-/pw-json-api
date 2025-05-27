@@ -59,7 +59,7 @@ trait HasEndpointList
   /**
    * Get endpoint by path
    *
-   * @return Endpoint[]
+   * @return Endpoint
    */
   public function getEndpoint(string $path): Endpoint|null
   {
@@ -67,9 +67,9 @@ trait HasEndpointList
   }
 
   /**
-   * Listen to path
+   * Add endpoint
    */
-  public function listen(string $path): Endpoint
+  public function addEndpoint(string $path): Endpoint
   {
     $endpoint = new Endpoint($path);
     $this->initEndpointList()->add($endpoint);
@@ -78,9 +78,9 @@ trait HasEndpointList
   }
 
   /**
-   * Unlisten path
+   * Remove endpoint
    */
-  public function unlisten(string $path): static
+  public function removeEndpoint(string $path): static
   {
     $this->initEndpointList()->remove($path);
     return $this;

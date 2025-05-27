@@ -2,6 +2,7 @@
 
 namespace PwJsonApi;
 
+use \ProcessWire\{WireException};
 use function ProcessWire\wire;
 
 class Api
@@ -11,15 +12,14 @@ class Api
   use HasServiceList;
   use HasHooks;
 
-  /** JSON options */
-  public const JSON_OPTIONS = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
-
-  /** JSON options when debug mode is on */
-  public const JSON_OPTIONS_DEBUG =
-    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT;
-
   /** Is debug mode on? */
   private bool $debug = false;
+
+  /** Flags to pass to json_encode() */
+  public int $jsonFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+
+  /** Flags to pass to json_encode() when debug mode is on */
+  public int $jsonFlagsDebug = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT;
 
   /**
    * Create a new API instance
@@ -33,140 +33,136 @@ class Api
     }
   }
 
+  protected function handleRequest(
+    EndpointCrawlerResult $result,
+    \ProcessWire\HookEvent $event
+  ): Response {
+    // Try to find handler matching the request method.
+    // If found, get response from handler.
+    $requestMethod = RequestMethod::tryFrom(wire()->input->requestMethod());
+    $handler = $result->endpoint->getHandler($requestMethod);
+
+    if (empty($requestMethod) || empty($handler)) {
+      throw new ApiException('Method not allowed', 405);
+    }
+
+    // Before hooks
+    $beforeHooks = [
+      // API before
+      ...$this->findHooks(HookTiming::Before),
+
+      // API before by request method
+      ...$this->findHooks(HookTiming::Before, $requestMethod),
+
+      // Endpoint with services
+      ...$result->resolveHooks(HookTiming::Before, $requestMethod),
+    ];
+
+    if (!empty($beforeHooks)) {
+      $hookReturnBefore = new HookReturnBefore();
+      $hookReturnBefore->event = $event;
+      $hookReturnBefore->handler = $handler;
+      $hookReturnBefore->method = $requestMethod->value;
+      $hookReturnBefore->endpoint = $result->endpoint;
+      $hookReturnBefore->service = $result->service;
+
+      foreach ($beforeHooks as $hookFn) {
+        call_user_func($hookFn, $hookReturnBefore);
+      }
+    }
+
+    // Get response from endpoint
+    $response = (function () use ($handler, $event) {
+      $out = call_user_func($handler, $event);
+      if (empty($out)) {
+        return new Response();
+      }
+
+      if (!($out instanceof Response)) {
+        throw new WireException('Malformed result', 500);
+      }
+
+      return $out;
+    })();
+
+    // After hooks
+    $afterHooks = [
+      // Endpoint with services
+      ...$result->resolveHooks(HookTiming::After, $requestMethod),
+
+      // API before
+      ...$this->findHooks(HookTiming::After),
+
+      // API before by request method
+      ...$this->findHooks(HookTiming::After, $requestMethod),
+    ];
+
+    if (!empty($afterHooks)) {
+      $hookReturnAfter = new HookReturnAfter();
+      $hookReturnAfter->event = $event;
+      $hookReturnAfter->response = $response;
+      $hookReturnAfter->method = $requestMethod->value;
+      $hookReturnAfter->endpoint = $result->endpoint;
+      $hookReturnAfter->service = $result->service;
+
+      foreach ($afterHooks as $hookFn) {
+        call_user_func($hookFn, $hookReturnAfter);
+      }
+    }
+
+    return $response;
+  }
+
+  /**
+   * Run API
+   *
+   * Resolves all services and endpoints and creates listeners for them
+   * - Catches ApiExceptions and renders errors as JSON
+   *
+   * Note that this method will NOT catch any other exceptions, such as WireExceptions.
+   */
   public function run(): void
   {
     /** @var string[] */
     $paths = [];
-    foreach ($this->getServices() as $service) {
-      // Add listener to each endpoint
-      foreach ($service->getEndpoints() as $endpoint) {
-        // Build full path for the endpoint
-        $path = implode(
-          '/',
-          array_filter(
-            [
-              '', // for leading slash
-              $this->basePath,
-              $service->getBasePath(),
-              $endpoint->getPath(),
-              '?', // allow access with or without trailing slash
-            ],
-            fn($segment) => !is_null($segment)
-          )
-        );
 
-        // Check for duplicated path
-        if (in_array($path, $paths)) {
-          // TODO: throw critical exception
-          throw new \Exception(
-            "Duplicated endpoint path: '{$path}' (defined in service {$service->name})."
-          );
+    $crawler = new EndpointCrawler();
+
+    foreach ($crawler->crawl($this->getServices(), $this->hooks) as $result) {
+      /** @var EndpointCrawlerResult $result */
+      $path = $result->resolvePath($this->getBasePath());
+
+      // Allow access with or without trailing slash
+      $path .= '/?';
+
+      // Check for duplicated path
+      if (in_array($path, $paths)) {
+        throw new WireException(
+          "Duplicated endpoint path '{$path}' (defined in service '{$result->service->name}')."
+        );
+      }
+
+      $paths[] = $path;
+
+      // Listen to path
+      wire()->addHook($path, function (\ProcessWire\HookEvent $event) use ($result) {
+        $jsonFlags = $this->debug === true ? $this->jsonFlagsDebug : $this->jsonFlags;
+
+        header('Content-Type: application/json');
+
+        try {
+          $response = $this->handleRequest($result, $event);
+
+          http_response_code($response->code);
+          echo $response->toJson($jsonFlags);
+        } catch (ApiException $e) {
+          // Output error
+          http_response_code($e->getCode());
+          echo $e->toResponse()->toJson($jsonFlags);
         }
 
-        $paths[] = $path;
-
-        wire()->addHook($path, function (\ProcessWire\HookEvent $event) use ($service, $endpoint) {
-          header('Content-Type: application/json');
-
-          // Try to find handler matching the request method.
-          // If found, get response from handler.
-          try {
-            $requestMethod = RequestMethod::tryFrom(wire()->input->requestMethod());
-            $handler = $endpoint->getHandler($requestMethod);
-
-            if (empty($requestMethod) || empty($handler)) {
-              throw new ApiException('Method not allowed', 405);
-            }
-
-            // Payload for before hooks
-            $hookReturnBefore = new HookReturnBefore();
-            $hookReturnBefore->event = $event;
-            $hookReturnBefore->handler = $handler;
-            $hookReturnBefore->method = wire()->input->requestMethod();
-            $hookReturnBefore->endpoint = $endpoint;
-            $hookReturnBefore->service = $service;
-
-            // Run before hooks
-            foreach (
-              [
-                // Service before by request type
-                ...$service->findHooks(HookTiming::Before, $requestMethod),
-
-                // Service before
-                ...$service->findHooks(HookTiming::Before),
-
-                // Global before by request type
-                ...$this->findHooks(HookTiming::Before, $requestMethod),
-
-                // Global before
-                ...$this->findHooks(HookTiming::Before),
-              ]
-              as $hookFn
-            ) {
-              call_user_func($hookFn, $hookReturnBefore);
-            }
-
-            // Get response from endpoint
-            $response = (function () use ($handler, $event) {
-              $out = call_user_func($handler, $event);
-              if (empty($out)) {
-                return new Response();
-              }
-
-              if (!($out instanceof Response)) {
-                // TODO: throw critical exception
-                throw new ApiException('Malformed result', 500);
-              }
-
-              return $out;
-            })();
-
-            // Payload for after hooks
-            $hookReturnAfter = new HookReturnAfter();
-            $hookReturnAfter->event = $event;
-            $hookReturnAfter->response = $response;
-            $hookReturnAfter->method = wire()->input->requestMethod();
-            $hookReturnAfter->endpoint = $endpoint;
-            $hookReturnAfter->service = $service;
-
-            foreach (
-              [
-                // Service after by request type
-                ...$service->findHooks(HookTiming::After, $requestMethod),
-
-                // Service after
-                ...$service->findHooks(HookTiming::After),
-
-                // Global after by request type
-                ...$this->findHooks(HookTiming::After, $requestMethod),
-
-                // Global after
-                ...$this->findHooks(HookTiming::After),
-              ]
-              as $hookFn
-            ) {
-              call_user_func($hookFn, $hookReturnAfter);
-            }
-
-            // Output response
-            http_response_code($response->code);
-            echo $response->toJson(
-              $this->debug === true ? self::JSON_OPTIONS_DEBUG : self::JSON_OPTIONS
-            );
-          } catch (ApiException $e) {
-            // Output error
-            http_response_code($e->getCode());
-            echo $e
-              ->toResponse()
-              ->toJson(
-                $this->debug === true ? self::JSON_OPTIONS_DEBUG : self::JSON_OPTIONS,
-                false
-              );
-          }
-
-          die();
-        });
-      }
+        die();
+      });
     }
   }
 }

@@ -6,6 +6,7 @@ class Service
 {
   use Utils;
   use HasEndpointList;
+  use HasServiceList;
   use HasHooks;
 
   /** Service name */

@@ -2,10 +2,18 @@
 
 namespace PwJsonApi;
 
+/**
+ * API response
+ */
 class Response
 {
+  /** Response data */
   public array $data;
+
+  /** Response code */
   public int $code;
+
+  /** Response data */
   public array $withData = [];
 
   public function __construct(array $data = [], $code = 200)
@@ -15,7 +23,7 @@ class Response
   }
 
   /**
-   * Add top level key to the response
+   * Add top level keys and values to the response
    */
   public function with(array $data): static
   {

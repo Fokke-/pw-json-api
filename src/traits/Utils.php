@@ -7,7 +7,7 @@ namespace PwJsonApi;
  */
 trait Utils
 {
-  protected function formatPath(string|null $path): string|null
+  private function formatPath(string|null $path): string|null
   {
     // For empty or root path, return null
     if (empty($path) || $path === '/') {

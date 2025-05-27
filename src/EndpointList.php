@@ -2,6 +2,8 @@
 
 namespace PwJsonApi;
 
+use \ProcessWire\{WireException};
+
 class EndpointList
 {
   use HasBasePath;
@@ -73,7 +75,7 @@ class EndpointList
     $endpoint = $endpointOrPath instanceof Endpoint ? $endpointOrPath : $this->get($endpointOrPath);
 
     if (empty($endpoint)) {
-      throw new \Exception(
+      throw new WireException(
         "Unable to remove endpoint. Endpoint with path '{$endpointOrPath}' was not found."
       );
     }

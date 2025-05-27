@@ -27,6 +27,14 @@ class Hooks
   }
 
   /**
+   * Get all hooks
+   */
+  public function getItems(): array
+  {
+    return $this->items;
+  }
+
+  /**
    * Get hooks by key
    */
   public function get(HookKey $key): array
@@ -45,9 +53,9 @@ class Hooks
   /**
    * Find hooks by timing and request method
    */
-  public function find(HookTiming $order, RequestMethod|null $requestMethod = null): array
+  public function find(HookTiming $timing, RequestMethod|null $requestMethod = null): array
   {
-    $key = $order->name . ($requestMethod ? $requestMethod->name : '');
+    $key = $timing->name . ($requestMethod ? $requestMethod->name : '');
     return $this->items[$key];
   }
 }

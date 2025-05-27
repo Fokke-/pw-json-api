@@ -2,10 +2,10 @@
 
 namespace PwJsonApi;
 
-use \ProcessWire\{PageArray, Page, Field};
+use \ProcessWire\{PageArray, Page};
 
 // TODO: field parse hooks
-// TODO: all hooks as an array
+// TODO: global configuration for page parser
 class PageParser
 {
   /**
@@ -28,18 +28,18 @@ class PageParser
   protected Page|PageArray|null $input = null;
 
   /**
-   * Handler for before parse page
+   * Handlers for before parse page
    *
-   * @var callable|null
+   * @var callable[]
    */
-  protected $beforeParsePageHandler = null;
+  protected $beforeParsePageHandlers = [];
 
   /**
-   * Handler for after parse page
+   * Handlers for after parse page
    *
-   * @var callable|null
+   * @var callable[]
    */
-  protected $afterParsePageHandler = null;
+  protected $afterParsePageHandlers = [];
 
   /**
    * Set Page of PageArray to parse
@@ -108,24 +108,24 @@ class PageParser
   }
 
   /**
-   * Hook to run before a single page will be parsed
+   * Add hook to run before a single page will be parsed
    *
    * @param callable(HookReturnBeforePageParse): void $handler
    */
   public function beforeParse(callable $handler): static
   {
-    $this->beforeParsePageHandler = $handler;
+    $this->beforeParsePageHandlers[] = $handler;
     return $this;
   }
 
   /**
-   * Hook to run after a single page has been parsed
+   * Add hook to run after a single page has been parsed
    *
    * @param callable(HookReturnAfterPageParse): void $handler
    */
   public function afterParse(callable $handler): static
   {
-    $this->afterParsePageHandler = $handler;
+    $this->afterParsePageHandlers[] = $handler;
     return $this;
   }
 
@@ -135,12 +135,14 @@ class PageParser
   protected function parsePage(\ProcessWire\Page $page): array
   {
     // Run beforeParsePage hook
-    if (is_callable($this->beforeParsePageHandler)) {
-      $hookRet = new HookReturnBeforePageParse();
-      $hookRet->page = $page;
+    $hookRet = new HookReturnBeforePageParse();
+    $hookRet->page = $page;
 
-      call_user_func($this->beforeParsePageHandler, $hookRet);
-      $page = $hookRet->page;
+    foreach ($this->beforeParsePageHandlers as $handler) {
+      if (is_callable($handler)) {
+        call_user_func($handler, $hookRet);
+        $page = $hookRet->page;
+      }
     }
 
     // Gather fields to parse
@@ -170,13 +172,15 @@ class PageParser
     );
 
     // Run afterParsePage hook
-    if (is_callable($this->afterParsePageHandler)) {
-      $hookRet = new HookReturnAfterPageParse();
-      $hookRet->parsedPage = $parsedPage;
-      $hookRet->page = $page;
+    $hookRet = new HookReturnAfterPageParse();
+    $hookRet->parsedPage = $parsedPage;
+    $hookRet->page = $page;
 
-      call_user_func($this->afterParsePageHandler, $hookRet);
-      $parsedPage = $hookRet->parsedPage;
+    foreach ($this->afterParsePageHandlers as $handler) {
+      if (is_callable($handler)) {
+        call_user_func($handler, $hookRet);
+        $parsedPage = $hookRet->parsedPage;
+      }
     }
 
     return $parsedPage;
@@ -199,24 +203,26 @@ class PageParser
   {
     // Get field object and try to parse it
     $field = $page->getField($fieldName);
+
     if (!empty($field)) {
       $fieldClassName = (new \ReflectionClass($field->type))->getShortName();
+      $value = $page->{$fieldName};
 
       switch ($fieldClassName) {
         case 'InputfieldCheckbox':
-          return (bool) $page->{$field->name};
+          return (bool) $value;
           break;
 
         case 'FieldtypeFloat':
-          return (float) $page->{$field->name};
+          return (float) $value;
           break;
 
         case 'FieldtypeInteger':
-          return (int) $page->{$field->name};
+          return (int) $value;
           break;
 
         default:
-          return $page->{$field->name};
+          return $value;
           break;
       }
     }
