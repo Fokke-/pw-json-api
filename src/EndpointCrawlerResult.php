@@ -2,6 +2,9 @@
 
 namespace PwJsonApi;
 
+/**
+ * Result of a successful endpoint crawl
+ */
 class EndpointCrawlerResult
 {
   /**

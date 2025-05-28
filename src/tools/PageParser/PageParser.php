@@ -169,14 +169,16 @@ class PageParser
    */
   protected function parsePage(\ProcessWire\Page $page): array
   {
-    // Run beforeParsePage hook
-    $hookRet = new HookReturnBeforePageParse();
+    if (!empty($this->beforeParsePageHandlers)) {
+      // Run beforeParsePage hook
+      $hookRet = new HookReturnBeforePageParse();
 
-    foreach ($this->beforeParsePageHandlers as $handler) {
-      if (is_callable($handler)) {
-        $hookRet->page = $page;
-        call_user_func($handler, $hookRet);
-        $page = $hookRet->page;
+      foreach ($this->beforeParsePageHandlers as $handler) {
+        if (is_callable($handler)) {
+          $hookRet->page = $page;
+          call_user_func($handler, $hookRet);
+          $page = $hookRet->page;
+        }
       }
     }
 
@@ -203,14 +205,16 @@ class PageParser
     );
 
     // Run afterParsePage hook
-    $hookRet = new HookReturnAfterPageParse();
-    $hookRet->page = $page;
+    if (!empty($this->afterParsePageHandlers)) {
+      $hookRet = new HookReturnAfterPageParse();
+      $hookRet->page = $page;
 
-    foreach ($this->afterParsePageHandlers as $handler) {
-      if (is_callable($handler)) {
-        $hookRet->parsedPage = $parsedPage;
-        call_user_func($handler, $hookRet);
-        $parsedPage = $hookRet->parsedPage;
+      foreach ($this->afterParsePageHandlers as $handler) {
+        if (is_callable($handler)) {
+          $hookRet->parsedPage = $parsedPage;
+          call_user_func($handler, $hookRet);
+          $parsedPage = $hookRet->parsedPage;
+        }
       }
     }
 
@@ -238,19 +242,23 @@ class PageParser
     $parser = new PageParser();
 
     if (!empty($field)) {
-      // Run before parse field hooks
-      $hookRet = new HookReturnBeforeFieldParse();
-      $hookRet->field = $field;
-      $hookRet->page = $page;
+      if (!empty($this->beforeParseFieldHandlers)) {
+        // Run before parse field hooks
+        $hookRet = new HookReturnBeforeFieldParse();
+        $hookRet->field = $field;
+        $hookRet->page = $page;
 
-      foreach ($this->beforeParseFieldHandlers as $handler) {
-        if (is_callable($handler)) {
-          $hookRet->value = $value;
-          $hookRet->parser = $parser;
+        foreach ($this->beforeParseFieldHandlers as $handler) {
+          if (is_callable($handler)) {
+            $hookRet->value = $value;
+            $hookRet->parser = $parser;
 
-          call_user_func($handler, $hookRet);
-          $value = $hookRet->value;
-          $parser = $hookRet->parser;
+            call_user_func($handler, $hookRet);
+
+            // Update value and parser from callback
+            $value = $hookRet->value;
+            $parser = $hookRet->parser;
+          }
         }
       }
 
@@ -288,16 +296,18 @@ class PageParser
       })();
 
       // Run after parse field hooks
-      $hookRet = new HookReturnAfterFieldParse();
-      $hookRet->field = $field;
-      $hookRet->page = $page;
+      if (!empty($this->afterParseFieldHandlers)) {
+        $hookRet = new HookReturnAfterFieldParse();
+        $hookRet->field = $field;
+        $hookRet->page = $page;
 
-      foreach ($this->afterParseFieldHandlers as $handler) {
-        if (is_callable($handler)) {
-          $hookRet->value = $parsedValue;
+        foreach ($this->afterParseFieldHandlers as $handler) {
+          if (is_callable($handler)) {
+            $hookRet->value = $parsedValue;
 
-          call_user_func($handler, $hookRet);
-          $parsedValue = $hookRet->value;
+            call_user_func($handler, $hookRet);
+            $parsedValue = $hookRet->value;
+          }
         }
       }
 
@@ -316,7 +326,7 @@ class PageParser
   public function parseImage(PageImage $image)
   {
     return [
-      'url' => $image->url,
+      'url' => $image->httpUrl,
       'filesize' => $image->filesize,
       'description' => !empty($image->description) ? $image->description : null,
       'tags' => !empty($image->tags) ? $image->tags : null,

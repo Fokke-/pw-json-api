@@ -43,7 +43,7 @@ trait HasHooks
   /**
    * Hook before any request
    *
-   * @param callable(HookReturnBefore): void $handler
+   * @param callable(RequestHookReturnBefore): void $handler
    */
   public function hookBefore(callable $handler): static
   {
@@ -54,9 +54,9 @@ trait HasHooks
   /**
    * Hook before GET request
    *
-   * @param callable(HookReturnBefore): void $handler
+   * @param callable(RequestHookReturnBefore): void $handler
    */
-  public function hookGeforeGet(callable $handler): static
+  public function hookBeforeGet(callable $handler): static
   {
     $this->initHooks()->add(HookKey::BeforeGet, $handler);
     return $this;
@@ -65,7 +65,7 @@ trait HasHooks
   /**
    * Hook before POST request
    *
-   * @param callable(HookReturnBefore): void $handler
+   * @param callable(RequestHookReturnBefore): void $handler
    */
   public function hookBeforePost(callable $handler): static
   {
@@ -76,7 +76,7 @@ trait HasHooks
   /**
    * Hook before HEAD request
    *
-   * @param callable(HookReturnBefore): void $handler
+   * @param callable(RequestHookReturnBefore): void $handler
    */
   public function hookBeforeHead(callable $handler): static
   {
@@ -87,7 +87,7 @@ trait HasHooks
   /**
    * Hook before PUT request
    *
-   * @param callable(HookReturnBefore): void $handler
+   * @param callable(RequestHookReturnBefore): void $handler
    */
   public function hookBeforePut(callable $handler): static
   {
@@ -98,7 +98,7 @@ trait HasHooks
   /**
    * Hook before DELETE request
    *
-   * @param callable(HookReturnBefore): void $handler
+   * @param callable(RequestHookReturnBefore): void $handler
    */
   public function hookBeforeDelete(callable $handler): static
   {
@@ -109,7 +109,7 @@ trait HasHooks
   /**
    * Hook before OPTIONS request
    *
-   * @param callable(HookReturnBefore): void $handler
+   * @param callable(RequestHookReturnBefore): void $handler
    */
   public function hookBeforeOptions(callable $handler): static
   {
@@ -120,7 +120,7 @@ trait HasHooks
   /**
    * Hook after any request
    *
-   * @param callable(HookReturnAfter): void $handler
+   * @param callable(RequestHookReturnAfter): void $handler
    */
   public function hookAfter(callable $handler): static
   {
@@ -131,7 +131,7 @@ trait HasHooks
   /**
    * Hook after GET request
    *
-   * @param callable(HookReturnAfter): void $handler
+   * @param callable(RequestHookReturnAfter): void $handler
    */
   public function hookAfterGet(callable $handler): static
   {
@@ -142,7 +142,7 @@ trait HasHooks
   /**
    * Hook after POST request
    *
-   * @param callable(HookReturnAfter): void $handler
+   * @param callable(RequestHookReturnAfter): void $handler
    */
   public function hookAfterPost(callable $handler): static
   {
@@ -153,7 +153,7 @@ trait HasHooks
   /**
    * Hook after HEAD request
    *
-   * @param callable(HookReturnAfter): void $handler
+   * @param callable(RequestHookReturnAfter): void $handler
    */
   public function hookAfterHead(callable $handler): static
   {
@@ -164,7 +164,7 @@ trait HasHooks
   /**
    * Hook after PUT request
    *
-   * @param callable(HookReturnAfter): void $handler
+   * @param callable(RequestHookReturnAfter): void $handler
    */
   public function hookAfterPut(callable $handler): static
   {
@@ -175,7 +175,7 @@ trait HasHooks
   /**
    * Hook after DELETE request
    *
-   * @param callable(HookReturnAfter): void $handler
+   * @param callable(RequestHookReturnAfter): void $handler
    */
   public function hookAfterDelete(callable $handler): static
   {
@@ -186,7 +186,7 @@ trait HasHooks
   /**
    * Hook after OPTIONS request
    *
-   * @param callable(HookReturnAfter): void $handler
+   * @param callable(RequestHookReturnAfter): void $handler
    */
   public function hookAfterOptions(callable $handler): static
   {

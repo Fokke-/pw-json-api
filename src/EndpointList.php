@@ -4,6 +4,9 @@ namespace PwJsonApi;
 
 use \ProcessWire\{WireException};
 
+/**
+ * Represents a list of endpoints and methods to interact with them.
+ */
 class EndpointList
 {
   use HasBasePath;

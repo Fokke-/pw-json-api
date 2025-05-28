@@ -2,6 +2,8 @@
 
 namespace PwJsonApi;
 
+// TODO: rename to RequestHooks
+// TODO: rename related enums
 class Hooks
 {
   /**

@@ -2,6 +2,12 @@
 
 namespace PwJsonApi;
 
+/**
+ * This class can be used to crawl entire tree of services.
+ *
+ * The main purpose is to return all endpoints and their service
+ * hierarchy.
+ */
 class EndpointCrawler
 {
   /**
@@ -13,8 +19,8 @@ class EndpointCrawler
    * Crawl all services and yield endpoints
    *
    * This function recursively traverses a hierarchy of services and their subservices,
-   * yielding information about each endpoint, including the service it belongs to,
-   * the endpoint itself, and the full path segments leading to it.
+   * yielding information about each endpoint, including the services it belongs to,
+   * and the endpoint itself.
    *
    * @param Service[] $services
    * @return Generator<EndpointCrawlerResult>

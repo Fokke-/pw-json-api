@@ -5,6 +5,9 @@ namespace PwJsonApi;
 use \ProcessWire\{WireException};
 use function ProcessWire\wire;
 
+/**
+ * ProcessWire JSON API
+ */
 class Api
 {
   use Utils;
@@ -46,6 +49,11 @@ class Api
       throw new ApiException('Method not allowed', 405);
     }
 
+    // Inject service list to the endpoint
+    foreach ($result->serviceSequence as $service) {
+      $result->endpoint->services->add($service);
+    }
+
     // Before hooks
     $beforeHooks = [
       // API before
@@ -59,12 +67,13 @@ class Api
     ];
 
     if (!empty($beforeHooks)) {
-      $hookReturnBefore = new HookReturnBefore();
+      $hookReturnBefore = new RequestHookReturnBefore();
       $hookReturnBefore->event = $event;
       $hookReturnBefore->handler = $handler;
       $hookReturnBefore->method = $requestMethod->value;
       $hookReturnBefore->endpoint = $result->endpoint;
       $hookReturnBefore->service = $result->service;
+      $hookReturnBefore->services = $result->endpoint->services;
 
       foreach ($beforeHooks as $hookFn) {
         call_user_func($hookFn, $hookReturnBefore);
@@ -98,12 +107,13 @@ class Api
     ];
 
     if (!empty($afterHooks)) {
-      $hookReturnAfter = new HookReturnAfter();
+      $hookReturnAfter = new RequestHookReturnAfter();
       $hookReturnAfter->event = $event;
       $hookReturnAfter->response = $response;
       $hookReturnAfter->method = $requestMethod->value;
       $hookReturnAfter->endpoint = $result->endpoint;
       $hookReturnAfter->service = $result->service;
+      $hookReturnAfter->services = $result->endpoint->services;
 
       foreach ($afterHooks as $hookFn) {
         call_user_func($hookFn, $hookReturnAfter);

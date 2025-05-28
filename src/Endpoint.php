@@ -2,6 +2,9 @@
 
 namespace PwJsonApi;
 
+/**
+ * Single endpoint
+ */
 class Endpoint
 {
   use Utils;
@@ -20,10 +23,16 @@ class Endpoint
   protected array $handlers = [];
 
   /**
+   * Endpoint services. Resolved before endpoint request is being handled.
+   */
+  public ServiceList $services;
+
+  /**
    * Constructor
    */
   public function __construct(string|null $path = null)
   {
+    $this->path = $this->formatPath($path);
     $this->handlers = array_reduce(
       RequestMethod::cases(),
       function ($acc, $method) {
@@ -32,7 +41,7 @@ class Endpoint
       },
       []
     );
-    $this->path = $this->formatPath($path);
+    $this->services = new ServiceList();
   }
 
   /**

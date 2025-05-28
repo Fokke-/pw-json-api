@@ -68,6 +68,10 @@ trait HasEndpointList
 
   /**
    * Add endpoint
+   *
+   * Specify path has ProcessWire URL hook path.
+   *
+   * @see https://processwire.com/blog/posts/pw-3.0.173/#introducing-url-path-hooks
    */
   public function addEndpoint(string $path): Endpoint
   {
