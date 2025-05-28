@@ -2,7 +2,8 @@
 
 namespace PwJsonApi;
 
-use \ProcessWire\{PageArray, Page, PageImage, PageImages};
+use \ProcessWire\{PageArray, Page, PageFile, PageFiles, PageImage, PageImages};
+use function ProcessWire\wire;
 
 // TODO: global configuration for page parser
 class PageParser
@@ -12,7 +13,7 @@ class PageParser
    *
    * @var string[]
    */
-  protected array $fields = [];
+  protected array $fields = ['id', 'name'];
 
   /**
    * Fields names to exclude
@@ -191,7 +192,7 @@ class PageParser
         $fields = $page->getFields()->explode('name');
       }
 
-      return ['id', 'name', ...$fields];
+      return $fields;
     })();
 
     // Parse page data
@@ -282,6 +283,17 @@ class PageParser
             },
             []
           );
+        } elseif ($value instanceof PageFile) {
+          return $this->parseFile($value);
+        } elseif ($value instanceof PageFiles) {
+          return array_reduce(
+            $value->getArray(),
+            function ($acc, $file) {
+              $acc[] = $this->parseFile($file);
+              return $acc;
+            },
+            []
+          );
         } elseif ($value instanceof Page) {
           if ($value === false || !$value->id) {
             return null;
@@ -323,19 +335,55 @@ class PageParser
   }
 
   // TODO: hooks for this?
+  public function parseFile(PageFile $file)
+  {
+    // Parser for custom fields
+    $parser = new PageParser();
+
+    $out = [
+      'url' => $file->httpUrl,
+      'filesize' => $file->filesize,
+      'filesize_str' => $file->filesizeStr,
+      'description' => !empty($file->description) ? $file->description : null,
+      'tags' => !empty($file->tags) ? $file->tags : null,
+      'created' => $file->created,
+      'modified' => $file->modified,
+    ];
+
+    /** @var \ProcessWire\Template|null */
+    $customFieldsTpl = $file->field->getFieldtype()->getFieldsTemplate($file->field);
+    if ($customFieldsTpl && $customFieldsTpl->fields->count()) {
+      // Create temporary page for custom fields
+      // This page will be used to feed the parser.
+      // This will cause some overhead, but it's acceptable for now.
+      $tempCustomFieldsPage = new Page();
+      $tempCustomFieldsPage->template = $customFieldsTpl;
+
+      foreach ($customFieldsTpl->fields as $customField) {
+        $tempCustomFieldsPage->set($customField->name, $file->get($customField->name));
+      }
+
+      $out['_custom_fields'] = $parser
+        ->excludeFields('id', 'name')
+        ->parse($tempCustomFieldsPage)
+        ->toArray();
+    }
+
+    return $out;
+  }
+
+  // TODO: hooks for this?
   public function parseImage(PageImage $image)
   {
-    return [
-      'url' => $image->httpUrl,
-      'filesize' => $image->filesize,
-      'description' => !empty($image->description) ? $image->description : null,
-      'tags' => !empty($image->tags) ? $image->tags : null,
-      'created' => $image->created,
-      'modified' => $image->modified,
+    $out = [
+      ...$this->parseFile($image),
       'width' => $image->width,
       'height' => $image->height,
+      'focus' => $image->focus(),
       '_aspect_ratio' => $image->ratio(),
     ];
+
+    return $out;
   }
 
   /**
