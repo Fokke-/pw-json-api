@@ -3,9 +3,9 @@
 namespace PwJsonApi;
 
 /**
- * Hook timing
+ * Request hook timing
  */
-enum HookTiming
+enum RequestHookTiming
 {
   case Before;
   case After;

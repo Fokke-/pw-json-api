@@ -5,7 +5,7 @@ namespace PwJsonApi;
 /**
  * Available hook keys
  */
-enum HookKey
+enum RequestHookKey
 {
   /** Before any request */
   case Before;

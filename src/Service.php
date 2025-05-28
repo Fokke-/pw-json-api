@@ -2,12 +2,17 @@
 
 namespace PwJsonApi;
 
+/**
+ * Services are used to group endpoints.
+ *
+ * Service inherits hooks from the API instance and from all the parent services.
+ */
 class Service
 {
   use Utils;
   use HasEndpointList;
   use HasServiceList;
-  use HasHooks;
+  use HasRequestHooks;
 
   /** Service name */
   public readonly string $name;

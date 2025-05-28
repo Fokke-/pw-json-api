@@ -13,7 +13,7 @@ class Api
   use Utils;
   use HasBasePath;
   use HasServiceList;
-  use HasHooks;
+  use HasRequestHooks;
 
   /** Is debug mode on? */
   private bool $debug = false;
@@ -57,13 +57,13 @@ class Api
     // Before hooks
     $beforeHooks = [
       // API before
-      ...$this->findHooks(HookTiming::Before),
+      ...$this->findHooks(RequestHookTiming::Before),
 
       // API before by request method
-      ...$this->findHooks(HookTiming::Before, $requestMethod),
+      ...$this->findHooks(RequestHookTiming::Before, $requestMethod),
 
       // Endpoint with services
-      ...$result->resolveHooks(HookTiming::Before, $requestMethod),
+      ...$result->resolveHooks(RequestHookTiming::Before, $requestMethod),
     ];
 
     if (!empty($beforeHooks)) {
@@ -97,13 +97,13 @@ class Api
     // After hooks
     $afterHooks = [
       // Endpoint with services
-      ...$result->resolveHooks(HookTiming::After, $requestMethod),
+      ...$result->resolveHooks(RequestHookTiming::After, $requestMethod),
 
       // API before
-      ...$this->findHooks(HookTiming::After),
+      ...$this->findHooks(RequestHookTiming::After),
 
       // API before by request method
-      ...$this->findHooks(HookTiming::After, $requestMethod),
+      ...$this->findHooks(RequestHookTiming::After, $requestMethod),
     ];
 
     if (!empty($afterHooks)) {

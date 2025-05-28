@@ -2,12 +2,13 @@
 
 namespace PwJsonApi;
 
-// TODO: rename to RequestHooks
-// TODO: rename related enums
-class Hooks
+/**
+ * Represents an object of request hooks, categorised by request hook key
+ */
+class RequestHooks
 {
   /**
-   * Hooks
+   * Request hooks
    *
    * @var array<string, callable[]>
    */
@@ -19,7 +20,7 @@ class Hooks
   public function __construct()
   {
     $this->items = array_reduce(
-      HookKey::cases(),
+      RequestHookKey::cases(),
       function ($acc, $item) {
         $acc[$item->name] = [];
         return $acc;
@@ -39,7 +40,7 @@ class Hooks
   /**
    * Get hooks by key
    */
-  public function get(HookKey $key): array
+  public function get(RequestHookKey $key): array
   {
     return $this->items[$key->name];
   }
@@ -47,7 +48,7 @@ class Hooks
   /**
    * Add a new hook
    */
-  public function add(HookKey $key, callable $handler)
+  public function add(RequestHookKey $key, callable $handler)
   {
     $this->items[$key->name][] = $handler;
   }
@@ -55,7 +56,7 @@ class Hooks
   /**
    * Find hooks by timing and request method
    */
-  public function find(HookTiming $timing, RequestMethod|null $requestMethod = null): array
+  public function find(RequestHookTiming $timing, RequestMethod|null $requestMethod = null): array
   {
     $key = $timing->name . ($requestMethod ? $requestMethod->name : '');
     return $this->items[$key];

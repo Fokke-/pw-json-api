@@ -8,7 +8,7 @@ namespace PwJsonApi;
 class Endpoint
 {
   use Utils;
-  use HasHooks;
+  use HasRequestHooks;
 
   /**
    * Endpoint path

@@ -3,8 +3,9 @@
 namespace PwJsonApi;
 
 /**
- * Available hook keys
+ * Config
  */
+// TODO: create singleton class?
 enum Config
 {
   /**

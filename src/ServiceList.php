@@ -2,6 +2,9 @@
 
 namespace PwJsonApi;
 
+/**
+ * Represents a list of services
+ */
 class ServiceList
 {
   /**

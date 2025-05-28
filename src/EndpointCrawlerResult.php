@@ -75,10 +75,12 @@ class EndpointCrawlerResult
    *
    * @return callable[]
    */
-  public function resolveHooks(HookTiming $timing, RequestMethod|null $requestMethod = null): array
-  {
+  public function resolveHooks(
+    RequestHookTiming $timing,
+    RequestMethod|null $requestMethod = null
+  ): array {
     $serviceHooks = array_reduce(
-      $timing === HookTiming::Before
+      $timing === RequestHookTiming::Before
         ? $this->serviceSequence
         : array_reverse($this->serviceSequence),
       function ($acc, $service) use ($timing, $requestMethod) {
@@ -98,7 +100,7 @@ class EndpointCrawlerResult
       ...$this->endpoint->findHooks($timing, $requestMethod),
     ];
 
-    if ($timing === HookTiming::Before) {
+    if ($timing === RequestHookTiming::Before) {
       return [...$serviceHooks, ...$endpointHooks];
     }
 
