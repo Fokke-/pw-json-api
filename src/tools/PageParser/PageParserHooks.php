@@ -3,15 +3,15 @@
 namespace PwJsonApi;
 
 /**
- * Request hooks
+ * Page parser hooks
  */
-class RequestHooks extends Hooks
+class PageParserHooks extends Hooks
 {
   /**
    * Constructor
    */
   public function __construct()
   {
-    parent::__construct(RequestHookKey::cases());
+    parent::__construct(PageParserHookKey::cases());
   }
 }

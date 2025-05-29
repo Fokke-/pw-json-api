@@ -57,13 +57,13 @@ class Api
     // Before hooks
     $beforeHooks = [
       // API before
-      ...$this->findHooks(RequestHookTiming::Before),
+      ...$this->findRequestHooks(HookTiming::Before),
 
       // API before by request method
-      ...$this->findHooks(RequestHookTiming::Before, $requestMethod),
+      ...$this->findRequestHooks(HookTiming::Before, $requestMethod),
 
       // Endpoint with services
-      ...$result->resolveHooks(RequestHookTiming::Before, $requestMethod),
+      ...$result->resolveHooks(HookTiming::Before, $requestMethod),
     ];
 
     if (!empty($beforeHooks)) {
@@ -97,13 +97,13 @@ class Api
     // After hooks
     $afterHooks = [
       // Endpoint with services
-      ...$result->resolveHooks(RequestHookTiming::After, $requestMethod),
+      ...$result->resolveHooks(HookTiming::After, $requestMethod),
 
       // API before
-      ...$this->findHooks(RequestHookTiming::After),
+      ...$this->findRequestHooks(HookTiming::After),
 
       // API before by request method
-      ...$this->findHooks(RequestHookTiming::After, $requestMethod),
+      ...$this->findRequestHooks(HookTiming::After, $requestMethod),
     ];
 
     if (!empty($afterHooks)) {

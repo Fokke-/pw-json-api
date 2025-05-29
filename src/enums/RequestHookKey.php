@@ -3,7 +3,7 @@
 namespace PwJsonApi;
 
 /**
- * Available hook keys
+ * Request hook keys
  */
 enum RequestHookKey
 {
