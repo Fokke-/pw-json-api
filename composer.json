@@ -1,26 +1,43 @@
 {
-	"name": "fokke/pw-json-api",
-	"type": "library",
-	"description": "JSON API for ProcessWire",
-	"license": "MIT",
-	"keywords": [
-		"json",
-		"api"
-	],
-	"authors": [
-		{
-			"name": "Ville Fokke Saarivaara",
-			"homepage": "https://fokke.fi",
-			"email": "ville.saarivaara@gmail.com"
-		}
-	],
-	"autoload": {
-		"classmap": [
-			"src/"
-		]
-	},
-	"require": {
-		"php": ">=8.1",
-		"processwire/processwire": ">=3.0.173"
-	}
+  "name": "fokke/pw-json-api",
+  "type": "library",
+  "description": "JSON API for ProcessWire",
+  "license": "MIT",
+  "keywords": [
+    "json",
+    "api"
+  ],
+  "authors": [
+    {
+      "name": "Ville Fokke Saarivaara",
+      "homepage": "https://fokke.fi",
+      "email": "ville.saarivaara@gmail.com"
+    }
+  ],
+  "scripts": {
+    "test": "./scripts/test.sh",
+    "post-install-cmd": [
+      "cp -fr vendor/processwire/processwire/wire public/wire-new && mkdir -p public/wire && mv public/wire public/wire-old && mv public/wire-new public/wire && rm -fr public/wire-old"
+    ],
+    "post-update-cmd": [
+      "cp -fr vendor/processwire/processwire/wire public/wire-new && mkdir -p public/wire && mv public/wire public/wire-old && mv public/wire-new public/wire && rm -fr public/wire-old"
+    ]
+  },
+  "autoload": {
+    "classmap": [
+      "src/"
+    ]
+  },
+  "require": {
+    "php": ">=8.2",
+    "processwire/processwire": ">=3.0.173"
+  },
+  "require-dev": {
+    "pestphp/pest": "^3.8"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
 }
