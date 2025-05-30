@@ -10,29 +10,14 @@ trait HasRequestHooks
   /**
    * Hooks
    */
-  private RequestHooks|null $hooks = null;
-
-  /**
-   * Initialize hooks
-   *
-   * Thanks to the goofy PHP restriction to only allow primitive as a default value for a property,
-   * this method will initialize a new hook list.
-   */
-  private function initRequestHooks(): RequestHooks
-  {
-    if (!$this->hooks) {
-      $this->hooks = new RequestHooks();
-    }
-
-    return $this->hooks;
-  }
+  protected RequestHooks|null $hooks = null;
 
   /**
    * Get hooks by key
    */
   public function getRequestHooks(RequestHookKey $key): array
   {
-    return $this->initRequestHooks()->getItems()[$key->name];
+    return $this->hooks->getItems()[$key->name];
   }
 
   /**
@@ -42,7 +27,7 @@ trait HasRequestHooks
     HookTiming $timing,
     RequestMethod|null $requestMethod = null
   ): array {
-    return $this->initRequestHooks()->find($timing, $requestMethod);
+    return $this->hooks->find($timing, $requestMethod);
   }
 
   /**
@@ -52,7 +37,7 @@ trait HasRequestHooks
    */
   public function hookBefore(callable $handler): static
   {
-    $this->initRequestHooks()->add(RequestHookKey::Before, $handler);
+    $this->hooks->add(RequestHookKey::Before, $handler);
     return $this;
   }
 
@@ -63,7 +48,7 @@ trait HasRequestHooks
    */
   public function hookBeforeGet(callable $handler): static
   {
-    $this->initRequestHooks()->add(RequestHookKey::BeforeGet, $handler);
+    $this->hooks->add(RequestHookKey::BeforeGet, $handler);
     return $this;
   }
 
@@ -74,7 +59,7 @@ trait HasRequestHooks
    */
   public function hookBeforePost(callable $handler): static
   {
-    $this->initRequestHooks()->add(RequestHookKey::BeforePost, $handler);
+    $this->hooks->add(RequestHookKey::BeforePost, $handler);
     return $this;
   }
 
@@ -85,7 +70,7 @@ trait HasRequestHooks
    */
   public function hookBeforeHead(callable $handler): static
   {
-    $this->initRequestHooks()->add(RequestHookKey::BeforeHead, $handler);
+    $this->hooks->add(RequestHookKey::BeforeHead, $handler);
     return $this;
   }
 
@@ -96,7 +81,7 @@ trait HasRequestHooks
    */
   public function hookBeforePut(callable $handler): static
   {
-    $this->initRequestHooks()->add(RequestHookKey::BeforePut, $handler);
+    $this->hooks->add(RequestHookKey::BeforePut, $handler);
     return $this;
   }
 
@@ -107,7 +92,7 @@ trait HasRequestHooks
    */
   public function hookBeforeDelete(callable $handler): static
   {
-    $this->initRequestHooks()->add(RequestHookKey::BeforeDelete, $handler);
+    $this->hooks->add(RequestHookKey::BeforeDelete, $handler);
     return $this;
   }
 
@@ -118,7 +103,7 @@ trait HasRequestHooks
    */
   public function hookBeforeOptions(callable $handler): static
   {
-    $this->initRequestHooks()->add(RequestHookKey::BeforeOptions, $handler);
+    $this->hooks->add(RequestHookKey::BeforeOptions, $handler);
     return $this;
   }
 
@@ -129,7 +114,7 @@ trait HasRequestHooks
    */
   public function hookAfter(callable $handler): static
   {
-    $this->initRequestHooks()->add(RequestHookKey::After, $handler);
+    $this->hooks->add(RequestHookKey::After, $handler);
     return $this;
   }
 
@@ -140,7 +125,7 @@ trait HasRequestHooks
    */
   public function hookAfterGet(callable $handler): static
   {
-    $this->initRequestHooks()->add(RequestHookKey::AfterGet, $handler);
+    $this->hooks->add(RequestHookKey::AfterGet, $handler);
     return $this;
   }
 
@@ -151,7 +136,7 @@ trait HasRequestHooks
    */
   public function hookAfterPost(callable $handler): static
   {
-    $this->initRequestHooks()->add(RequestHookKey::AfterPost, $handler);
+    $this->hooks->add(RequestHookKey::AfterPost, $handler);
     return $this;
   }
 
@@ -162,7 +147,7 @@ trait HasRequestHooks
    */
   public function hookAfterHead(callable $handler): static
   {
-    $this->initRequestHooks()->add(RequestHookKey::AfterHead, $handler);
+    $this->hooks->add(RequestHookKey::AfterHead, $handler);
     return $this;
   }
 
@@ -173,7 +158,7 @@ trait HasRequestHooks
    */
   public function hookAfterPut(callable $handler): static
   {
-    $this->initRequestHooks()->add(RequestHookKey::AfterPut, $handler);
+    $this->hooks->add(RequestHookKey::AfterPut, $handler);
     return $this;
   }
 
@@ -184,7 +169,7 @@ trait HasRequestHooks
    */
   public function hookAfterDelete(callable $handler): static
   {
-    $this->initRequestHooks()->add(RequestHookKey::AfterDelete, $handler);
+    $this->hooks->add(RequestHookKey::AfterDelete, $handler);
     return $this;
   }
 
@@ -195,7 +180,7 @@ trait HasRequestHooks
    */
   public function hookAfterOptions(callable $handler): static
   {
-    $this->initRequestHooks()->add(RequestHookKey::AfterOptions, $handler);
+    $this->hooks->add(RequestHookKey::AfterOptions, $handler);
     return $this;
   }
 }

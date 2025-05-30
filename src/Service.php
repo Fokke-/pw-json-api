@@ -11,8 +11,8 @@ abstract class Service
 {
   use Utils;
   use HasApiInstance;
-  use HasEndpointList;
   use HasServiceList;
+  use HasEndpointList;
   use HasRequestHooks;
 
   /** Service name */
@@ -24,5 +24,6 @@ abstract class Service
     $this->name = (new \ReflectionClass($this))->getShortName();
     $this->services = new ServiceList();
     $this->endpoints = new EndpointList();
+    $this->hooks = new RequestHooks();
   }
 }

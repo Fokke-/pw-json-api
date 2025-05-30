@@ -42,6 +42,7 @@ class Endpoint
       []
     );
     $this->services = new ServiceList();
+    $this->hooks = new RequestHooks();
   }
 
   /**

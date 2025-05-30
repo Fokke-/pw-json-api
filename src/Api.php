@@ -31,6 +31,7 @@ class Api
   {
     $this->config = new ApiConfig();
     $this->services = new ServiceList();
+    $this->hooks = new RequestHooks();
 
     if (is_callable($configure)) {
       call_user_func($configure, $this->config);
