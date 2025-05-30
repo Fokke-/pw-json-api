@@ -5,8 +5,6 @@ namespace PwJsonApi;
 use \ProcessWire\{PageArray, Page, Field, PageFile, PageFiles, PageImage, PageImages};
 
 // TODO: global configuration for page parser
-// TODO: add enable() and disable()
-// TODO: allow notation pageField.fieldName
 class PageParser
 {
   use HasPageParserHooks;
@@ -389,7 +387,7 @@ class PageParser
       ...$this->parseFile($image, $field, $page, $parser),
       'width' => $image->width,
       'height' => $image->height,
-      'focus' => $image->focus(),
+      '_focus' => $image->focus(),
       '_aspect_ratio' => $image->ratio(),
     ];
 
