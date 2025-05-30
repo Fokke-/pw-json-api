@@ -10,6 +10,7 @@ namespace PwJsonApi;
 abstract class Service
 {
   use Utils;
+  use HasApiInstance;
   use HasEndpointList;
   use HasServiceList;
   use HasRequestHooks;

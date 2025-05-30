@@ -137,9 +137,11 @@ class Api
    */
   public function run(): void
   {
+    /** Previous installed service. Used in duplicate checking. */
+    $prevServiceName = null;
+
     /** @var string[] */
     $serviceNames = [];
-    $prevServiceName = null;
 
     /** @var string[] */
     $paths = [];
@@ -147,6 +149,8 @@ class Api
     $crawler = new EndpointCrawler();
 
     foreach ($crawler->crawl($this->getServices(), $this->hooks) as $result) {
+      /** @var EndpointCrawlerResult $result */
+
       // Check for duplicated service name
       if ($prevServiceName !== $result->service->name) {
         if (in_array($result->service->name, $serviceNames)) {
@@ -157,13 +161,13 @@ class Api
 
         $serviceNames[] = $result->service->name;
         $prevServiceName = $result->service->name;
+
+        // Inject API instance to the service
+        $result->service->_setApi($this);
       }
 
-      /** @var EndpointCrawlerResult $result */
-      $path = $result->resolvePath($this->getBasePath());
-
-      // Allow access with or without trailing slash
-      $path .= '/?';
+      // Resolve endpoint path
+      $path = $result->resolvePath($this->getBasePath()) . '/?';
 
       // Check for duplicated path
       if (in_array($path, $paths)) {

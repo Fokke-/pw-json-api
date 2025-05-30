@@ -13,9 +13,14 @@ class PageService extends Service
 
     $this->setBasePath('/pages');
     $this->addEndpoint('/')->get(function () {
-      return (new PageParser())
-        ->input(wire()->pages->findOne(1017)->children('template=basic-page'))
-        ->toResponse();
+      return new Response($this->getPages());
     });
+  }
+
+  public function getPages(): array
+  {
+    return (new PageParser())
+      ->input(wire()->pages->findOne(1017)->children('template=basic-page'))
+      ->toArray();
   }
 }
