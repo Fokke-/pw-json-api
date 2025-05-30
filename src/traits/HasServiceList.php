@@ -12,22 +12,16 @@ trait HasServiceList
    *
    * @var ServiceList
    */
-  private ServiceList|null $services = null;
+  protected ServiceList|null $services = null;
 
   /**
-   * Initialize service list
-   * TODO: remove this. Just init in constructor...
+   * Get services
    *
-   * Thanks to the goofy PHP restriction to only allow primitive as a default value for a property,
-   * this method will initialize a new service list.
+   * @return Service[]
    */
-  public function initServiceList(): ServiceList
+  public function getServices(): array
   {
-    if (!$this->services) {
-      $this->services = new ServiceList();
-    }
-
-    return $this->services;
+    return $this->services->getItems();
   }
 
   /**
@@ -35,7 +29,7 @@ trait HasServiceList
    */
   public function getService(string $name): Service|null
   {
-    foreach ($this->initServiceList()->getItems() as $service) {
+    foreach ($this->services->getItems() as $service) {
       if ($service->name === $name) {
         return $service;
       }
@@ -51,16 +45,6 @@ trait HasServiceList
   }
 
   /**
-   * Get services
-   *
-   * @return Service[]
-   */
-  public function getServices(): array
-  {
-    return $this->initServiceList()->getItems();
-  }
-
-  /**
    * Add service
    *
    * In optional setup function you can access the added service to
@@ -73,17 +57,7 @@ trait HasServiceList
     Service $service,
     callable|null $setup = null
   ): static {
-    $this->initServiceList()->add($service, $setup);
+    $this->services->add($service, $setup);
     return $this;
-  }
-
-  /**
-   * Get endpoint recursively by path
-   *
-   * @return Endpoint
-   */
-  public function getEndpoint(string $path): Endpoint|null
-  {
-    return $this->initEndpointList()->get($path);
   }
 }

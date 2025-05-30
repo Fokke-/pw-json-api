@@ -5,7 +5,7 @@ if (!defined('PROCESSWIRE')) {
 }
 
 // JSON API
-use PwJsonApi\{Api, Config};
+use PwJsonApi\Api;
 
 if ($page->template->name !== 'admin') {
   $api = new Api(function ($config) {

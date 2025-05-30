@@ -30,6 +30,7 @@ class Api
   public function __construct(callable|null $configure = null)
   {
     $this->config = new ApiConfig();
+    $this->services = new ServiceList();
 
     if (is_callable($configure)) {
       call_user_func($configure, $this->config);

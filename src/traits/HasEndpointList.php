@@ -12,29 +12,14 @@ trait HasEndpointList
    *
    * @var EndpointList
    */
-  private EndpointList|null $endpoints = null;
-
-  /**
-   * Initialize endpoint list
-   *
-   * Thanks to the goofy PHP restriction to only allow primitive as a default value for a property,
-   * this method will initialize a new endpoint list.
-   */
-  private function initEndpointList(): EndpointList
-  {
-    if (!$this->endpoints) {
-      $this->endpoints = new EndpointList();
-    }
-
-    return $this->endpoints;
-  }
+  protected EndpointList|null $endpoints = null;
 
   /**
    * Get base path
    */
   public function getBasePath(): string|null
   {
-    return $this->initEndpointList()->getBasePath();
+    return $this->endpoints->getBasePath();
   }
 
   /**
@@ -42,7 +27,7 @@ trait HasEndpointList
    */
   public function setBasePath(string|null $path): static
   {
-    $this->initEndpointList()->setBasePath($path);
+    $this->endpoints->setBasePath($path);
     return $this;
   }
 
@@ -53,7 +38,7 @@ trait HasEndpointList
    */
   public function getEndpoints(): array
   {
-    return $this->initEndpointList()->getItems();
+    return $this->endpoints->getItems();
   }
 
   /**
@@ -63,7 +48,7 @@ trait HasEndpointList
    */
   public function getEndpoint(string $path): Endpoint|null
   {
-    return $this->initEndpointList()->get($path);
+    return $this->endpoints->get($path);
   }
 
   /**
@@ -76,7 +61,7 @@ trait HasEndpointList
   public function addEndpoint(string $path): Endpoint
   {
     $endpoint = new Endpoint($path);
-    $this->initEndpointList()->add($endpoint);
+    $this->endpoints->add($endpoint);
 
     return $endpoint;
   }
@@ -86,7 +71,7 @@ trait HasEndpointList
    */
   public function removeEndpoint(string $path): static
   {
-    $this->initEndpointList()->remove($path);
+    $this->endpoints->remove($path);
     return $this;
   }
 }

@@ -44,6 +44,14 @@ class PageParser
   protected Page|PageArray|null $input = null;
 
   /**
+   * Constructor
+   */
+  public function __construct()
+  {
+    $this->hooks = new PageParserHooks();
+  }
+
+  /**
    * Set Page of PageArray to parse
    *
    * This method can be ran multiple times, and the new payload

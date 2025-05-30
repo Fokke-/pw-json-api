@@ -1,6 +1,5 @@
 <?php
 
-// TODO: move to class, as this is not easily testable
 namespace PwJsonApi;
 
 /**
