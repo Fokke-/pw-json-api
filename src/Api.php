@@ -3,6 +3,7 @@
 // TODO: getservice needs to be recursive!
 // TODO: move getEndpoint to HasService list and search recursively
 // TODO: getendpoints should return endpoints from subservices
+// TODO: getendpoint should return result object
 namespace PwJsonApi;
 
 use \ProcessWire\{WireException};
@@ -18,25 +19,20 @@ class Api
   use HasServiceList;
   use HasRequestHooks;
 
-  /** Is debug mode on? */
-  private bool $debug = false;
-
-  /** Flags to pass to json_encode() */
-  public int $jsonFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
-
-  /** Flags to pass to json_encode() when debug mode is on */
-  public int $jsonFlagsDebug =
-    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT;
+  /** Configuration */
+  private ApiConfig $config;
 
   /**
    * Create a new API instance
    *
-   * @param Config ...$config Configuration arguments
+   * @param callable(ApiConfig): void $configure Configuration function
    */
-  public function __construct(Config|null ...$config)
+  public function __construct(callable|null $configure = null)
   {
-    if (in_array(Config::Debug, $config)) {
-      $this->debug = true;
+    $this->config = new ApiConfig();
+
+    if (is_callable($configure)) {
+      call_user_func($configure, $this->config);
     }
   }
 
@@ -182,20 +178,17 @@ class Api
       wire()->addHook($path, function (\ProcessWire\HookEvent $event) use (
         $result
       ) {
-        $jsonFlags =
-          $this->debug === true ? $this->jsonFlagsDebug : $this->jsonFlags;
-
         header('Content-Type: application/json');
 
         try {
           $response = $this->handleRequest($result, $event);
 
           http_response_code($response->code);
-          echo $response->toJson($jsonFlags);
+          echo $response->toJson($this->config->jsonFlags);
         } catch (ApiException $e) {
           // Output error
           http_response_code($e->getCode());
-          echo $e->toResponse()->toJson($jsonFlags, false);
+          echo $e->toResponse()->toJson($this->config->jsonFlags, false);
         }
 
         die();

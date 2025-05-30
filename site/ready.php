@@ -8,12 +8,13 @@ if (!defined('PROCESSWIRE')) {
 use PwJsonApi\{Api, Config};
 
 if ($page->template->name !== 'admin') {
-  $api = new Api(Config::Debug);
+  $api = new Api(function ($config) {
+    $config->jsonFlags =
+      JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT;
+  });
   $api->setBasePath('/api');
 
   $api->hookAfter(function ($args) {
-    $test[] = 'api';
-
     $args->response->with([
       '_after_hook_execution_order' => [
         ...$args->response->withData['_after_hook_execution_order'] ?? [],
