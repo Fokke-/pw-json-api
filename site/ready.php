@@ -45,6 +45,7 @@ if ($page->template->name !== 'admin') {
     $service->addService(new VegetableService());
   });
 
+  $api->addService(new PageService());
   $api->addService(new ExceptionService());
 
   $api->run();
