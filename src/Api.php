@@ -1,9 +1,6 @@
 <?php
 
-// TODO: getservice needs to be recursive!
 // TODO: move getEndpoint to HasService list and search recursively
-// TODO: getendpoints should return endpoints from subservices
-// TODO: getendpoint should return result object
 namespace PwJsonApi;
 
 use \ProcessWire\{WireException};

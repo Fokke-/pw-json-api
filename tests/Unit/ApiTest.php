@@ -35,9 +35,7 @@ test('add service with subservice', function () {
   });
 
   expect($api->getService('FoodService') instanceof Service)->toBe(true);
-  expect($api->getService('FoodService')?->getService('FruitService') instanceof Service)->toBe(
-    true
-  );
+  expect($api->getService('FruitService') instanceof Service)->toBe(true);
 });
 
 test('endpoint can be found', function () {
@@ -46,13 +44,10 @@ test('endpoint can be found', function () {
     $service->addService(new FruitService());
   });
 
-  // TODO: update this when getEndpoint is available for $api
+  // TODO: update this when getEndpoint is recursive and available in API
   $rootEndpoint = $api->getService('FoodService')->getEndpoint('/');
   expect($rootEndpoint instanceof Endpoint)->toBe(true);
 
-  $orangeEndpoint = $api
-    ->getService('FoodService')
-    ->getService('FruitService')
-    ->getEndpoint('/orange');
+  $orangeEndpoint = $api->getService('FruitService')->getEndpoint('/orange');
   expect($orangeEndpoint instanceof Endpoint)->toBe(true);
 });
