@@ -130,7 +130,7 @@ class Api
   /**
    * Run API
    *
-   * Resolves all services and endpoints and creates listeners for them
+   * - Resolves all services and endpoints and creates listeners for them
    * - Catches ApiExceptions and renders errors as JSON
    *
    * Note that this method will NOT catch any other exceptions, such as WireExceptions.
@@ -138,11 +138,27 @@ class Api
   public function run(): void
   {
     /** @var string[] */
+    $serviceNames = [];
+    $prevServiceName = null;
+
+    /** @var string[] */
     $paths = [];
 
     $crawler = new EndpointCrawler();
 
     foreach ($crawler->crawl($this->getServices(), $this->hooks) as $result) {
+      // Check for duplicated service name
+      if ($prevServiceName !== $result->service->name) {
+        if (in_array($result->service->name, $serviceNames)) {
+          throw new \ProcessWire\WireException(
+            "Duplicated service '{$result->service->name}'"
+          );
+        }
+
+        $serviceNames[] = $result->service->name;
+        $prevServiceName = $result->service->name;
+      }
+
       /** @var EndpointCrawlerResult $result */
       $path = $result->resolvePath($this->getBasePath());
 

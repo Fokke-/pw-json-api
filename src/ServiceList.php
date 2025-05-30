@@ -48,13 +48,6 @@ class ServiceList
    */
   public function add(Service $service, callable|null $setup = null): static
   {
-    // TODO: check this on run process instead
-    if (!empty($this->get($service->name))) {
-      throw new \ProcessWire\WireException(
-        "Duplicated service '{$service->name}'"
-      );
-    }
-
     $this->items[] = $service;
 
     if (is_callable($setup)) {
