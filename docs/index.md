@@ -3,23 +3,24 @@
 layout: home
 
 hero:
-  name: "ProcessWire JSON API"
-  text: "Documentation for ProcessWire JSON API library"
+  name: 'ProcessWire JSON API'
+  text: ''
   tagline: My great project tagline
   actions:
     - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
+      text: Getting started
+      link: /getting-started
     - theme: alt
-      text: API Examples
-      link: /api-examples
+      text: Overview
+      link: /overview
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - icon: 😌
+    title: Fast and easy to use
+    details: No cryptic configuration files. Get the first endpoint running in minutes.
+  - icon: 📦
+    title: Extendable
+    details:
   - title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+    details:
 ---
-

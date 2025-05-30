@@ -1,28 +1,40 @@
-import { defineConfig } from 'vitepress'
+import { defineConfig } from 'vitepress';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "ProcessWire JSON API",
-  description: "Documentation for ProcessWire JSON API library",
+  title: 'ProcessWire JSON API',
+  description: '',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Examples', link: '/markdown-examples' }
+      { text: 'Guide', link: '/overview' },
     ],
 
     sidebar: [
       {
-        text: 'Examples',
+        text: 'Overview',
         items: [
-          { text: 'Markdown Examples', link: '/markdown-examples' },
-          { text: 'Runtime API Examples', link: '/api-examples' }
-        ]
-      }
+          { text: 'Overview', link: '/overview' },
+          { text: 'Getting started', link: '/getting-started' },
+        ],
+      },
+      {
+        text: 'Core concepts',
+        items: [
+          { text: 'API instance', link: '/api-instance' },
+          { text: 'Services and endpoints', link: '/services-and-endpoints' },
+          { text: 'Hooks', link: '/hooks' },
+        ],
+      },
+      {
+        text: 'Tools',
+        items: [{ text: 'Page parser', link: '/page-parser' }],
+      },
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuejs/vitepress' }
-    ]
-  }
-})
+      { icon: 'github', link: 'https://github.com/Fokke-/pw-json-api' },
+    ],
+  },
+});
