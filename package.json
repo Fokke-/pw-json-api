@@ -1,14 +1,18 @@
 {
-	"name": "pw-json-api",
-	"version": "1.0.0",
-	"description": "JSON API for ProcessWire",
-	"license": "MIT",
-	"author": "Ville Fokke Saarivaara",
-	"scripts": {
-		"format": "prettier --write src/"
-	},
-	"devDependencies": {
-		"@prettier/plugin-php": "0.22.4",
-		"prettier": "3.5.3"
-	}
+  "name": "pw-json-api",
+  "version": "1.0.0",
+  "description": "JSON API for ProcessWire",
+  "license": "MIT",
+  "author": "Ville Fokke Saarivaara",
+  "scripts": {
+    "format": "prettier --write src/",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "@prettier/plugin-php": "0.22.4",
+    "prettier": "3.5.3",
+    "vitepress": "1.6.3"
+  }
 }
