@@ -27,8 +27,11 @@ class EndpointCrawlerResult
   /**
    * Constructor
    */
-  public function __construct(Endpoint $endpoint, Service $service, array $serviceSequence)
-  {
+  public function __construct(
+    Endpoint $endpoint,
+    Service $service,
+    array $serviceSequence
+  ) {
     $this->endpoint = $endpoint;
     $this->service = $service;
     $this->serviceSequence = $serviceSequence;
@@ -75,8 +78,10 @@ class EndpointCrawlerResult
    *
    * @return callable[]
    */
-  public function resolveHooks(HookTiming $timing, RequestMethod|null $requestMethod = null): array
-  {
+  public function resolveHooks(
+    HookTiming $timing,
+    RequestMethod|null $requestMethod = null
+  ): array {
     $serviceHooks = array_reduce(
       $timing === HookTiming::Before
         ? $this->serviceSequence

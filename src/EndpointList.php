@@ -38,7 +38,11 @@ class EndpointList
 
     // Endpoint does not contain basePath of EndpointList
     // If search contains basePath, strip it.
-    if (!empty($this->basePath) && !empty($path) && str_starts_with($path, $this->basePath)) {
+    if (
+      !empty($this->basePath) &&
+      !empty($path) &&
+      str_starts_with($path, $this->basePath)
+    ) {
       $path = $this->formatPath(substr($path, strlen($this->basePath)));
     }
 
@@ -51,7 +55,7 @@ class EndpointList
   }
 
   /**
-   * Return paths of endpoints
+   * Return paths of endpoints, without list base path
    *
    * @return string[]
    */
@@ -65,9 +69,10 @@ class EndpointList
   /**
    * Add endpoint
    */
-  public function add(Endpoint $endpoint)
+  public function add(Endpoint $endpoint): static
   {
     $this->items[] = $endpoint;
+    return $this;
   }
 
   /**
@@ -75,7 +80,10 @@ class EndpointList
    */
   public function remove(Endpoint|string $endpointOrPath): static
   {
-    $endpoint = $endpointOrPath instanceof Endpoint ? $endpointOrPath : $this->get($endpointOrPath);
+    $endpoint =
+      $endpointOrPath instanceof Endpoint
+        ? $endpointOrPath
+        : $this->get($endpointOrPath);
 
     if (empty($endpoint)) {
       throw new WireException(

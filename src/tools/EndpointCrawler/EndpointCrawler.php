@@ -31,7 +31,11 @@ class EndpointCrawler
 
       // Loop service endpoints and yield results
       foreach ($service->getEndpoints() as $endpoint) {
-        yield new EndpointCrawlerResult($endpoint, $service, $this->servicesCarry);
+        yield new EndpointCrawlerResult(
+          $endpoint,
+          $service,
+          $this->servicesCarry
+        );
       }
 
       // Crawl endpoints recursively from subservices

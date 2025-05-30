@@ -10,12 +10,15 @@ class ApiException extends \Exception
   /**
    * Constructor
    *
-   * @param string $message
+   * @param string|null $message
    * @param integer $code
    * @param \Throwable|null $previous
    */
-  public function __construct(string $message, int $code = 400, ?\Throwable $previous = null)
-  {
+  public function __construct(
+    string $message = '',
+    ?int $code = 400,
+    ?\Throwable $previous = null
+  ) {
     parent::__construct($message, $code, $previous);
   }
 
@@ -25,7 +28,7 @@ class ApiException extends \Exception
   public function toResponse(): Response
   {
     return (new Response([], $this->code))->with([
-      'error' => $this->message,
+      'error' => !empty($this->message) ? $this->message : null,
     ]);
   }
 }

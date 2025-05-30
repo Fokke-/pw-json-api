@@ -1,5 +1,8 @@
 <?php
 
+// TODO: getservice needs to be recursive!
+// TODO: move getEndpoint to HasService list and search recursively
+// TODO: getendpoints should return endpoints from subservices
 namespace PwJsonApi;
 
 use \ProcessWire\{WireException};
@@ -22,7 +25,8 @@ class Api
   public int $jsonFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
 
   /** Flags to pass to json_encode() when debug mode is on */
-  public int $jsonFlagsDebug = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT;
+  public int $jsonFlagsDebug =
+    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT;
 
   /**
    * Create a new API instance
@@ -155,8 +159,11 @@ class Api
       $paths[] = $path;
 
       // Listen to path
-      wire()->addHook($path, function (\ProcessWire\HookEvent $event) use ($result) {
-        $jsonFlags = $this->debug === true ? $this->jsonFlagsDebug : $this->jsonFlags;
+      wire()->addHook($path, function (\ProcessWire\HookEvent $event) use (
+        $result
+      ) {
+        $jsonFlags =
+          $this->debug === true ? $this->jsonFlagsDebug : $this->jsonFlags;
 
         header('Content-Type: application/json');
 

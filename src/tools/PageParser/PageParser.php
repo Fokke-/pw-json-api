@@ -2,7 +2,15 @@
 
 namespace PwJsonApi;
 
-use \ProcessWire\{PageArray, Page, Field, PageFile, PageFiles, PageImage, PageImages};
+use \ProcessWire\{
+  PageArray,
+  Page,
+  Field,
+  PageFile,
+  PageFiles,
+  PageImage,
+  PageImages
+};
 
 // TODO: global configuration for page parser
 class PageParser
@@ -97,7 +105,10 @@ class PageParser
    */
   public function excludeFields(string ...$excludeFields): static
   {
-    $this->excludeFields = array_unique([...$this->excludeFields, ...$excludeFields]);
+    $this->excludeFields = array_unique([
+      ...$this->excludeFields,
+      ...$excludeFields,
+    ]);
     return $this;
   }
 
@@ -107,7 +118,9 @@ class PageParser
   protected function parsePage(\ProcessWire\Page $page): array
   {
     // Run BeforePageParse hooks
-    $beforePageParseHooks = $this->getPageParserHook(PageParserHookKey::BeforePageParse);
+    $beforePageParseHooks = $this->getPageParserHook(
+      PageParserHookKey::BeforePageParse
+    );
     if (!empty($beforePageParseHooks)) {
       $hookRet = new HookReturnBeforePageParse();
 
@@ -122,14 +135,19 @@ class PageParser
 
     // Gather fields to parse
     $fields = (function () use ($page) {
-      $fields = !empty($this->fields) ? $this->fields : $page->getFields()->explode('name');
+      $fields = !empty($this->fields)
+        ? $this->fields
+        : $page->getFields()->explode('name');
 
       // // If no fields are specified, get all
       // if (empty($fields)) {
       //   $fields = $page->getFields()->explode('name');
       // }
 
-      return array_diff([...$this->properties, ...$fields], $this->excludeFields);
+      return array_diff(
+        [...$this->properties, ...$fields],
+        $this->excludeFields
+      );
     })();
 
     // Parse page data
@@ -143,7 +161,9 @@ class PageParser
     );
 
     // Run AfterPageParse hooks
-    $afterPageParseHooks = $this->getPageParserHook(PageParserHookKey::AfterPageParse);
+    $afterPageParseHooks = $this->getPageParserHook(
+      PageParserHookKey::AfterPageParse
+    );
     if (!empty($afterPageParseHooks)) {
       $hookRet = new HookReturnAfterPageParse();
       $hookRet->page = $page;
@@ -182,7 +202,9 @@ class PageParser
 
     if (!empty($field)) {
       // Run BeforeFieldParse hooks
-      $beforeFieldParseHooks = $this->getPageParserHook(PageParserHookKey::BeforeFieldParse);
+      $beforeFieldParseHooks = $this->getPageParserHook(
+        PageParserHookKey::BeforeFieldParse
+      );
       if (!empty($beforeFieldParseHooks)) {
         $hookRet = new HookReturnBeforeFieldParse();
         $hookRet->field = $field;
@@ -246,7 +268,9 @@ class PageParser
       })();
 
       // Run AfterFieldParse hooks
-      $afterFieldParseHooks = $this->getPageParserHook(PageParserHookKey::AfterFieldParse);
+      $afterFieldParseHooks = $this->getPageParserHook(
+        PageParserHookKey::AfterFieldParse
+      );
       if (!empty($afterFieldParseHooks)) {
         $hookRet = new HookReturnAfterFieldParse();
         $hookRet->field = $field;
@@ -288,7 +312,9 @@ class PageParser
     $parser->excludeFields('id', 'name');
 
     // Run BeforeFileParse hooks
-    $beforeFileParseHooks = $this->getPageParserHook(PageParserHookKey::BeforeFileParse);
+    $beforeFileParseHooks = $this->getPageParserHook(
+      PageParserHookKey::BeforeFileParse
+    );
     if (!empty($beforeFileParseHooks)) {
       $hookRet = new HookReturnBeforeFileParse();
       $hookRet->field = $field;
@@ -316,7 +342,9 @@ class PageParser
     ];
 
     /** @var \ProcessWire\Template|null */
-    $customFieldsTpl = $file->field->getFieldtype()->getFieldsTemplate($file->field);
+    $customFieldsTpl = $file->field
+      ->getFieldtype()
+      ->getFieldsTemplate($file->field);
     if ($customFieldsTpl?->fields->count()) {
       // Create temporary page for custom fields
       // This page will be used to feed the parser.
@@ -325,14 +353,19 @@ class PageParser
       $tempCustomFieldsPage->template = $customFieldsTpl;
 
       foreach ($customFieldsTpl->fields as $customField) {
-        $tempCustomFieldsPage->set($customField->name, $file->get($customField->name));
+        $tempCustomFieldsPage->set(
+          $customField->name,
+          $file->get($customField->name)
+        );
       }
 
       $out['_custom_fields'] = $parser->input($tempCustomFieldsPage)->toArray();
     }
 
     // Run AfterFileParse hooks
-    $afterFileParseHooks = $this->getPageParserHook(PageParserHookKey::AfterFileParse);
+    $afterFileParseHooks = $this->getPageParserHook(
+      PageParserHookKey::AfterFileParse
+    );
     if (!empty($afterFileParseHooks)) {
       $hookRet = new HookReturnAfterFileParse();
       $hookRet->file = $file;
@@ -365,7 +398,9 @@ class PageParser
     $parser->excludeFields('id', 'name');
 
     // Run BeforeImageParse hooks
-    $beforeImageParseHooks = $this->getPageParserHook(PageParserHookKey::BeforeImageParse);
+    $beforeImageParseHooks = $this->getPageParserHook(
+      PageParserHookKey::BeforeImageParse
+    );
     if (!empty($beforeImageParseHooks)) {
       $hookRet = new HookReturnBeforeImageParse();
       $hookRet->field = $field;
@@ -392,7 +427,9 @@ class PageParser
     ];
 
     // Run AfterImageParse hooks
-    $afterImageParseHooks = $this->getPageParserHook(PageParserHookKey::AfterImageParse);
+    $afterImageParseHooks = $this->getPageParserHook(
+      PageParserHookKey::AfterImageParse
+    );
     if (!empty($afterImageParseHooks)) {
       $hookRet = new HookReturnAfterImageParse();
       $hookRet->image = $image;

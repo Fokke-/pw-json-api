@@ -42,7 +42,10 @@ trait HasPageParserHooks
    */
   public function hookBeforePageParse(callable $handler): static
   {
-    $this->initPageParserHooks()->add(PageParserHookKey::BeforePageParse, $handler);
+    $this->initPageParserHooks()->add(
+      PageParserHookKey::BeforePageParse,
+      $handler
+    );
     return $this;
   }
 
@@ -53,7 +56,10 @@ trait HasPageParserHooks
    */
   public function hookAfterPageParse(callable $handler): static
   {
-    $this->initPageParserHooks()->add(PageParserHookKey::AfterPageParse, $handler);
+    $this->initPageParserHooks()->add(
+      PageParserHookKey::AfterPageParse,
+      $handler
+    );
     return $this;
   }
 
@@ -64,7 +70,10 @@ trait HasPageParserHooks
    */
   public function hookBeforeFieldParse(callable $handler): static
   {
-    $this->initPageParserHooks()->add(PageParserHookKey::BeforeFieldParse, $handler);
+    $this->initPageParserHooks()->add(
+      PageParserHookKey::BeforeFieldParse,
+      $handler
+    );
     return $this;
   }
 
@@ -75,7 +84,10 @@ trait HasPageParserHooks
    */
   public function hookAfterFieldParse(callable $handler): static
   {
-    $this->initPageParserHooks()->add(PageParserHookKey::AfterFieldParse, $handler);
+    $this->initPageParserHooks()->add(
+      PageParserHookKey::AfterFieldParse,
+      $handler
+    );
     return $this;
   }
 
@@ -86,7 +98,10 @@ trait HasPageParserHooks
    */
   public function hookBeforeImageParse(callable $handler): static
   {
-    $this->initPageParserHooks()->add(PageParserHookKey::BeforeImageParse, $handler);
+    $this->initPageParserHooks()->add(
+      PageParserHookKey::BeforeImageParse,
+      $handler
+    );
     return $this;
   }
 
@@ -97,7 +112,10 @@ trait HasPageParserHooks
    */
   public function hookAfterImageParse(callable $handler): static
   {
-    $this->initPageParserHooks()->add(PageParserHookKey::AfterImageParse, $handler);
+    $this->initPageParserHooks()->add(
+      PageParserHookKey::AfterImageParse,
+      $handler
+    );
     return $this;
   }
 
@@ -108,7 +126,10 @@ trait HasPageParserHooks
    */
   public function hookBeforeFileParse(callable $handler): static
   {
-    $this->initPageParserHooks()->add(PageParserHookKey::BeforeFileParse, $handler);
+    $this->initPageParserHooks()->add(
+      PageParserHookKey::BeforeFileParse,
+      $handler
+    );
     return $this;
   }
 
@@ -119,7 +140,10 @@ trait HasPageParserHooks
    */
   public function hookAfterFileParse(callable $handler): static
   {
-    $this->initPageParserHooks()->add(PageParserHookKey::AfterFileParse, $handler);
+    $this->initPageParserHooks()->add(
+      PageParserHookKey::AfterFileParse,
+      $handler
+    );
     return $this;
   }
 }

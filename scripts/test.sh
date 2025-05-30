@@ -13,6 +13,9 @@ while ! ddev exec true 2>/dev/null; do
 done
 
 echo "Container is alive. Preparing test environment..."
+ddev composer install
+# TODO: return this
+# ddev import-db --file=./tests/fixtures/test-db.sql.gz
 
 echo "Running tests..."
 # Run the tests

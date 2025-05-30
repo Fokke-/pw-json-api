@@ -8,7 +8,7 @@ namespace PwJsonApi;
 class Response
 {
   /** Response data */
-  public array $data;
+  public array|null $data;
 
   /** Response code */
   public int $code;
@@ -16,7 +16,7 @@ class Response
   /** Response data */
   public array $withData = [];
 
-  public function __construct(array $data = [], $code = 200)
+  public function __construct(?array $data = [], $code = 200)
   {
     $this->data = $data;
     $this->code = $code;
@@ -39,7 +39,7 @@ class Response
   {
     $out = [
       ...(function () use ($withData) {
-        if ($withData === false) {
+        if ($withData === false || $this->data === null) {
           return [];
         }
 

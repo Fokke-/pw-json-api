@@ -7,7 +7,7 @@ namespace PwJsonApi;
  *
  * Service inherits hooks from the API instance and from all the parent services.
  */
-class Service
+abstract class Service
 {
   use Utils;
   use HasEndpointList;

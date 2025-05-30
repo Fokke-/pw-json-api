@@ -1,7 +1,7 @@
 node_modules
 vendor
-public/wire
-public/site/assets/cache
-public/site/assets/files
-public/site/assets/logs
-public/site/assets/sessions
+wire
+site/assets/cache
+site/assets/files
+site/assets/logs
+site/assets/sessions

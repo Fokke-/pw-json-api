@@ -16,16 +16,18 @@
   ],
   "scripts": {
     "test": "./scripts/test.sh",
+    "export-test-db": "ddev export-db --file=./tests/fixtures/test-db.sql.gz",
     "post-install-cmd": [
-      "cp -fr vendor/processwire/processwire/wire public/wire-new && mkdir -p public/wire && mv public/wire public/wire-old && mv public/wire-new public/wire && rm -fr public/wire-old"
+      "cp -fr vendor/processwire/processwire/wire wire-new && mkdir -p wire && mv wire wire-old && mv wire-new wire && rm -fr wire-old"
     ],
     "post-update-cmd": [
-      "cp -fr vendor/processwire/processwire/wire public/wire-new && mkdir -p public/wire && mv public/wire public/wire-old && mv public/wire-new public/wire && rm -fr public/wire-old"
+      "cp -fr vendor/processwire/processwire/wire wire-new && mkdir -p wire && mv wire wire-old && mv wire-new wire && rm -fr wire-old"
     ]
   },
   "autoload": {
     "classmap": [
-      "src/"
+      "src/",
+      "site/lib/"
     ]
   },
   "require": {
@@ -33,7 +35,8 @@
     "processwire/processwire": ">=3.0.173"
   },
   "require-dev": {
-    "pestphp/pest": "^3.8"
+    "pestphp/pest": "^3.8",
+    "guzzlehttp/guzzle": "^7.9"
   },
   "config": {
     "allow-plugins": {

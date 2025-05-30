@@ -32,7 +32,7 @@ class Endpoint
    */
   public function __construct(string|null $path = null)
   {
-    $this->path = $this->formatPath($path);
+    $this->setPath($path);
     $this->handlers = array_reduce(
       RequestMethod::cases(),
       function ($acc, $method) {
@@ -66,7 +66,9 @@ class Endpoint
    */
   public function getHandler(RequestMethod $method): callable|null
   {
-    return !empty($this->handlers[$method->name]) ? $this->handlers[$method->name] : null;
+    return !empty($this->handlers[$method->name])
+      ? $this->handlers[$method->name]
+      : null;
   }
 
   /**

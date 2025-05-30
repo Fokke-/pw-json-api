@@ -39,7 +39,25 @@
 |
 */
 
-// function something()
-// {
-//     // ..
-// }
+function getHttp()
+{
+  $client = new GuzzleHttp\Client([
+    'base_uri' => 'https://pw-json-api.ddev.site/api/',
+    'http_errors' => false,
+  ]);
+
+  return $client;
+}
+
+function resToJson(\Psr\Http\Message\ResponseInterface $res): array
+{
+  return json_decode((string) $res->getbody(), true);
+}
+
+function getResponse(string $uri): array
+{
+  $client = getHttp();
+  $res = $client->get($uri);
+
+  return resToJson($res);
+}
