@@ -3,10 +3,8 @@
 namespace PwJsonApi;
 
 /**
- * This class can be used to crawl entire tree of services.
- *
- * The main purpose is to return all endpoints and their service
- * hierarchy.
+ * Crawl entire tree of services and yield all endpoints with
+ * information about their service hierarchies.
  */
 class EndpointCrawler
 {
