@@ -12,11 +12,11 @@ while ! ddev exec true 2>/dev/null; do
   sleep 2
 done
 
-echo "Container is alive. Preparing test environment..."
+# Prepare test environment
+echo "Container is alive. Preparing environment..."
 ddev composer install
-# TODO: return this
-# ddev import-db --file=./tests/fixtures/test-db.sql.gz
+ddev import-db --file=./tests/fixtures/test-db.sql.gz
 
-echo "Running tests..."
 # Run the tests
+echo "Running tests..."
 ddev exec ./vendor/bin/pest
