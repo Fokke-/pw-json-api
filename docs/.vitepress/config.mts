@@ -7,6 +7,10 @@ export default defineConfig({
   base: '/pw-json-api/',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
+    search: {
+      provider: 'local',
+    },
+
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Guide', link: '/overview' },

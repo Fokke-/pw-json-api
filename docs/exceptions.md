@@ -2,8 +2,8 @@
 
 The library catches any exception derived from the `ApiException` class and converts it to a response. You can throw an `ApiException` at any time to halt the process.
 
-::: info
-Only `ApiException` will be caught. For other exceptions, such as `WireException`, you need to add custom handling.
+::: tip
+For other exceptions, such as `WireException`, you need to add custom handling.
 :::
 
 ## Example exception
@@ -32,7 +32,7 @@ The default response code is `400`. Use `code()` to specify a custom code.
 throw (new ApiException('Snap, crackle and pop!'))->code(401);
 ```
 
-## Additional top level keys
+## Additional top-level keys
 
 Like responses, exceptions can also contain additional key-value pairs.
 

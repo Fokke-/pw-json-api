@@ -26,7 +26,7 @@ $api->hookAfter(function ($args) {
   // Inject key to response data
   $args->response->data['_foo'] = 'bar';
 
-  // Include additional top level keys to the response
+  // Include additional top-level keys in the response
   $args->response->with([
     'baz' => 'qux',
   ]);
