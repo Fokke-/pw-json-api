@@ -1,7 +1,7 @@
 {
   "name": "fokke/pw-json-api",
   "type": "library",
-  "description": "JSON API for ProcessWire",
+  "description": "ProcessWire JSON API",
   "license": "MIT",
   "keywords": [
     "json",

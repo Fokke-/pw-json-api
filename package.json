@@ -2,7 +2,7 @@
   "name": "pw-json-api",
   "type": "module",
   "version": "1.0.0",
-  "description": "JSON API for ProcessWire",
+  "description": "ProcessWire JSON API",
   "license": "MIT",
   "author": "Ville Fokke Saarivaara",
   "scripts": {
