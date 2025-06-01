@@ -4,6 +4,7 @@ import { defineConfig } from 'vitepress';
 export default defineConfig({
   title: 'ProcessWire JSON API',
   description: '',
+  base: '/pw-json-api/',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
