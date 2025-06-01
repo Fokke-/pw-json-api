@@ -1,4 +1,4 @@
-# JSON API for ProcessWire
+# ProcessWire JSON API
 
 ## NOT READY FOR PRODUCTION USE
 
