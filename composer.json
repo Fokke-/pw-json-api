@@ -16,27 +16,6 @@
       "email": "ville.saarivaara@gmail.com"
     }
   ],
-  "archive": {
-    "exclude": [
-      "/.ddev",
-      "/.zed",
-      "/docs",
-      "/node_modules",
-      "/scripts",
-      "/site",
-      "/tests",
-      "/vendor",
-      "/wire",
-      "/.git",
-      "/.gitignore",
-      "/.htaccess",
-      "/.prettierrc.json",
-      "/index.php",
-      "/package.json",
-      "/phpunit.xml",
-      "/pnpm-lock.yaml"
-    ]
-  },
   "scripts": {
     "test": "./scripts/test.sh",
     "export-test-db": "ddev export-db --file=./tests/fixtures/test-db.sql.gz",

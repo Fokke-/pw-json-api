@@ -1,6 +1,6 @@
-# API instance
+# API Instance
 
-API instance will hold all the services. You can also define system-wide request hooks, which will apply to every endpoint. [Read more about hooks](/request-hooks).
+An API instance holds all the services. You can also define system-wide request hooks, which will apply to every endpoint. [Read more about hooks](/request-hooks).
 
 ## Configuration
 
@@ -8,10 +8,10 @@ The main instance can be configured by passing a function to the constructor.
 
 ```php
 $api = new Api(function ($config) {
-  // Should endpoint path and with a trailing slash? (null = no preference)
+  // Should endpoint paths end with a trailing slash? (null = no preference)
   $config->trailingSlashes = null;
 
-  // Flags to pass to json_encode function
+  // Flags to pass to the json_encode function
   $config->jsonFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
 });
 ```
@@ -26,30 +26,30 @@ $api->setBasePath('/api');
 
 ## Adding a service
 
-Call `addService()` to attach a service into the API.
+Call `addService()` to attach a service to the API.
 
 ```php
 $api->addService(new HelloWorldService());
 ```
 
-The newly added service can be accessed in optional setup function. This can be used to reconfigure the service, add child services, define hooks etc.
+The newly added service can be accessed in an optional setup function. This can be used to reconfigure the service, add child services, define hooks, etc.
 
 ```php
 $api->addService(new HelloWorldService(), function ($service) {
-  // Override default base path
+  // Override the default base path
   $service->setBasePath('/greet');
 
-  // Add child service
+  // Add a child service
   $service->addService(new AnotherService());
 });
 ```
 
 ## Multiple instances
 
-You can create multiple API instances, with their own configurations, services and hooks. This can be useful for API versioning.
+You can create multiple API instances, each with its own configuration, services, and hooks. This can be useful for API versioning.
 
 ::: tip
-To avoid path clashing, it's highly recommended to set unique base paths for all instances.
+To avoid path clashes, it's highly recommended to set unique base paths for all instances.
 :::
 
 ```php

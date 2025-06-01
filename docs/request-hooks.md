@@ -1,12 +1,12 @@
 # Request hooks
 
-Request hooks can be used to modify the behaviour of the endpoints. The most common use case is to check for authorisation before the request is handled, or to modify response data after the request has been handled. For this purpose [hook arguments](#hook-arguments) will be passed to hook handler function.
+Request hooks can be used to modify the behavior of endpoints. The most common use cases are to check for authorization before the request is handled, or to modify response data after the request has been handled. For this purpose, [hook arguments](#hook-arguments) will be passed to the hook handler function.
 
-The examples below use `hookBefore()` or `hookAfter()` methods, which will apply to any request method. There are also [request type specific hooks](#hook-methods-reference) available.
+The examples below use the `hookBefore()` and `hookAfter()` methods, which apply to any request method. There are also [request type-specific hooks](#hook-methods-reference) available.
 
 ## API hooks
 
-Defined for the whole API instance. Hooks will apply to all endpoints.
+Defined for the whole API instance. These hooks will apply to all endpoints.
 
 ```php
 // Simple auth check for all requests, with any request method
@@ -35,7 +35,7 @@ $api->hookAfter(function ($args) {
 
 ## Service hooks
 
-Defined for a single service branch. Hooks will apply to all endpoints (child services included) within the given service. These can be defined directly in service constructor or they can be injected to service object.
+Defined for a single service branch. Hooks will apply to all endpoints (including child services) within the given service. These can be defined directly in the service constructor or injected into the service object.
 
 ### Define in service constructor
 
@@ -65,7 +65,7 @@ $api->findService('HelloWorldService')?->hookAfter(function ($args) {
 
 ## Endpoint hooks
 
-Defined for a single endpoint. These can be defined directly when creating an endpoint (which would not make much sense), or they can be injected to the endpoint object.
+Defined for a single endpoint. These can be defined directly when creating an endpoint (which does not make much sense), or they can be injected into the endpoint object.
 
 ```php
 $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
@@ -75,7 +75,7 @@ $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
 
 ## Hook arguments
 
-You can access hook arguments in `$args` argument of the hook handler function. The following properties are always included:
+You can access hook arguments via the `$args` parameter of the hook handler function. The following properties are always included:
 
 | Property          | Type                     | Description                 |
 | ----------------- | ------------------------ | --------------------------- |

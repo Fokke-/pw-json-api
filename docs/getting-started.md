@@ -8,7 +8,7 @@ composer require fokke/pw-json-api
 
 ## Create your first service
 
-Create a new service file, like `/site/services/HelloWorldService.php` with the following code.
+Create a new service file, such as `/site/services/HelloWorldService.php` with the following code:
 
 ```php
 <?php namespace ProcessWire;
@@ -33,7 +33,7 @@ class HelloWorldService extends Service
 
 ## Create an API instance
 
-The library utilises ProcessWire URL hooks to create listeners to your endpoints. Therefore you must initialise the API instance either in `/site/ready.php` or in `/site/init.php` file.
+The library utilizes ProcessWire URL hooks to create listeners for your endpoints. Therefore, you must initialize the API instance either in the `/site/ready.php` or `/site/init.php` file.
 
 ```php
 use PwJsonApi\Api;
@@ -53,7 +53,7 @@ $api->run();
 
 ## Test the endpoint
 
-Open the URL `/api/hello-world`. The server should respond with code 200 and the following JSON:
+Open the URL `/api/hello-world`. The server should respond with status code 200 and the following JSON:
 
 ```json
 {

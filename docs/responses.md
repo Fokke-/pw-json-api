@@ -1,6 +1,6 @@
 # Responses
 
-The data you return with the response will be rendered under `data` key in the resulting JSON.
+The data you return with the response will be rendered under the `data` key in the resulting JSON.
 
 ## Example response
 
@@ -24,7 +24,7 @@ The resulting JSON:
 
 ## Response code
 
-The default response code is `200`. Use `code()` to specify custom response code.
+The default response code is `200`. Use `code()` to specify a custom response code.
 
 ```php
 return (new Response([
@@ -33,9 +33,9 @@ return (new Response([
 ]))->code(201);
 ```
 
-## Additional top level keys
+## Additional top-level keys
 
-Sometimes you need to return additional key-value pairs, such as a message, alongside the data. In this example response data contains user details, and the message would not belong there. Use `with()` to define additional keys.
+Sometimes you need to return additional key-value pairs, such as a message, alongside the data. In this example, the response data contains user details, and the message would not belong there. Use `with()` to define additional keys.
 
 ```php{4-6}
 return (new Response([
