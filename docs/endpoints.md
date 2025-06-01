@@ -17,7 +17,7 @@ The supported listeners are:
 - `delete()`
 - `options()`
 
-Like API instance or service, endpoint can also contain request hooks. [Read more about hooks](/hooks).
+Like API instance or service, endpoint can also contain request hooks. [Read more about hooks](/request-hooks).
 
 ## Example endpoint
 

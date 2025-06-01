@@ -4,7 +4,7 @@ Services are used to group endpoints. Since services are classes, they can have 
 
 Service can define any number of [endpoints](/endpoints), and services may also contain child services, which will inherit hooks from the parent service.
 
-You can also define service-wide request hooks, which will apply to every endpoint of the service and it's child services. [Read more about hooks](/hooks).
+You can also define service-wide request hooks, which will apply to every endpoint of the service and it's child services. [Read more about hooks](/request-hooks).
 
 ## Example service
 
@@ -70,10 +70,10 @@ This relationship can be also defined in fly while adding the service to the mai
 
 ## Accessing main instance from the service
 
-Reference to the main instance can be accessed in `api` property of the service. Methods and properties of other services can be accessed through this property.
+Reference to the main instance can be injected in `api` property of the service. You can use this to access methods and properties of other services.
 
 ::: warning
-Main instance will be injected to the service after `run()` has been called. Therefore you cannot access `api` in the service constructor.
+Main instance will be injected to the service after `run()` has been called. Therefore you cannot access `api` directly in the service constructor.
 :::
 
 ```php
@@ -92,7 +92,7 @@ class HelloWorldService extends Service
 
       return new Response([
         'hello' => 'world',
-        ...$anotherService->gimmeGimme(),
+        ...$anotherService?->gimmeGimme(),
       ]);
     });
   }

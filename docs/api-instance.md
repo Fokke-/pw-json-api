@@ -1,6 +1,6 @@
 # API instance
 
-API instance will hold all the services. You can also define system-wide request hooks, which will apply to every endpoint. [Read more about hooks](/hooks).
+API instance will hold all the services. You can also define system-wide request hooks, which will apply to every endpoint. [Read more about hooks](/request-hooks).
 
 ## Configuration
 
