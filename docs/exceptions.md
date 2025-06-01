@@ -1,9 +1,9 @@
 # Exceptions
 
-The library catches any exception derived from `ApiException` class, and converts it to a response. You can throw `ApiException` at any time to halt process.
+The library catches any exception derived from the `ApiException` class and converts it to a response. You can throw an `ApiException` at any time to halt the process.
 
 ::: info
-Only `ApiException` will be caught. For other exceptions, such as `WireException`, you need add custom handling.
+Only `ApiException` will be caught. For other exceptions, such as `WireException`, you need to add custom handling.
 :::
 
 ## Example exception
@@ -26,7 +26,7 @@ The resulting JSON:
 
 ## Exception response code
 
-The default response code is `400`. Use `code()` to specify custom code.
+The default response code is `400`. Use `code()` to specify a custom code.
 
 ```php
 throw (new ApiException('Snap, crackle and pop!'))->code(401);
@@ -52,7 +52,7 @@ The resulting JSON:
 
 ## Api404Exception
 
-This can be used as a shorthand for exception with `404` response code. Errors with 404 code should not have any visible message.
+This can be used as a shorthand for an exception with a `404` response code.
 
 ```php
 use PwJsonApi\Api404Exception;

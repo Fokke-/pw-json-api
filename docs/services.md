@@ -2,13 +2,13 @@
 
 Services are used to group endpoints. Since services are classes, they can have properties and methods.
 
-Service can define any number of [endpoints](/endpoints), and services may also contain child services, which will inherit hooks from the parent service.
+A service can define any number of [endpoints](/endpoints), and services may also contain child services, which will inherit hooks from the parent service.
 
-You can also define service-wide request hooks, which will apply to every endpoint of the service and it's child services. [Read more about hooks](/request-hooks).
+You can also define service-wide request hooks, which will apply to every endpoint of the service and its child services. [Read more about hooks](/request-hooks).
 
 ## Example service
 
-Create a new service by extending `Service` class. In the constructor you can define one or more endpoints with handlers for different request methods. [Read more about endpoints](/endpoints).
+Create a new service by extending the `Service` class. In the constructor, you can define one or more endpoints with handlers for different request methods. [Read more about endpoints](/endpoints).
 
 ```php
 <?php namespace ProcessWire;
@@ -49,7 +49,7 @@ class HelloWorldService extends Service
 
 ## Base path
 
-Like the main instance, the service can also define it's base path in constructor.
+Like the main instance, the service can also define its base path in the constructor.
 
 ```php
 $this->setBasePath('/greet');
@@ -57,23 +57,23 @@ $this->setBasePath('/greet');
 
 ## Child services
 
-In the most cases a flat service tree is enough, but for bigger API's you can define child services to further categorise the endpoints. Child services will inherit all hooks from parent service(s), and base paths of the parent services will apply.
+In most cases, a flat service tree is enough, but for larger APIs you can define child services to further categorize the endpoints. Child services will inherit all hooks from parent service(s), and the base paths of the parent services will apply.
 
-Child services can be defined in service constructor by calling `addService`.
+Child services can be defined in the service constructor by calling `addService()`.
 
 ```php
 // In service constructor
 $this->addService(new AnotherService());
 ```
 
-This relationship can be also defined in fly while adding the service to the main instance, allowing to nest services which normally would not be related to each other. [See example of adding child service in fly](api-instance.html#adding-a-service).
+This relationship can also be defined on the fly while adding the service to the main instance, allowing you to nest services that normally would not be related to each other. [See example of adding a child service on the fly](api-instance.html#adding-a-service).
 
-## Accessing main instance from the service
+## Accessing the main instance from the service
 
-Reference to the main instance can be injected in `api` property of the service. You can use this to access methods and properties of other services.
+A reference to the main instance will be injected into the `api` property of the service. You can use this to access methods and properties of other services.
 
 ::: warning
-Main instance will be injected to the service after `run()` has been called. Therefore you cannot access `api` directly in the service constructor.
+The main instance will be injected into the service after `run()` has been called. Therefore, you cannot access `api` directly in the service constructor.
 :::
 
 ```php

@@ -39,6 +39,10 @@ export default defineConfig({
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/Fokke-/pw-json-api' },
+      {
+        icon: 'packagist',
+        link: 'https://packagist.org/packages/fokke/pw-json-api',
+      },
     ],
   },
 });

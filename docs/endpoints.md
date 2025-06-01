@@ -1,11 +1,11 @@
 # Endpoints
 
-Under the hood endpoint path will be used to create [ProcessWire URL hook](https://processwire.com/blog/posts/pw-3.0.173/#introducing-url-path-hooks). All URL hook features are supported.
+Under the hood, the endpoint path will be used to create a [ProcessWire URL hook](https://processwire.com/blog/posts/pw-3.0.173/#introducing-url-path-hooks). All URL hook features are supported.
 
-Endpoint listener must either return a [`Response`](/responses) object, or throw [`ApiException`](/exceptions) to halt the process and respond with an error.
+Each endpoint listener must either return a [`Response`](/responses) object or throw an [`ApiException`](/exceptions) to halt the process and respond with an error.
 
 ::: info
-By default all request methods are denied, and you must add listeners for all request methods you want to allow. Requests with disallowed methods will be denied with 405 response.
+By default, all request methods are denied. You must add listeners for each request method you want to allow. Requests with disallowed methods will be denied with a 405 response.
 :::
 
 The supported listeners are:
@@ -17,11 +17,11 @@ The supported listeners are:
 - `delete()`
 - `options()`
 
-Like API instance or service, endpoint can also contain request hooks. [Read more about hooks](/request-hooks).
+Like an API instance or service, an endpoint can also contain request hooks. [Read more about hooks](/request-hooks).
 
 ## Example endpoint
 
-Call `addEndpoint()` in the service constructor and pass `path` you want to listen to.
+Call `addEndpoint()` in the service constructor and pass the `path` you want to listen to.
 
 ```php
 use PwJsonApi\ApiException;
@@ -59,7 +59,7 @@ $this->addEndpoint('/user')
 
 ## Dynamic paths
 
-You can use named arguments or regular expressions to allow dynamic paths. Use `$event` argument of response handler to access named arguments.
+You can use named arguments or regular expressions to allow dynamic paths. Use the `$event` argument of the response handler to access named arguments.
 
 ```php{3}
 $this->addEndpoint('/products/{product}')
