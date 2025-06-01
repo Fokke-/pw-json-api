@@ -1,0 +1,17 @@
+.ddev export-ignore
+.git export-ignore
+.gitignore export-ignore
+.htaccess export-ignore
+.prettierrc.json export-ignore
+.zed export-ignore
+docs export-ignore
+index.php export-ignore
+node_modules export-ignore
+package.json export-ignore
+phpunit.xml export-ignore
+pnpm-lock.yaml export-ignore
+scripts export-ignore
+site export-ignore
+tests export-ignore
+vendor export-ignore
+wire export-ignore
