@@ -5,9 +5,10 @@
   "license": "MIT",
   "keywords": [
     "json",
-    "api"
+    "api",
+    "processwire",
+    "pw"
   ],
-  "homepage": "https://pwjsonapi.fokke.fi",
   "authors": [
     {
       "name": "Ville Fokke Saarivaara",
@@ -20,9 +21,12 @@
       "/.ddev",
       "/.zed",
       "/docs",
+      "/node_modules",
       "/scripts",
       "/site",
       "/tests",
+      "/vendor",
+      "/wire",
       "/.git",
       "/.gitignore",
       "/.htaccess",
