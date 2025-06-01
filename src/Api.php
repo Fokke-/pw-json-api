@@ -1,6 +1,5 @@
 <?php
 
-// TODO: move getEndpoint to HasService list and search recursively
 namespace PwJsonApi;
 
 use \ProcessWire\{WireException};
