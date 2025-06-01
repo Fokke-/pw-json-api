@@ -1,5 +1,7 @@
 .ddev export-ignore
 .git export-ignore
+.gitattributes export-ignore
+.github export-ignore
 .gitignore export-ignore
 .htaccess export-ignore
 .prettierrc.json export-ignore
@@ -11,7 +13,13 @@ package.json export-ignore
 phpunit.xml export-ignore
 pnpm-lock.yaml export-ignore
 scripts export-ignore
-site export-ignore
+site/assets export-ignore
+site/lib/services export-ignore
+site/modules export-ignore
+site/templates export-ignore
+site/.htaccess export-ignore
+site/config.php export-ignore
+site/ready.php export-ignore
 tests export-ignore
 vendor export-ignore
 wire export-ignore
