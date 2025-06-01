@@ -1,14 +1,15 @@
 <?php namespace ProcessWire;
 
+// JSON API
+use PwJsonApi\{Api};
+
 if (!defined('PROCESSWIRE')) {
   die();
 }
 
-// JSON API
-use PwJsonApi\Api;
-
 if ($page->template->name !== 'admin') {
   $api = new Api(function ($config) {
+    $config->trailingSlashes = null;
     $config->jsonFlags =
       JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT;
   });
@@ -17,7 +18,7 @@ if ($page->template->name !== 'admin') {
   $api->hookAfter(function ($args) {
     $args->response->with([
       '_after_hook_execution_order' => [
-        ...$args->response->withData['_after_hook_execution_order'] ?? [],
+        ...$args->response->additionalData['_after_hook_execution_order'] ?? [],
         'api',
       ],
     ]);
@@ -27,7 +28,8 @@ if ($page->template->name !== 'admin') {
     $service->hookAfter(function ($args) {
       $args->response->with([
         '_after_hook_execution_order' => [
-          ...$args->response->withData['_after_hook_execution_order'] ?? [],
+          ...$args->response->additionalData['_after_hook_execution_order'] ??
+          [],
           'service',
         ],
       ]);
@@ -36,7 +38,8 @@ if ($page->template->name !== 'admin') {
     $service->getEndpoint('/')->hookafter(function ($args) {
       $args->response->with([
         '_after_hook_execution_order' => [
-          ...$args->response->withData['_after_hook_execution_order'] ?? [],
+          ...$args->response->additionalData['_after_hook_execution_order'] ??
+          [],
           'endpoint',
         ],
       ]);
@@ -48,6 +51,20 @@ if ($page->template->name !== 'admin') {
 
   $api->addService(new PageService());
   $api->addService(new ExceptionService());
+  $api->addService(new HelloWorldService());
+
+  $api->findEndpoint('/api/food/fruits/orange/')?->hookAfter(function ($args) {
+    $args->response->data['_foo'] = 'bar';
+  });
 
   $api->run();
+
+  $parallelApi = new Api(function ($config) {
+    $config->jsonFlags =
+      JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT;
+  });
+  $parallelApi->setBasePath('/parallel-api');
+  $parallelApi->addService(new HelloWorldService());
+
+  $parallelApi->run();
 }
