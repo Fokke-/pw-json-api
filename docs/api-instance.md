@@ -1,0 +1,63 @@
+# API instance
+
+API instance will hold all the services. You can also define system-wide request hooks, which will apply to every endpoint. [Read more about hooks](/hooks).
+
+## Configuration
+
+The main instance can be configured by passing a function to the constructor.
+
+```php
+$api = new Api(function ($config) {
+  // Should endpoint path and with a trailing slash? (null = no preference)
+  $config->trailingSlashes = null;
+
+  // Flags to pass to json_encode function
+  $config->jsonFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+});
+```
+
+## Base path
+
+All endpoint paths will be prefixed with the base path. You can set a custom base path with `setBasePath()`. The default value is `/`.
+
+```php
+$api->setBasePath('/api');
+```
+
+## Adding a service
+
+Call `addService()` to attach a service into the API.
+
+```php
+$api->addService(new HelloWorldService());
+```
+
+The newly added service can be accessed in optional setup function. This can be used to reconfigure the service, add child services, define hooks etc.
+
+```php
+$api->addService(new HelloWorldService(), function ($service) {
+  // Override default base path
+  $service->setBasePath('/greet');
+
+  // Add child service
+  $service->addService(new AnotherService());
+});
+```
+
+## Multiple instances
+
+You can create multiple API instances, with their own configurations, services and hooks. This can be useful for API versioning.
+
+::: tip
+To avoid path clashing, it's highly recommended to set unique base paths for all instances.
+:::
+
+```php
+$v1 = new Api();
+$v1->setBasePath('/v1');
+$v1->run();
+
+$v2 = new Api();
+$v2->setBasePath('/v2');
+$v2->run();
+```

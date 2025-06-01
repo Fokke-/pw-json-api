@@ -13,24 +13,27 @@ export default defineConfig({
 
     sidebar: [
       {
-        text: 'Overview',
+        text: 'The first steps',
         items: [
           { text: 'Overview', link: '/overview' },
           { text: 'Getting started', link: '/getting-started' },
         ],
       },
       {
-        text: 'Core concepts',
+        text: 'Digging deeper',
         items: [
           { text: 'API instance', link: '/api-instance' },
-          { text: 'Services and endpoints', link: '/services-and-endpoints' },
-          { text: 'Hooks', link: '/hooks' },
+          { text: 'Services', link: '/services' },
+          { text: 'Endpoints', link: '/endpoints' },
+          { text: 'Responses', link: '/responses' },
+          { text: 'Exceptions', link: '/exceptions' },
+          { text: 'Request hooks', link: '/request-hooks' },
         ],
       },
-      {
-        text: 'Tools',
-        items: [{ text: 'Page parser', link: '/page-parser' }],
-      },
+      // {
+      //   text: 'With the tools in hand',
+      //   items: [{ text: 'Page parser', link: '/page-parser' }],
+      // },
     ],
 
     socialLinks: [

@@ -5,7 +5,7 @@ layout: home
 hero:
   name: 'ProcessWire JSON API'
   text: ''
-  tagline: My great project tagline
+  tagline: NOT READY FOR PRODUCTION USE
   actions:
     - theme: brand
       text: Getting started
@@ -13,14 +13,13 @@ hero:
     - theme: alt
       text: Overview
       link: /overview
-
-features:
-  - icon: 😌
-    title: Fast and easy to use
-    details: No cryptic configuration files. Get the first endpoint running in minutes.
-  - icon: 📦
-    title: Extendable
-    details:
-  - title: Feature C
-    details:
+# features:
+#   - icon: 🏖️
+#     title: Fast and easy to use
+#     details: No cryptic configuration files. Get the first endpoint running in minutes.
+#   - icon: 📦
+#     title: It slices! It dices!
+#     details:
+#   - title: Feature C
+#     details:
 ---
