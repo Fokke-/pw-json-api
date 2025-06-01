@@ -14,6 +14,7 @@ abstract class Service
   use HasServiceList;
   use HasEndpointList;
   use HasRequestHooks;
+  use HasApiSearch;
 
   /** Service name */
   public readonly string $name;

@@ -15,6 +15,7 @@ class Api
   use HasBasePath;
   use HasServiceList;
   use HasRequestHooks;
+  use HasApiSearch;
 
   /** Configuration */
   private ApiConfig $config;
@@ -35,8 +36,11 @@ class Api
     }
   }
 
+  /**
+   * Handle request
+   */
   protected function handleRequest(
-    EndpointCrawlerResult $result,
+    ApiSearchEndpointResult $result,
     \ProcessWire\HookEvent $event
   ): Response {
     // Try to find handler matching the request method.
@@ -46,12 +50,6 @@ class Api
 
     if (empty($requestMethod) || empty($handler)) {
       throw (new ApiException())->code(405);
-    }
-
-    // Inject service list to the endpoint
-    // TODO: why is this necessary?
-    foreach ($result->serviceSequence as $service) {
-      $result->endpoint->services->add($service);
     }
 
     // Before hooks
@@ -133,22 +131,20 @@ class Api
    */
   public function run(): void
   {
-    /** Previous installed service. Used in duplicate checking. */
-    $prevServiceName = null;
-
     /** @var string[] */
     $serviceNames = [];
 
     /** @var string[] */
     $paths = [];
 
-    $crawler = new EndpointCrawler();
+    $search = new ApiSearch();
 
-    foreach ($crawler->crawl($this->getServices(), $this->hooks) as $result) {
-      /** @var EndpointCrawlerResult $result */
+    foreach ($search->iterate($this->getServices(), $this->hooks) as $result) {
+      /** @var ApiSearchServiceResult|ApiSearchEndpointResult $result */
 
-      // Check for duplicated service name
-      if ($prevServiceName !== $result->service->name) {
+      // Prepare service
+      if ($result instanceof ApiSearchServiceResult) {
+        // Check for duplicated service
         if (in_array($result->service->name, $serviceNames)) {
           throw new \ProcessWire\WireException(
             "Duplicated service '{$result->service->name}'"
@@ -156,53 +152,60 @@ class Api
         }
 
         $serviceNames[] = $result->service->name;
-        $prevServiceName = $result->service->name;
 
         // Inject API instance to the service
         $result->service->_setApi($this);
       }
 
-      // Resolve endpoint path
-      $path = (function () use ($result) {
-        $out = $result->resolvePath($this->getBasePath());
+      // Prepare endpoint
+      if ($result instanceof ApiSearchEndpointResult) {
+        // Resolve endpoint path
+        $path = (function () use ($result) {
+          $out = $result->resolvePath($this->getBasePath());
 
-        if ($this->config->trailingSlashes === true) {
-          return $out . '/';
-        } elseif ($this->config->trailingSlashes === null) {
-          return $out . '/?';
+          if ($this->config->trailingSlashes === true) {
+            return $out . '/';
+          } elseif ($this->config->trailingSlashes === null) {
+            return $out . '/?';
+          }
+
+          return $out;
+        })();
+
+        // Check for duplicated path
+        if (in_array($path, $paths)) {
+          throw new WireException(
+            "Duplicated endpoint path '{$path}' (defined in service '{$result->service->name}')."
+          );
         }
 
-        return $out;
-      })();
+        $paths[] = $path;
 
-      // Check for duplicated path
-      if (in_array($path, $paths)) {
-        throw new WireException(
-          "Duplicated endpoint path '{$path}' (defined in service '{$result->service->name}')."
-        );
+        // Inject service list to the endpoint
+        foreach ($result->serviceSequence as $service) {
+          $result->endpoint->services->add($service);
+        }
+
+        // Listen to path
+        wire()->addHook($path, function (\ProcessWire\HookEvent $event) use (
+          $result
+        ) {
+          header('Content-Type: application/json');
+
+          try {
+            $response = $this->handleRequest($result, $event);
+
+            http_response_code($response->code);
+            echo $response->toJson($this->config->jsonFlags);
+          } catch (ApiException $e) {
+            // Output error
+            http_response_code($e->response->code);
+            echo $e->response->toJson($this->config->jsonFlags, false);
+          }
+
+          die();
+        });
       }
-
-      $paths[] = $path;
-
-      // Listen to path
-      wire()->addHook($path, function (\ProcessWire\HookEvent $event) use (
-        $result
-      ) {
-        header('Content-Type: application/json');
-
-        try {
-          $response = $this->handleRequest($result, $event);
-
-          http_response_code($response->code);
-          echo $response->toJson($this->config->jsonFlags);
-        } catch (ApiException $e) {
-          // Output error
-          http_response_code($e->response->code);
-          echo $e->response->toJson($this->config->jsonFlags, false);
-        }
-
-        die();
-      });
     }
   }
 }

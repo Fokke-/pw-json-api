@@ -7,6 +7,6 @@ namespace PwJsonApi;
  */
 class RequestHookReturnAfter extends RequestHookReturn
 {
-  /** Request response, which can be modified */
+  /** Response from endpoint request handler */
   public Response $response;
 }

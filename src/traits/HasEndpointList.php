@@ -44,7 +44,8 @@ trait HasEndpointList
   /**
    * Get endpoint by path
    *
-   * @return Endpoint
+   * Note that this method is not recursive.
+   * To search recursively, use findEndpoint()
    */
   public function getEndpoint(string $path): Endpoint|null
   {

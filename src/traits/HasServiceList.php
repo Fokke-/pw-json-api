@@ -25,23 +25,14 @@ trait HasServiceList
   }
 
   /**
-   * Recursively get service by name
+   * Get service by name
+   *
+   * Note that this method is not recursive.
+   * To search recursively, use findService()
    */
   public function getService(string $name): Service|null
   {
-    foreach ($this->services->getItems() as $service) {
-      if ($service->name === $name) {
-        return $service;
-      }
-
-      // Recursively search in the current service
-      $foundService = $service->getService($name);
-      if ($foundService !== null) {
-        return $foundService;
-      }
-    }
-
-    return null;
+    return $this->services->get($name);
   }
 
   /**

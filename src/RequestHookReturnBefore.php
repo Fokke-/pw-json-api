@@ -8,7 +8,7 @@ namespace PwJsonApi;
 class RequestHookReturnBefore extends RequestHookReturn
 {
   /*
-   * Request handler
+   * Endpoint request handler
    *
    * @var callable
    */
