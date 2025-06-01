@@ -13,7 +13,7 @@ class Response
   /** Response code */
   public int $code = 200;
 
-  /** Additional top level key-value pairs */
+  /** Additional top-level key-value pairs */
   public array $additionalData = [];
 
   public function __construct(?array $data = [])
@@ -31,7 +31,7 @@ class Response
   }
 
   /**
-   * Add top level keys and values to the response
+   * Add top-level keys and values to the response
    */
   public function with(array $data): static
   {

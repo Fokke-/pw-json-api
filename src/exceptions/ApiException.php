@@ -39,7 +39,7 @@ class ApiException extends \Exception
   }
 
   /**
-   * Add top level keys and values to the response
+   * Add top-level keys and values to the response
    */
   public function with(array $data): static
   {
