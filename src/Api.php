@@ -49,6 +49,7 @@ class Api
     }
 
     // Inject service list to the endpoint
+    // TODO: why is this necessary?
     foreach ($result->serviceSequence as $service) {
       $result->endpoint->services->add($service);
     }
@@ -162,7 +163,17 @@ class Api
       }
 
       // Resolve endpoint path
-      $path = $result->resolvePath($this->getBasePath()) . '/?';
+      $path = (function () use ($result) {
+        $out = $result->resolvePath($this->getBasePath());
+
+        if ($this->config->trailingSlashes === true) {
+          return $out . '/';
+        } elseif ($this->config->trailingSlashes === null) {
+          return $out . '/?';
+        }
+
+        return $out;
+      })();
 
       // Check for duplicated path
       if (in_array($path, $paths)) {
