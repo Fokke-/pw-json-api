@@ -13,9 +13,8 @@ class Response
   /** Response code */
   public int $code = 200;
 
-  /** Response data */
-  // TODO: rename to additionalData
-  public array $withData = [];
+  /** Additional top level key-value pairs */
+  public array $additionalData = [];
 
   public function __construct(?array $data = [])
   {
@@ -36,7 +35,7 @@ class Response
    */
   public function with(array $data): static
   {
-    $this->withData = [...$this->withData, ...$data];
+    $this->additionalData = [...$this->additionalData, ...$data];
     return $this;
   }
 
@@ -56,10 +55,10 @@ class Response
         ];
       })(),
       ...array_reduce(
-        array_keys($this->withData),
+        array_keys($this->additionalData),
         function ($acc, $key) {
-          if (!is_null($this->withData[$key])) {
-            $acc[$key] = $this->withData[$key];
+          if (!is_null($this->additionalData[$key])) {
+            $acc[$key] = $this->additionalData[$key];
           }
 
           return $acc;

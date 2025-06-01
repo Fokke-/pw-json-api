@@ -14,13 +14,13 @@ test('response with data', function () {
 });
 
 test('response with custom code', function () {
-  $response = new Response(null, 201);
+  $response = (new Response(null))->code(201);
   expect($response->code)->toBe(201);
 });
 
 test('response with extra keys', function () {
   $response = (new Response())->with(['foo' => 'bar']);
-  expect($response->withData)->toBe(['foo' => 'bar']);
+  expect($response->additionalData)->toBe(['foo' => 'bar']);
 });
 
 test('toArray()', function () {
