@@ -11,15 +11,24 @@ class Response
   public array|null $data;
 
   /** Response code */
-  public int $code;
+  public int $code = 200;
 
   /** Response data */
+  // TODO: rename to additionalData
   public array $withData = [];
 
-  public function __construct(?array $data = [], $code = 200)
+  public function __construct(?array $data = [])
   {
     $this->data = $data;
+  }
+
+  /**
+   * Specify response code
+   */
+  public function code(int $code): static
+  {
     $this->code = $code;
+    return $this;
   }
 
   /**
@@ -28,7 +37,6 @@ class Response
   public function with(array $data): static
   {
     $this->withData = [...$this->withData, ...$data];
-
     return $this;
   }
 
