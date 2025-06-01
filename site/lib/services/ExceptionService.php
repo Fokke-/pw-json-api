@@ -17,7 +17,7 @@ class ExceptionService extends Service
     });
 
     $this->addEndpoint('/custom-code')->get(function () {
-      throw new ApiException('This was doomed to fail!', 401);
+      throw (new ApiException('This was doomed to fail!'))->code(401);
     });
 
     $this->addEndpoint('/without-message')->get(function () {

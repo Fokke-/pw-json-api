@@ -45,7 +45,7 @@ class Api
     $handler = $result->endpoint->getHandler($requestMethod);
 
     if (empty($requestMethod) || empty($handler)) {
-      throw new ApiException('Method not allowed', 405);
+      throw (new ApiException())->code(405);
     }
 
     // Inject service list to the endpoint
@@ -197,8 +197,8 @@ class Api
           echo $response->toJson($this->config->jsonFlags);
         } catch (ApiException $e) {
           // Output error
-          http_response_code($e->getCode());
-          echo $e->toResponse()->toJson($this->config->jsonFlags, false);
+          http_response_code($e->response->code);
+          echo $e->response->toJson($this->config->jsonFlags, false);
         }
 
         die();

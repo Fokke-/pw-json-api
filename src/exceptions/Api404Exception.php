@@ -14,14 +14,7 @@ class Api404Exception extends ApiException
    */
   public function __construct(?\Throwable $previous = null)
   {
-    parent::__construct('', 404, $previous);
-  }
-
-  /**
-   * Transform exception to a new Response
-   */
-  public function toResponse(): Response
-  {
-    return new Response([], $this->code);
+    parent::__construct(null, $previous);
+    $this->response->code(404);
   }
 }

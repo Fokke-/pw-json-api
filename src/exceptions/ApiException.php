@@ -7,28 +7,43 @@ namespace PwJsonApi;
  */
 class ApiException extends \Exception
 {
+  /** Response object */
+  public readonly Response $response;
+
   /**
    * Constructor
    *
-   * @param string|null $message
+   * @param string $message
    * @param integer $code
    * @param \Throwable|null $previous
    */
   public function __construct(
-    string $message = '',
-    ?int $code = 400,
+    string|null $message = null,
     ?\Throwable $previous = null
   ) {
-    parent::__construct($message, $code, $previous);
+    parent::__construct(!empty($message) ? $message : '', 400, $previous);
+
+    $this->response = (new Response())->code(400)->with([
+      'error' => $message,
+    ]);
   }
 
   /**
-   * Transform exception to a new Response
+   * Specify response code
    */
-  public function toResponse(): Response
+  public function code(int $code): static
   {
-    return (new Response([], $this->code))->with([
-      'error' => !empty($this->message) ? $this->message : null,
-    ]);
+    $this->code = $code;
+    $this->response->code($code);
+    return $this;
+  }
+
+  /**
+   * Add top level keys and values to the response
+   */
+  public function with(array $data): static
+  {
+    $this->response->with($data);
+    return $this;
   }
 }
