@@ -5,6 +5,7 @@ export default defineConfig({
   title: 'ProcessWire JSON API',
   description: '',
   base: '/pw-json-api/',
+  lastUpdated: true,
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     search: {
@@ -48,5 +49,12 @@ export default defineConfig({
         link: 'https://packagist.org/packages/fokke/pw-json-api',
       },
     ],
+
+    outline: {
+      level: [2, 3],
+    },
+    editLink: {
+      pattern: 'https://github.com/Fokke-/pw-json-api/edit/master/docs/:path',
+    },
   },
 });

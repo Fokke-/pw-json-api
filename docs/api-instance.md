@@ -8,7 +8,8 @@ The main instance can be configured by passing a function to the constructor.
 
 ```php
 $api = new Api(function ($config) {
-  // Should endpoint paths end with a trailing slash? (null = no preference)
+  // Should endpoint paths end with a trailing slash?
+  // (null = no preference)
   $config->trailingSlashes = null;
 
   // Flags to pass to the json_encode function

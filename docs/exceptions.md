@@ -9,10 +9,6 @@ For other exceptions, such as `WireException`, you need to add custom handling.
 ## Example exception
 
 ```php
-use PwJsonApi\ApiException;
-```
-
-```php
 throw new ApiException('Snap, crackle and pop!');
 ```
 
@@ -53,10 +49,6 @@ The resulting JSON:
 ## Api404Exception
 
 This can be used as a shorthand for an exception with a `404` response code.
-
-```php
-use PwJsonApi\Api404Exception;
-```
 
 ```php
 throw new Api404Exception();

@@ -4,7 +4,7 @@ Under the hood, the endpoint path will be used to create a [ProcessWire URL hook
 
 Each endpoint listener must either return a [`Response`](/responses) object or throw an [`ApiException`](/exceptions) to halt the process and respond with an error.
 
-::: info
+::: tip
 By default, all request methods are denied. You must add listeners for each request method you want to allow. Requests with disallowed methods will be denied with a 405 response.
 :::
 
