@@ -1,10 +1,11 @@
 .DS_Store
+.tmp
+docs/.vitepress/cache
+docs/.vitepress/dist
 node_modules
-vendor
-wire
 site/assets/cache
 site/assets/files
 site/assets/logs
 site/assets/sessions
-docs/.vitepress/dist
-docs/.vitepress/cache
+vendor
+wire

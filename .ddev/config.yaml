@@ -118,7 +118,8 @@ corepack_enable: false
 # would provide http and https URLs for "example.com" and "sub1.example.com"
 # Please take care with this because it can cause great confusion.
 
-# upload_dirs: "custom/upload/dir"
+upload_dirs:
+  - '.tmp/uploads'
 #
 # upload_dirs:
 #   - custom/upload/dir
