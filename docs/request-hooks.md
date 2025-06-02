@@ -4,7 +4,9 @@ Request hooks can be used to modify the behavior of endpoints. The most common u
 
 The examples below use the `hookBefore()` and `hookAfter()` methods, which apply to any request method. There are also [request type-specific hooks](#hook-methods-reference) available.
 
-## API hooks
+## Hook scopes
+
+### API hooks
 
 Defined for the whole API instance. These hooks will apply to all endpoints.
 
@@ -24,7 +26,7 @@ $api->hookBefore(function () {
 // Modify response data of every successful response
 $api->hookAfter(function ($args) {
   // Inject key to response data
-  $args->response->data['_foo'] = 'bar';
+  $args->response->data['_foo'] = 'foo';
 
   // Include additional top-level keys in the response
   $args->response->with([
@@ -33,43 +35,61 @@ $api->hookAfter(function ($args) {
 });
 ```
 
-## Service hooks
+### Service hooks
 
-Defined for a single service branch. Hooks will apply to all endpoints (including child services) within the given service. These can be defined directly in the service constructor or injected into the service object.
+Defined for a single service branch. These hooks will apply to all endpoints (including child services) within the given service. Service hooks can be defined directly in the service constructor or injected into the service object.
 
-### Define in service constructor
+#### Define in service constructor
 
 ```php
 $this->hookAfter(function ($args) {
-  $args->response->data['_foo'] = 'bar';
+  $args->response->data['_foo'] = 'foo';
 });
 ```
 
-### Inject in addService() callback
+#### Inject in addService() callback
 
 ```php
 $api->addService(new HelloWorldService(), function ($service) {
   $service->hookAfter(function ($args) {
-    $args->response->data['_foo'] = 'bar';
+    $args->response->data['_foo'] = 'foo';
   });
 });
 ```
 
-### Find installed service and inject
+#### Find installed service and inject
 
 ```php
 $api->findService('HelloWorldService')?->hookAfter(function ($args) {
-  $args->response->data['_foo'] = 'bar';
+  $args->response->data['_foo'] = 'foo';
 });
 ```
 
-## Endpoint hooks
+### Endpoint hooks
 
-Defined for a single endpoint. These can be defined directly when creating an endpoint (which does not make much sense), or they can be injected into the endpoint object.
+Defined for a single endpoint. Endpoint hooks can be defined directly when creating an endpoint (which does not make much sense), or they can be injected into the endpoint object.
 
 ```php
 $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
-  $args->response->data['_foo'] = 'bar';
+  $args->response->data['_foo'] = 'foo';
+});
+```
+
+## Multiple hooks
+
+If you attach multiple hooks on a single target, all of them will be executed.
+
+```php
+$api->hookAfter(function ($args) {
+  $args->response->data['_foo'] = 'foo';
+});
+
+$api->findService('HelloWorldService')?->hookAfter(function ($args) {
+  $args->response->data['_bar'] = 'bar';
+});
+
+$api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
+  $args->response->data['_baz'] = 'baz';
 });
 ```
 
@@ -85,13 +105,13 @@ You can access hook arguments via the `$args` parameter of the hook handler func
 | `$args->service`  | `Service`                | Requested service           |
 | `$args->services` | `ServiceList`            | List of all parent services |
 
-### Additional hook arguments for "before" Hooks
+### hookBefore\* arguments
 
 | Property         | Type       | Description              |
 | ---------------- | ---------- | ------------------------ |
 | `$args->handler` | `callable` | Endpoint request handler |
 
-### Additional hook arguments for "after" Hooks
+### hookAfter\* arguments
 
 | Property          | Type     | Description                            |
 | ----------------- | -------- | -------------------------------------- |

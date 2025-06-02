@@ -84,6 +84,11 @@
   --vp-button-brand-active-border: transparent;
   --vp-button-brand-active-text: var(--vp-c-white);
   --vp-button-brand-active-bg: var(--vp-c-brand-1);
+  --vp-sidebar-bg-color: #f0f2f1;
+}
+
+.dark {
+  --vp-sidebar-bg-color: #111a18;
 }
 
 /**
