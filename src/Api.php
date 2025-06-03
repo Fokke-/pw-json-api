@@ -21,18 +21,26 @@ class Api
 
   /**
    * Create a new API instance
-   *
-   * @param callable(ApiConfig): void $configure Configuration function
    */
-  public function __construct(callable|null $configure = null)
+  public function __construct()
   {
     $this->config = new ApiConfig();
     $this->services = new ServiceList();
     $this->hooks = new RequestHooks();
+  }
 
+  /**
+   * Configure API instance
+   *
+   * @param callable(ApiConfig): void $configure Configuration function
+   */
+  public function configure(callable|null $configure = null): static
+  {
     if (is_callable($configure)) {
       call_user_func($configure, $this->config);
     }
+
+    return $this;
   }
 
   /**

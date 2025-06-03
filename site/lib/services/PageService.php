@@ -20,6 +20,11 @@ class PageService extends Service
   public function getPages(): array
   {
     return (new PageParser())
+      ->configure(function ($config) {
+        $config->parseChildren = true;
+        $config->parsePageFieldChildren = false;
+        $config->maxDepth = 3;
+      })
       ->input(wire()->pages->findOne(1017)->children('template=basic-page'))
       ->toArray();
   }

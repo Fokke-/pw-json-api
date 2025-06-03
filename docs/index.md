@@ -19,7 +19,7 @@ hero:
 #     details: No cryptic configuration files. Get the first endpoint running in minutes.
 #   - icon: 📦
 #     title: It slices! It dices!
-#     details:
+#     details: Lorem ipsum dolor sit amet.
 #   - title: Feature C
-#     details:
+#     details: Lorem ipsum dolor sit amet.
 ---

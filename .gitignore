@@ -4,7 +4,6 @@ docs/.vitepress/cache
 docs/.vitepress/dist
 node_modules
 site/assets/cache
-site/assets/files
 site/assets/logs
 site/assets/sessions
 vendor

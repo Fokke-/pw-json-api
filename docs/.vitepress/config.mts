@@ -11,12 +11,10 @@ export default defineConfig({
     search: {
       provider: 'local',
     },
-
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Guide', link: '/overview' },
     ],
-
     sidebar: [
       {
         text: 'The first steps',
@@ -41,7 +39,6 @@ export default defineConfig({
       //   items: [{ text: 'Page parser', link: '/page-parser' }],
       // },
     ],
-
     socialLinks: [
       { icon: 'github', link: 'https://github.com/Fokke-/pw-json-api' },
       {
@@ -49,7 +46,6 @@ export default defineConfig({
         link: 'https://packagist.org/packages/fokke/pw-json-api',
       },
     ],
-
     outline: {
       level: [2, 3],
     },
