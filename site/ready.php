@@ -8,7 +8,8 @@ if (!defined('PROCESSWIRE')) {
 }
 
 if ($page->template->name !== 'admin') {
-  $api = new Api(function ($config) {
+  $api = new Api();
+  $api->configure(function ($config) {
     $config->trailingSlashes = null;
     $config->jsonFlags =
       JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT;
@@ -52,19 +53,14 @@ if ($page->template->name !== 'admin') {
   $api->addService(new PageService());
   $api->addService(new ExceptionService());
   $api->addService(new HelloWorldService());
-
-  $api->findEndpoint('/api/food/fruits/orange/')?->hookAfter(function ($args) {
-    $args->response->data['_foo'] = 'bar';
-  });
-
   $api->run();
 
+  // Add second API instance
   $parallelApi = new Api(function ($config) {
     $config->jsonFlags =
       JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT;
   });
   $parallelApi->setBasePath('/parallel-api');
   $parallelApi->addService(new HelloWorldService());
-
   $parallelApi->run();
 }
