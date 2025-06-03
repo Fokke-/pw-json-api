@@ -2,6 +2,10 @@
 
 An API instance holds all the services. You can also define system-wide request hooks, which will apply to every endpoint. [Read more about hooks](/request-hooks).
 
+```php
+$api = new Api();
+```
+
 ## Configuration
 
 Use `configure()` method to configure the main instance.
