@@ -14,7 +14,9 @@ use \ProcessWire\{
   SelectableOptionArray
 };
 
-// TODO: configure files as full urls?
+/**
+ * ProcessWire Page parser
+ */
 class PageParser
 {
   use HasPageParserHooks;
@@ -55,7 +57,7 @@ class PageParser
    *
    * @internal
    */
-  public $_currentDepth = 1;
+  public int $_currentDepth = 1;
 
   /**
    * Constructor
