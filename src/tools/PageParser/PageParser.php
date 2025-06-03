@@ -423,7 +423,8 @@ class PageParser
     }
 
     $out = [
-      'url' => $file->httpUrl,
+      'url' =>
+        $this->config->fullFileUrls === true ? $file->httpUrl : $file->url,
       'filesize' => $file->filesize,
       'filesize_str' => $file->filesizeStr,
       'description' => !empty($file->description) ? $file->description : null,

@@ -24,6 +24,7 @@ class PageService extends Service
         $config->parseChildren = true;
         $config->parsePageFieldChildren = false;
         $config->maxDepth = 3;
+        $config->fullFileUrls = true;
       })
       ->input(wire()->pages->findOne(1017)->children('template=basic-page'))
       ->toArray();

@@ -21,4 +21,7 @@ class PageParserConfig
 
   /** Key name for child pages */
   public string $childrenKey = '_children';
+
+  /** Output full URLs for files */
+  public bool $fullFileUrls = true;
 }
