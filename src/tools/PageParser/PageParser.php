@@ -5,17 +5,26 @@ namespace PwJsonApi;
 use \ProcessWire\{
   PageArray,
   Page,
+  Template,
   Field,
   PageFile,
   PageFiles,
   PageImage,
-  PageImages
+  PageImages,
+  SelectableOptionArray
 };
 
-// TODO: global configuration for page parser
+// TODO: stop merging things like input
+// TODO: configure files as full urls?
+// TODO: fix endless recursion with page fields
 class PageParser
 {
   use HasPageParserHooks;
+
+  /**
+   * Configuration
+   */
+  private PageParserConfig $config;
 
   /**
    * Fields names to parse
@@ -44,79 +53,78 @@ class PageParser
   protected Page|PageArray|null $input = null;
 
   /**
+   * Current depth in recursive parsing
+   *
+   * @internal
+   */
+  public $_currentDepth = 1;
+
+  /**
    * Constructor
    */
   public function __construct()
   {
+    $this->config = new PageParserConfig();
     $this->hooks = new PageParserHooks();
   }
 
   /**
-   * Set Page of PageArray to parse
+   * Configure page parser
    *
-   * This method can be ran multiple times, and the new payload
-   * will be merged with the previous one.
+   * @param callable(PageParserConfig): void $configure Configuration function
    */
-  public function input(PageArray|Page $input): static
+  public function configure(callable|null $configure = null): static
   {
-    // If there's no current input, init it an bail out
-    if ($this->input === null) {
-      $this->input = $input;
-      return $this;
+    if (is_callable($configure)) {
+      call_user_func($configure, $this->config);
     }
 
-    // If current input is Page, and we're inserting another Page or PageArray,
-    // convert input to PageArray
-    if ($this->input instanceof Page) {
-      $this->input = (new PageArray())->add($this->input);
-    }
-
-    $this->input->add($input);
     return $this;
   }
 
   /**
-   * Sort pages in input
-   *
-   * Note that this performs internal sorting using WireArray::sort(), which is slower than
-   * sorting pages in query phase. This method is only useful when you have called
-   * parse() method multiple times, and the sorting of resulting input is incorrect.
-   *
-   * @see https://processwire.com/api/ref/wire-array/sort/
+   * Set Page of PageArray to parse
    */
-  public function sort(string $properties): static
+  public function input(PageArray|Page $input): static
   {
-    if ($this->input instanceof PageArray) {
-      $this->input->sort($properties);
-    }
+    $this->input = $input;
+    return $this;
+  }
 
+  /**
+   * Get current input
+   */
+  public function getInput(): PageArray|Page
+  {
+    return $this->input;
+  }
+
+  /**
+   * Clear input
+   *
+   * Alias for calling input() with no arguments
+   */
+  public function clearInput(): static
+  {
+    $this->input = null;
     return $this;
   }
 
   /**
    * Specify fields to parse
-   *
-   * This method can be ran multiple times, and the new payload
-   * will be merged with the previous one.
    */
   public function fields(string ...$fields): static
   {
-    $this->fields = array_unique([...$this->fields, ...$fields]);
+    $this->fields = array_unique($fields);
     return $this;
   }
 
   /**
    * Specify fields to exclude
-   *
-   * This method can be ran multiple times, and the new payload
-   * will be merged with the previous one.
    */
   public function excludeFields(string ...$excludeFields): static
   {
-    $this->excludeFields = array_unique([
-      ...$this->excludeFields,
-      ...$excludeFields,
-    ]);
+    $this->excludeFields = array_unique($excludeFields);
     return $this;
   }
 
@@ -143,17 +151,12 @@ class PageParser
 
     // Gather fields to parse
     $fields = (function () use ($page) {
-      $fields = !empty($this->fields)
+      $resolvedFields = !empty($this->fields)
         ? $this->fields
         : $page->getFields()->explode('name');
 
-      // // If no fields are specified, get all
-      // if (empty($fields)) {
-      //   $fields = $page->getFields()->explode('name');
-      // }
-
       return array_diff(
-        [...$this->properties, ...$fields],
+        [...$this->properties, ...$resolvedFields],
         $this->excludeFields
       );
     })();
@@ -162,11 +165,49 @@ class PageParser
     $parsedPage = array_reduce(
       $fields,
       function ($acc, $fieldName) use ($page) {
+        $field = $page->getField($fieldName);
+
+        // Skip non-existant properties
+        if (!$page->has($fieldName)) {
+          return $acc;
+        }
+
+        // Skip certain field types
+        if (
+          !empty($field) &&
+          in_array($field->type, [
+            'FieldtypeCache',
+            'FieldtypeComments', // TODO: return this
+            'FieldtypeFieldsetOpen',
+            'FieldtypeFieldsetTabOpen',
+            'FieldtypeFieldsetClose',
+          ])
+        ) {
+          return $acc;
+        }
+
         $acc[$fieldName] = $this->parseField($fieldName, $page);
         return $acc;
       },
       []
     );
+
+    // Parse child pages
+    // TODO: config for child page selector
+    if (
+      $this->config->parseChildren === true &&
+      $page->numChildren($this->config->childrenSelector) &&
+      $this->_currentDepth < $this->config->maxDepth
+    ) {
+      // Use current parser as a base for child page parser
+      $parser = clone $this;
+      $parser->config = clone $this->config;
+      $parser->_currentDepth = $this->_currentDepth + 1;
+
+      $parsedPage[$this->config->childrenKey] = $parser
+        ->input($page->children($this->config->childrenSelector))
+        ->toArray();
+    }
 
     // Run AfterPageParse hooks
     $afterPageParseHooks = $this->getPageParserHook(
@@ -201,14 +242,27 @@ class PageParser
   /**
    * Parse field
    */
-  // TODO: pass parse handlers to sub-parsers
   protected function parseField(string $fieldName, Page $page): mixed
   {
     $field = $page->getField($fieldName);
     $value = $page->{$fieldName};
-    $parser = new PageParser();
+
+    // If field was not found, try to parse as property
+    if (empty($field) && $page->has($fieldName)) {
+      if ($value instanceof Template) {
+        return $value->name;
+      }
+
+      return $value;
+    }
 
     if (!empty($field)) {
+      // Clone current parser. This will be used for fields with
+      // any sort of page reference as a value.
+      $parser = clone $this;
+      $parser->config = clone $this->config;
+      $parser->config->parseChildren = $parser->config->parsePageFieldChildren;
+
       // Run BeforeFieldParse hooks
       $beforeFieldParseHooks = $this->getPageParserHook(
         PageParserHookKey::BeforeFieldParse
@@ -237,9 +291,13 @@ class PageParser
         if ($fieldClassName === 'FieldtypeCheckbox') {
           return (bool) $value;
         } elseif ($fieldClassName === 'FieldtypeFloat') {
-          return (float) $value;
+          return $value === '' ? null : (float) $value;
+        } elseif ($fieldClassName === 'FieldtypeDecimal') {
+          return $value === '' ? null : (float) $value;
         } elseif ($fieldClassName === 'FieldtypeInteger') {
-          return (int) $value;
+          return $value === '' ? null : (int) $value;
+        } elseif ($fieldClassName === 'FieldtypeToggle') {
+          return $value === '' ? null : $value;
         } elseif ($value instanceof Pageimage) {
           return $this->parseImage($value, $field, $page);
         } elseif ($value instanceof Pageimages) {
@@ -270,6 +328,39 @@ class PageParser
           return $parser->input($value)->toArray();
         } elseif ($value instanceof PageArray) {
           return $parser->input($value)->toArray();
+        } elseif ($value instanceof SelectableOptionArray) {
+          // Single option
+          if (
+            in_array($field->inputfieldClass, [
+              'InputfieldRadios',
+              'InputfieldSelect',
+            ])
+          ) {
+            $option = $value->first();
+            if (!$option) {
+              return null;
+            }
+
+            return [
+              'id' => $option->id,
+              'value' => $option->value,
+              'title' => $option->title,
+            ];
+          }
+
+          // Multiple options
+          return array_reduce(
+            $value->getArray(),
+            function ($acc, $option) {
+              $acc[] = [
+                'id' => $option->id,
+                'value' => $option->value,
+                'title' => $option->title,
+              ];
+              return $acc;
+            },
+            []
+          );
         } else {
           return $value;
         }
@@ -296,11 +387,6 @@ class PageParser
       }
 
       return $parsedValue;
-    }
-
-    // If field name is a property, return value as-is
-    if ($page->has($fieldName)) {
-      return $page->{$fieldName};
     }
 
     return null;
@@ -367,6 +453,7 @@ class PageParser
         );
       }
 
+      $tempCustomFieldsPage->of(true);
       $out['_custom_fields'] = $parser->input($tempCustomFieldsPage)->toArray();
     }
 
@@ -403,7 +490,6 @@ class PageParser
   ) {
     // Parser for custom fields of the file,
     $parser = $parser ?? new PageParser();
-    $parser->excludeFields('id', 'name');
 
     // Run BeforeImageParse hooks
     $beforeImageParseHooks = $this->getPageParserHook(
@@ -431,7 +517,7 @@ class PageParser
       'width' => $image->width,
       'height' => $image->height,
       '_focus' => $image->focus(),
-      '_aspect_ratio' => $image->ratio(),
+      '_ratio' => $image->ratio(),
     ];
 
     // Run AfterImageParse hooks
