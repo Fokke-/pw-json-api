@@ -14,9 +14,7 @@ use \ProcessWire\{
   SelectableOptionArray
 };
 
-// TODO: stop merging things like input
 // TODO: configure files as full urls?
-// TODO: fix endless recursion with page fields
 class PageParser
 {
   use HasPageParserHooks;
@@ -193,7 +191,6 @@ class PageParser
     );
 
     // Parse child pages
-    // TODO: config for child page selector
     if (
       $this->config->parseChildren === true &&
       $page->numChildren($this->config->childrenSelector) &&
