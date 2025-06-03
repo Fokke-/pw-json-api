@@ -4,10 +4,10 @@ An API instance holds all the services. You can also define system-wide request 
 
 ## Configuration
 
-The main instance can be configured by passing a function to the constructor.
+Use `configure()` method to configure the main instance.
 
 ```php
-$api = new Api(function ($config) {
+$api->configure(function ($config) {
   // Should endpoint paths end with a trailing slash?
   // (null = no preference)
   $config->trailingSlashes = null;
