@@ -7,7 +7,7 @@ use ProcessWire\{Page, Field};
 class HookReturnAfterFieldParse
 {
   /** Parsed value value */
-  public mixed $value;
+  public mixed $parsedValue;
 
   /** Source field */
   public Field|null $field;
