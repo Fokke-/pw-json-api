@@ -15,6 +15,6 @@ class HookReturnBeforeFieldParse
   /** Source page */
   public Page $page;
 
-  /** Parser (used for Page and Pagearray) */
+  /** Parser for any field with any page reference as a value */
   public PageParser $parser;
 }

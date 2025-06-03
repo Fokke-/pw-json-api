@@ -15,7 +15,7 @@ trait HasPageParserHooks
   /**
    * Get hooks by key
    */
-  public function getPageParserHook(PageParserHookKey $key): array
+  public function getPageParserHooks(PageParserHookKey $key): array
   {
     return $this->hooks->getItems()[$key->name];
   }

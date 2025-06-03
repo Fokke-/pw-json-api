@@ -34,10 +34,12 @@ export default defineConfig({
           { text: 'Request hooks', link: '/request-hooks' },
         ],
       },
-      // {
-      //   text: 'With the tools in hand',
-      //   items: [{ text: 'Page parser', link: '/page-parser' }],
-      // },
+      {
+        text: 'With the tools in hand',
+        items: [
+          { text: 'ProcessWire page parser', link: '/processwire-page-parser' },
+        ],
+      },
     ],
     socialLinks: [
       { icon: 'github', link: 'https://github.com/Fokke-/pw-json-api' },

@@ -8,7 +8,7 @@ $api = new Api();
 
 ## Configuration
 
-Use `configure()` method to configure the main instance.
+Use `configure()` to configure the main instance.
 
 ```php
 $api->configure(function ($config) {
