@@ -133,6 +133,8 @@ class PageParser
    */
   protected function parsePage(\ProcessWire\Page $page): array
   {
+    $page = clone $page;
+
     // Use current parser as a base for child page parser
     $childPageParser = clone $this;
     $childPageParser->config = clone $this->config;
@@ -399,6 +401,8 @@ class PageParser
     ?Page $page = null,
     ?PageParser $parser = null
   ) {
+    $file = clone $file;
+
     // Parser for custom fields of the file,
     $parser = $parser ?? new PageParser();
     $parser->excludeFields('id', 'name');
@@ -445,6 +449,7 @@ class PageParser
         // This page will be used to feed the parser.
         // This will introduce some overhead, but it's acceptable for now.
         $tempCustomFieldsPage = new Page();
+        $tempCustomFieldsPage->of(false);
         $tempCustomFieldsPage->template = $customFieldsTpl;
 
         foreach ($customFieldsTpl->fields as $customField) {
@@ -492,6 +497,8 @@ class PageParser
     ?Page $page = null,
     ?PageParser $parser = null
   ) {
+    $image = clone $image;
+
     // Parser for custom fields of the file,
     $parser = $parser ?? new PageParser();
 
