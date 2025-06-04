@@ -15,10 +15,9 @@ Note that `toArray()` or `toResponse()` starts the actual parsing. Any configura
 
 ```php
 use PwJsonApi\PageParser;
-use function ProcessWire\wire;
 
 $output = (new PageParser())
-  ->input(wire()->pages->find('template=basic-page'))
+  ->input($this->wire->pages->find('template=basic-page'))
   ->fields('title', 'body')
   ->toArray();
 ```
@@ -60,7 +59,7 @@ $parser->configure(function ($config) {
 Specify the pages to parse with `input()`. Accepts a `Page` or `PageArray`.
 
 ```php
-$parser->input(wire()->pages->find('template=basic-page'));
+$parser->input($this->wire->pages->find('template=basic-page'));
 ```
 
 ## Field Selection
@@ -97,7 +96,7 @@ Enable child page parsing via [parser configuration](#configuration). Fine-tune 
 
 ```php{4}
 $result = (new PageParser())
-  ->input(wire()->pages->find('template=basic-page'))
+  ->input($this->wire->pages->find('template=basic-page'))
   ->fields('title', 'body')
   ->toArray();
 ```
@@ -108,7 +107,7 @@ $result = (new PageParser())
 
 ```php{4}
 $response = (new PageParser())
-  ->input(wire()->pages->find('template=basic-page'))
+  ->input($this->wire->pages->find('template=basic-page'))
   ->fields('title', 'body')
   ->toResponse();
 ```
@@ -215,10 +214,10 @@ $parser->hookAfterImageParse(function ($args) {
     // custom fields of the image, you can use it to create thumbnails.
     $args->parsedImage['_thumbnails'] = [
       '200x200' => $args->parser->parseImage(
-        $args->originalImage->size(200, 200)
+        $args->originalImage->size(200, 200),
       ),
       '100x100' => $args->parser->parseImage(
-        $args->originalImage->size(100, 100)
+        $args->originalImage->size(100, 100),
       ),
     ];
   }

@@ -15,6 +15,7 @@ class Api
   use HasServiceList;
   use HasRequestHooks;
   use HasApiSearch;
+  use HasWire;
 
   /** Configuration */
   private ApiConfig $config;
@@ -27,6 +28,7 @@ class Api
     $this->config = new ApiConfig();
     $this->services = new ServiceList();
     $this->hooks = new RequestHooks();
+    $this->wire = wire();
   }
 
   /**
@@ -52,7 +54,9 @@ class Api
   ): Response {
     // Try to find handler matching the request method.
     // If found, get response from handler.
-    $requestMethod = RequestMethod::tryFrom(wire()->input->requestMethod());
+    $requestMethod = RequestMethod::tryFrom(
+      $this->wire->input->requestMethod(),
+    );
     $handler = $result->endpoint->getHandler($requestMethod);
 
     if (empty($requestMethod) || empty($handler)) {
@@ -194,9 +198,9 @@ class Api
         }
 
         // Listen to path
-        wire()->addHook($path, function (\ProcessWire\HookEvent $event) use (
-          $result,
-        ) {
+        $this->wire->addHook($path, function (
+          \ProcessWire\HookEvent $event,
+        ) use ($result) {
           header('Content-Type: application/json');
 
           try {

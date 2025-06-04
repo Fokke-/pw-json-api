@@ -25,7 +25,6 @@ Call `addEndpoint()` in the service constructor and pass the `path` you want to 
 
 ```php
 use PwJsonApi\ApiException;
-use function ProcessWire\wire;
 ```
 
 ```php
@@ -41,7 +40,7 @@ $this->addEndpoint('/user')
   // Handle POST request
   ->post(function () {
     // Validate post data etc.
-    // $data = wire('input')->post;
+    // $data = $this->wire->input->post;
 
     // If something goes wrong...
     // throw new ApiException('Snap, crackle and pop!');

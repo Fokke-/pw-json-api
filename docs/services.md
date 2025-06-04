@@ -68,7 +68,15 @@ $this->addService(new AnotherService());
 
 This relationship can also be defined on the fly while adding the service to the main instance, allowing you to nest services that normally would not be related to each other. [See example of adding a child service on the fly](api-instance.html#adding-a-service).
 
-## Accessing the main instance from the service
+## Accessing the ProcessWire API in the service
+
+Use `wire` property to access ProcessWire API
+
+```php
+$page = $this->wire->pages->findOne('template=basic-page');
+```
+
+## Accessing the main instance in the service
 
 A reference to the main instance will be injected into the `api` property of the service. You can use this to access methods and properties of other services.
 

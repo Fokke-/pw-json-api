@@ -14,8 +14,8 @@ Defined for the whole API instance. These hooks will apply to all endpoints.
 // Simple auth check for all requests, with any request method
 $api->hookBefore(function () {
   if (
-    wire()->user->isLoggedin() === false ||
-    wire()->user->hasRole('rabbit') === false
+    $this->wire->user->isLoggedin() === false ||
+    $this->wire->user->hasRole('rabbit') === false
   ) {
     throw (new ApiException())->code(401)->with([
       'login_url' => 'https://example.com/login',
