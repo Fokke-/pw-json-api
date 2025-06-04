@@ -100,7 +100,7 @@ class HelloWorldService extends Service
 
       return new Response([
         'hello' => 'world',
-        ...$anotherService?->gimmeGimme(),
+        ...($anotherService?->gimmeGimme() ?? []),
       ]);
     });
   }
