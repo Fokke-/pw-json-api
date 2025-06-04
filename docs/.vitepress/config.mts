@@ -47,7 +47,15 @@ export default defineConfig({
         icon: 'packagist',
         link: 'https://packagist.org/packages/fokke/pw-json-api',
       },
+      {
+        icon: 'githubsponsors',
+        link: 'https://github.com/sponsors/Fokke-',
+      },
     ],
+    footer: {
+      message: 'Released under the MIT License.',
+      copyright: 'Copyright © 2025-present Ville Fokke Saarivaara',
+    },
     outline: {
       level: [2, 3],
     },
