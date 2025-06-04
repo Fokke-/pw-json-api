@@ -38,6 +38,7 @@ The library utilizes ProcessWire URL hooks to create listeners for your endpoint
 ```php
 use PwJsonApi\Api;
 
+// Consider auto-loading all the services
 require_once './services/HelloWorldService.php';
 
 // API instance
