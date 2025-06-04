@@ -1,5 +1,10 @@
 # Getting started
 
+Please check that your environment meets the minimum system requirements:
+
+- **PHP** >=8.2
+- **ProcessWire** >=3.0.173
+
 ## Install the library
 
 ```console
