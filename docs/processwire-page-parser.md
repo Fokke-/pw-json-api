@@ -15,6 +15,7 @@ Note that `toArray()` or `toResponse()` starts the actual parsing. Any configura
 
 ```php
 use PwJsonApi\PageParser;
+use function ProcessWire\wire;
 
 $output = (new PageParser())
   ->input(wire()->pages->find('template=basic-page'))
@@ -32,7 +33,7 @@ $parser->configure(function ($config) {
   $config->parseChildren = false;
 
   /** Recursively parse children of page field references? */
-  $config->parsePageFieldChildren = false;
+  $config->parsePageReferenceChildren = false;
 
   /** Maximum depth for recursive parsing */
   $config->maxDepth = 3;
@@ -45,6 +46,12 @@ $parser->configure(function ($config) {
 
   /** Output full file URLs */
   $config->fullFileUrls = true;
+
+  /** Parse custom fields of files? */
+  $config->parseFileCustomFields = true;
+
+  /** Key name for custom fields of files */
+  $config->fileCustomFieldsKey = '_custom_fields';
 });
 ```
 
