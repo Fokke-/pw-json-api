@@ -2,7 +2,7 @@
 
 namespace PwJsonApi;
 
-use ProcessWire\{Page, Field, PageFile};
+use ProcessWire\{Page, Field, Pagefile};
 
 class HookReturnAfterFileParse
 {
@@ -10,7 +10,7 @@ class HookReturnAfterFileParse
   public array $parsedFile;
 
   /** Source file */
-  public PageFile $file;
+  public Pagefile $file;
 
   /** Source field */
   public Field|null $field;

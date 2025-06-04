@@ -7,10 +7,10 @@ use \ProcessWire\{
   Page,
   Template,
   Field,
-  PageFile,
-  PageFiles,
-  PageImage,
-  PageImages,
+  Pagefile,
+  Pagefiles,
+  Pageimage,
+  Pageimages,
   SelectableOptionArray
 };
 
@@ -311,9 +311,9 @@ class PageParser
             },
             []
           );
-        } elseif ($value instanceof PageFile) {
+        } elseif ($value instanceof Pagefile) {
           return $this->parseFile($value, $field, $page);
-        } elseif ($value instanceof PageFiles) {
+        } elseif ($value instanceof Pagefiles) {
           return array_reduce(
             $value->getArray(),
             function ($acc, $file) use ($field, $page) {
@@ -393,10 +393,10 @@ class PageParser
   }
 
   /**
-   * Parse PageFile object
+   * Parse Pagefile object
    */
   public function parseFile(
-    PageFile $file,
+    Pagefile $file,
     ?Field $field = null,
     ?Page $page = null,
     ?PageParser $parser = null
@@ -489,10 +489,10 @@ class PageParser
   }
 
   /**
-   * Parse PageImage object
+   * Parse Pageimage object
    */
   public function parseImage(
-    PageImage $image,
+    Pageimage $image,
     ?Field $field = null,
     ?Page $page = null,
     ?PageParser $parser = null
