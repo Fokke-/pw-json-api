@@ -63,7 +63,7 @@ class Response
 
           return $acc;
         },
-        []
+        [],
       ),
     ];
 

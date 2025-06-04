@@ -87,7 +87,7 @@ class EndpointList
 
     if (empty($endpoint)) {
       throw new WireException(
-        "Unable to remove endpoint. Endpoint with path '{$endpointOrPath}' was not found."
+        "Unable to remove endpoint. Endpoint with path '{$endpointOrPath}' was not found.",
       );
     }
 

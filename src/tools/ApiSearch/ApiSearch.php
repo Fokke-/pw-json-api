@@ -12,6 +12,8 @@ class ApiSearch
    */
   private array $servicesCarry = [];
 
+  public function __construct() {}
+
   /**
    * Iterate all services and yield services and endpoints
    *
@@ -35,7 +37,7 @@ class ApiSearch
         yield new ApiSearchEndpointResult(
           $endpoint,
           $service,
-          $this->servicesCarry
+          $this->servicesCarry,
         );
       }
 

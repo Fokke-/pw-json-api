@@ -10,7 +10,7 @@ class PageParserConfig
   /** Recursively parse child pages? */
   public bool $parseChildren = false;
 
-  /** Recursively parse children of page references? */
+  /** Recursively parse children of page field references? */
   public bool $parsePageReferenceChildren = false;
 
   /** Maximum depth for recursive parsing */
@@ -24,4 +24,10 @@ class PageParserConfig
 
   /** Output full file URLs */
   public bool $fullFileUrls = true;
+
+  /** Parse custom fields of files? */
+  public bool $parseFileCustomFields = true;
+
+  /** Key name for custom fields of files */
+  public string $fileCustomFieldsKey = '_custom_fields';
 }

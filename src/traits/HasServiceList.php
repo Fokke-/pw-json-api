@@ -46,7 +46,7 @@ trait HasServiceList
    */
   public function addService(
     Service $service,
-    callable|null $setup = null
+    callable|null $setup = null,
   ): static {
     $this->services->add($service, $setup);
     return $this;

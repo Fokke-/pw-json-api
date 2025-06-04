@@ -2,12 +2,12 @@
 
 namespace PwJsonApi;
 
-use ProcessWire\{Page, Field, PageFile};
+use ProcessWire\{Page, Field, Pagefile};
 
 class HookReturnBeforeFileParse
 {
   /** Source file */
-  public PageFile $file;
+  public Pagefile $file;
 
   /** Source field */
   public Field|null $field;

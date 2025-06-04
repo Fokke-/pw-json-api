@@ -39,7 +39,7 @@ class Endpoint
         $acc[$method->name] = [];
         return $acc;
       },
-      []
+      [],
     );
     $this->services = new ServiceList();
     $this->hooks = new RequestHooks();

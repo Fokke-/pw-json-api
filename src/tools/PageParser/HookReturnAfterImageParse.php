@@ -2,7 +2,7 @@
 
 namespace PwJsonApi;
 
-use ProcessWire\{Page, Field, PageImage};
+use ProcessWire\{Page, Field, Pageimage};
 
 class HookReturnAfterImageParse
 {
@@ -10,10 +10,10 @@ class HookReturnAfterImageParse
   public array $parsedImage;
 
   /** Source image */
-  public PageImage $image;
+  public Pageimage $image;
 
   /** Original image */
-  public PageImage|null $originalImage;
+  public Pageimage|null $originalImage;
 
   /** Source field */
   public Field|null $field;

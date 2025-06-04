@@ -25,7 +25,7 @@ trait HasRequestHooks
    */
   public function findRequestHooks(
     HookTiming $timing,
-    RequestMethod|null $requestMethod = null
+    RequestMethod|null $requestMethod = null,
   ): array {
     return $this->hooks->find($timing, $requestMethod);
   }
