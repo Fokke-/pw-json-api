@@ -20,3 +20,9 @@ test('method not allowed', function () {
 
   expect($res->getStatusCode())->toBe(405);
 });
+
+test('options method is always accepted', function () {
+  $client = getHttp();
+  $res = $client->request('options', 'food');
+  expect($res->getStatusCode())->toBe(200);
+});

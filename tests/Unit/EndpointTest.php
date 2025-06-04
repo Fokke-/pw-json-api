@@ -40,9 +40,3 @@ test('delete handler', function () {
   $endpoint->delete(function () {});
   expect($endpoint->getHandler(RequestMethod::Delete))->toBeCallable();
 });
-
-test('options handler', function () {
-  $endpoint = new Endpoint('/foo');
-  $endpoint->options(function () {});
-  expect($endpoint->getHandler(RequestMethod::Options))->toBeCallable();
-});

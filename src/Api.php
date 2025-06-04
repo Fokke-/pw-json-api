@@ -52,12 +52,22 @@ class Api
     ApiSearchEndpointResult $result,
     \ProcessWire\HookEvent $event,
   ): Response {
-    // Try to find handler matching the request method.
-    // If found, get response from handler.
+    // Resolve request method
     $requestMethod = RequestMethod::tryFrom(
       $this->wire->input->requestMethod(),
     );
-    $handler = $result->endpoint->getHandler($requestMethod);
+
+    // OPTIONS is the special request method,
+    // which we will always allow.
+    if ($requestMethod === RequestMethod::Options) {
+      $handler = function () {
+        return new Response();
+      };
+    } else {
+      // Try to find handler matching the request method.
+      // If found, get response from handler.
+      $handler = $result->endpoint->getHandler($requestMethod);
+    }
 
     if (empty($requestMethod) || empty($handler)) {
       throw (new ApiException())->code(405);
