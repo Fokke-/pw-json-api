@@ -434,26 +434,31 @@ class PageParser
       'modified' => $file->modified,
     ];
 
-    /** @var \ProcessWire\Template|null */
-    $customFieldsTpl = $file->field
-      ->getFieldtype()
-      ->getFieldsTemplate($file->field);
-    if ($customFieldsTpl?->fields->count()) {
-      // Create temporary page for custom fields
-      // This page will be used to feed the parser.
-      // This will introduce some overhead, but it's acceptable for now.
-      $tempCustomFieldsPage = new Page();
-      $tempCustomFieldsPage->template = $customFieldsTpl;
+    if ($this->config->parseFileCustomFields === true) {
+      /** @var \ProcessWire\Template|null */
+      $customFieldsTpl = $file->field
+        ->getFieldtype()
+        ->getFieldsTemplate($file->field);
 
-      foreach ($customFieldsTpl->fields as $customField) {
-        $tempCustomFieldsPage->set(
-          $customField->name,
-          $file->get($customField->name)
-        );
+      if ($customFieldsTpl?->fields->count()) {
+        // Create temporary page for custom fields
+        // This page will be used to feed the parser.
+        // This will introduce some overhead, but it's acceptable for now.
+        $tempCustomFieldsPage = new Page();
+        $tempCustomFieldsPage->template = $customFieldsTpl;
+
+        foreach ($customFieldsTpl->fields as $customField) {
+          $tempCustomFieldsPage->set(
+            $customField->name,
+            $file->get($customField->name)
+          );
+        }
+
+        $tempCustomFieldsPage->of(true);
+        $out[$this->config->fileCustomFieldsKey] = $parser
+          ->input($tempCustomFieldsPage)
+          ->toArray();
       }
-
-      $tempCustomFieldsPage->of(true);
-      $out['_custom_fields'] = $parser->input($tempCustomFieldsPage)->toArray();
     }
 
     // Run AfterFileParse hooks

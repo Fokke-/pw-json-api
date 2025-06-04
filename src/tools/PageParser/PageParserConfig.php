@@ -24,4 +24,10 @@ class PageParserConfig
 
   /** Output full file URLs */
   public bool $fullFileUrls = true;
+
+  /** Parse custom fields of files? */
+  public bool $parseFileCustomFields = true;
+
+  /** Key name for custom fields of files */
+  public string $fileCustomFieldsKey = '_custom_fields';
 }

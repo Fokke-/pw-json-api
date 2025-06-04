@@ -111,7 +111,7 @@ $response = (new PageParser())
 Hooks allow you to modify data before and after parsing pages, fields, images, and files. This enables advanced customization, such as resizing images, altering field values, or adding extra data.
 
 ::: tip
-Remember to set hooks **before** `toArray()` or `toResponse()` call.
+Hooks must be defined before the `toArray()` or `toResponse()` call.
 :::
 
 ### hookBeforePageParse()
