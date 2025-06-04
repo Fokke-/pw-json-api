@@ -126,15 +126,4 @@ class Endpoint
     $this->handlers[RequestMethod::Delete->name] = $handler;
     return $this;
   }
-
-  /**
-   * Handle OPTIONS requests
-   *
-   * @param callable(\ProcessWire\HookEvent): Response $handler
-   */
-  public function options(callable $handler): static
-  {
-    $this->handlers[RequestMethod::Options->name] = $handler;
-    return $this;
-  }
 }
