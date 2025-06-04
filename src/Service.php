@@ -2,6 +2,8 @@
 
 namespace PwJsonApi;
 
+use function ProcessWire\wire;
+
 /**
  * Services are used to group endpoints.
  *
@@ -15,6 +17,7 @@ abstract class Service
   use HasEndpointList;
   use HasRequestHooks;
   use HasApiSearch;
+  use HasWire;
 
   /** Service name */
   public readonly string $name;
@@ -26,5 +29,6 @@ abstract class Service
     $this->services = new ServiceList();
     $this->endpoints = new EndpointList();
     $this->hooks = new RequestHooks();
+    $this->wire = wire();
   }
 }

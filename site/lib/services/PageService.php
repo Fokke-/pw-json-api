@@ -3,7 +3,6 @@
 use PwJsonApi\Response;
 use PwJsonApi\Service;
 use PwJsonApi\PageParser;
-use function ProcessWire\wire;
 
 class PageService extends Service
 {
@@ -26,7 +25,9 @@ class PageService extends Service
         $config->maxDepth = 3;
         $config->fullFileUrls = true;
       })
-      ->input(wire()->pages->findOne(1017)->children('template=basic-page'))
+      ->input(
+        $this->wire->pages->findOne(1017)->children('template=basic-page'),
+      )
       ->hookBeforePageParse(function ($args) {
         $args->parser->fields('float', 'integer');
       })
