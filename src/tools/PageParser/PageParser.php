@@ -184,7 +184,7 @@ class PageParser
           !empty($field) &&
           in_array($field->type, [
             'FieldtypeCache',
-            'FieldtypeComments', // TODO: return this
+            'FieldtypeComments',
             'FieldtypeFieldsetOpen',
             'FieldtypeFieldsetTabOpen',
             'FieldtypeFieldsetClose',
@@ -429,7 +429,7 @@ class PageParser
       'filesize' => $file->filesize,
       'filesize_str' => $file->filesizeStr,
       'description' => !empty($file->description) ? $file->description : null,
-      'tags' => !empty($file->tags) ? $file->tags : null,
+      'tags' => !empty($file->tags) ? explode(' ', $file->tags) : [],
       'created' => $file->created,
       'modified' => $file->modified,
     ];
