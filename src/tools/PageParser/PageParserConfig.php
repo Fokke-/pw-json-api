@@ -10,7 +10,7 @@ class PageParserConfig
   /** Recursively parse child pages? */
   public bool $parseChildren = false;
 
-  /** Recursively parse children of page references? */
+  /** Recursively parse children of page field references? */
   public bool $parsePageReferenceChildren = false;
 
   /** Maximum depth for recursive parsing */

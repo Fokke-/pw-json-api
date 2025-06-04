@@ -19,7 +19,7 @@ class ApiException extends \Exception
    */
   public function __construct(
     string|null $message = null,
-    ?\Throwable $previous = null
+    ?\Throwable $previous = null,
   ) {
     parent::__construct(!empty($message) ? $message : '', 400, $previous);
 

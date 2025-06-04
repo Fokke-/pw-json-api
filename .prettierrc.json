@@ -6,5 +6,6 @@
   "singleQuote": true,
   "printWidth": 80,
   "trailingComma": "all",
+  "phpVersion": "8.2",
   "plugins": ["@prettier/plugin-php"]
 }

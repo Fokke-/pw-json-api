@@ -30,7 +30,7 @@ class ApiSearchEndpointResult
   public function __construct(
     Endpoint $endpoint,
     Service $service,
-    array $serviceSequence
+    array $serviceSequence,
   ) {
     $this->endpoint = $endpoint;
     $this->service = $service;
@@ -59,14 +59,14 @@ class ApiSearchEndpointResult
               $acc[] = $service->getBasePath();
               return $acc;
             },
-            []
+            [],
           ),
 
           // Endpoint path
           $this->endpoint->getPath(),
         ],
-        fn($segment) => !is_null($segment)
-      )
+        fn($segment) => !is_null($segment),
+      ),
     );
   }
 
@@ -80,7 +80,7 @@ class ApiSearchEndpointResult
    */
   public function resolveHooks(
     HookTiming $timing,
-    RequestMethod|null $requestMethod = null
+    RequestMethod|null $requestMethod = null,
   ): array {
     $serviceHooks = array_reduce(
       $timing === HookTiming::Before
@@ -95,7 +95,7 @@ class ApiSearchEndpointResult
 
         return $acc;
       },
-      []
+      [],
     );
 
     $endpointHooks = [

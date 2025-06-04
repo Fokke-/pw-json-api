@@ -37,7 +37,7 @@ class ApiSearch
         yield new ApiSearchEndpointResult(
           $endpoint,
           $service,
-          $this->servicesCarry
+          $this->servicesCarry,
         );
       }
 

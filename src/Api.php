@@ -48,7 +48,7 @@ class Api
    */
   protected function handleRequest(
     ApiSearchEndpointResult $result,
-    \ProcessWire\HookEvent $event
+    \ProcessWire\HookEvent $event,
   ): Response {
     // Try to find handler matching the request method.
     // If found, get response from handler.
@@ -154,7 +154,7 @@ class Api
         // Check for duplicated service
         if (in_array($result->service->name, $serviceNames)) {
           throw new \ProcessWire\WireException(
-            "Duplicated service '{$result->service->name}'"
+            "Duplicated service '{$result->service->name}'",
           );
         }
 
@@ -182,7 +182,7 @@ class Api
         // Check for duplicated path
         if (in_array($path, $paths)) {
           throw new WireException(
-            "Duplicated endpoint path '{$path}' (defined in service '{$result->service->name}')."
+            "Duplicated endpoint path '{$path}' (defined in service '{$result->service->name}').",
           );
         }
 
@@ -195,7 +195,7 @@ class Api
 
         // Listen to path
         wire()->addHook($path, function (\ProcessWire\HookEvent $event) use (
-          $result
+          $result,
         ) {
           header('Content-Type: application/json');
 

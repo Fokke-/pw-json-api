@@ -25,7 +25,7 @@ abstract class Hooks
         $acc[$item->name] = [];
         return $acc;
       },
-      []
+      [],
     );
   }
 

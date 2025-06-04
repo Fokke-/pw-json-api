@@ -11,7 +11,7 @@ use \ProcessWire\{
   Pagefiles,
   Pageimage,
   Pageimages,
-  SelectableOptionArray
+  SelectableOptionArray,
 };
 
 /**
@@ -142,7 +142,7 @@ class PageParser
 
     // Run BeforePageParse hooks
     $beforePageParseHooks = $this->getPageParserHooks(
-      PageParserHookKey::BeforePageParse
+      PageParserHookKey::BeforePageParse,
     );
 
     if (!empty($beforePageParseHooks)) {
@@ -166,7 +166,7 @@ class PageParser
 
       return array_diff(
         [...$this->properties, ...$resolvedFields],
-        $this->excludeFields
+        $this->excludeFields,
       );
     })();
 
@@ -198,7 +198,7 @@ class PageParser
         $acc[$fieldName] = $this->parseField($fieldName, $page);
         return $acc;
       },
-      []
+      [],
     );
 
     // Parse child pages
@@ -214,7 +214,7 @@ class PageParser
 
     // Run AfterPageParse hooks
     $afterPageParseHooks = $this->getPageParserHooks(
-      PageParserHookKey::AfterPageParse
+      PageParserHookKey::AfterPageParse,
     );
     if (!empty($afterPageParseHooks)) {
       $hookRet = new HookReturnAfterPageParse();
@@ -269,7 +269,7 @@ class PageParser
 
       // Run BeforeFieldParse hooks
       $beforeFieldParseHooks = $this->getPageParserHooks(
-        PageParserHookKey::BeforeFieldParse
+        PageParserHookKey::BeforeFieldParse,
       );
       if (!empty($beforeFieldParseHooks)) {
         $hookRet = new HookReturnBeforeFieldParse();
@@ -309,7 +309,7 @@ class PageParser
               $acc[] = $this->parseImage($image, $field, $page);
               return $acc;
             },
-            []
+            [],
           );
         } elseif ($value instanceof Pagefile) {
           return $this->parseFile($value, $field, $page);
@@ -320,7 +320,7 @@ class PageParser
               $acc[] = $this->parseFile($file, $field, $page);
               return $acc;
             },
-            []
+            [],
           );
         } elseif ($value instanceof Page) {
           if ($value === false || !$value->id) {
@@ -361,7 +361,7 @@ class PageParser
               ];
               return $acc;
             },
-            []
+            [],
           );
         } else {
           return $value;
@@ -370,7 +370,7 @@ class PageParser
 
       // Run AfterFieldParse hooks
       $afterFieldParseHooks = $this->getPageParserHooks(
-        PageParserHookKey::AfterFieldParse
+        PageParserHookKey::AfterFieldParse,
       );
       if (!empty($afterFieldParseHooks)) {
         $hookRet = new HookReturnAfterFieldParse();
@@ -399,7 +399,7 @@ class PageParser
     Pagefile $file,
     ?Field $field = null,
     ?Page $page = null,
-    ?PageParser $parser = null
+    ?PageParser $parser = null,
   ) {
     $file = clone $file;
 
@@ -409,7 +409,7 @@ class PageParser
 
     // Run BeforeFileParse hooks
     $beforeFileParseHooks = $this->getPageParserHooks(
-      PageParserHookKey::BeforeFileParse
+      PageParserHookKey::BeforeFileParse,
     );
     if (!empty($beforeFileParseHooks)) {
       $hookRet = new HookReturnBeforeFileParse();
@@ -455,7 +455,7 @@ class PageParser
         foreach ($customFieldsTpl->fields as $customField) {
           $tempCustomFieldsPage->set(
             $customField->name,
-            $file->get($customField->name)
+            $file->get($customField->name),
           );
         }
 
@@ -468,7 +468,7 @@ class PageParser
 
     // Run AfterFileParse hooks
     $afterFileParseHooks = $this->getPageParserHooks(
-      PageParserHookKey::AfterFileParse
+      PageParserHookKey::AfterFileParse,
     );
     if (!empty($afterFileParseHooks)) {
       $hookRet = new HookReturnAfterFileParse();
@@ -495,7 +495,7 @@ class PageParser
     Pageimage $image,
     ?Field $field = null,
     ?Page $page = null,
-    ?PageParser $parser = null
+    ?PageParser $parser = null,
   ) {
     $image = clone $image;
 
@@ -504,7 +504,7 @@ class PageParser
 
     // Run BeforeImageParse hooks
     $beforeImageParseHooks = $this->getPageParserHooks(
-      PageParserHookKey::BeforeImageParse
+      PageParserHookKey::BeforeImageParse,
     );
     if (!empty($beforeImageParseHooks)) {
       $hookRet = new HookReturnBeforeImageParse();
@@ -533,7 +533,7 @@ class PageParser
 
     // Run AfterImageParse hooks
     $afterImageParseHooks = $this->getPageParserHooks(
-      PageParserHookKey::AfterImageParse
+      PageParserHookKey::AfterImageParse,
     );
     if (!empty($afterImageParseHooks)) {
       $hookRet = new HookReturnAfterImageParse();
