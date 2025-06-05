@@ -1,6 +1,5 @@
 <?php
 
-// TODO: all this should be moved elsewhere
 use ProcessWire\FoodService;
 use ProcessWire\FruitService;
 use PwJsonApi\Api;
@@ -46,6 +45,6 @@ test('endpoint can be found', function () {
 
   expect($api->findEndpoint('/food') instanceof Endpoint)->toBe(true);
   expect($api->findEndpoint('/food/fruits/orange') instanceof Endpoint)->toBe(
-    true
+    true,
   );
 });
