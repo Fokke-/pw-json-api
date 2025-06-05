@@ -20,6 +20,22 @@ test('query endpoint of service with base path', function () {
   expect($res->getStatusCode())->toBe(404);
 });
 
+test('method not allowed', function () {
+  $client = getHttp();
+  $res = $client->post('food');
+
+  expect($res->getStatusCode())->toBe(405);
+});
+
+test('options method is always accepted', function () {
+  $client = getHttp();
+  $res = $client->request('options', 'food');
+  expect($res->getStatusCode())->toBe(200);
+
+  $res = $client->request('options', 'non-existant-endpoint');
+  expect($res->getStatusCode())->toBe(200);
+});
+
 test('after hook can manipulate response', function () {
   $res = getResponse('food/fruits/apple');
   expect($res)->toHaveKey('food_type');
