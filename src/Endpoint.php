@@ -117,6 +117,17 @@ class Endpoint
   }
 
   /**
+   * Handle PATCH requests
+   *
+   * @param callable(\ProcessWire\HookEvent): Response $handler
+   */
+  public function patch(callable $handler): static
+  {
+    $this->handlers[RequestMethod::Patch->name] = $handler;
+    return $this;
+  }
+
+  /**
    * Handle DELETE requests
    *
    * @param callable(\ProcessWire\HookEvent): Response $handler

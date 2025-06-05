@@ -46,6 +46,14 @@ class Api
   }
 
   /**
+   * Get the current request method
+   */
+  protected function getRequestMethod(): ?RequestMethod
+  {
+    return RequestMethod::tryFrom($_SERVER['REQUEST_METHOD'] ?? '');
+  }
+
+  /**
    * Handle request
    */
   protected function handleRequest(
@@ -53,23 +61,15 @@ class Api
     \ProcessWire\HookEvent $event,
   ): Response {
     // Resolve request method
-    $requestMethod = RequestMethod::tryFrom(
-      $this->wire->input->requestMethod(),
-    );
-
-    // OPTIONS is the special request method,
-    // which we will always allow.
-    if ($requestMethod === RequestMethod::Options) {
-      $handler = function () {
-        return new Response();
-      };
-    } else {
-      // Try to find handler matching the request method.
-      // If found, get response from handler.
-      $handler = $result->endpoint->getHandler($requestMethod);
+    $requestMethod = $this->getRequestMethod();
+    if (empty($requestMethod)) {
+      throw (new ApiException())->code(405);
     }
 
-    if (empty($requestMethod) || empty($handler)) {
+    // Try to find handler matching the request method.
+    // If found, get response from handler.
+    $handler = $result->endpoint->getHandler($requestMethod);
+    if (empty($handler)) {
       throw (new ApiException())->code(405);
     }
 
@@ -152,6 +152,17 @@ class Api
    */
   public function run(): void
   {
+    // Special handling for OPTIONS requests.
+    // To avoid false positives with CORS errors, always return 200,
+    // regardless of the path.
+    if ($this->getRequestMethod() === RequestMethod::Options) {
+      $response = new Response();
+
+      header('Content-Type: application/json');
+      http_response_code($response->code);
+      die($response->toJson($this->config->jsonFlags, false));
+    }
+
     /** @var string[] */
     $serviceNames = [];
 

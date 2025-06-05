@@ -128,6 +128,7 @@ You can access hook arguments via the `$args` parameter of the hook handler func
 | `hookBeforePost()`    | Hook before POST request    |
 | `hookBeforeHead()`    | Hook before HEAD request    |
 | `hookBeforePut()`     | Hook before PUT request     |
+| `hookBeforePatch()`   | Hook before PATCH request   |
 | `hookBeforeDelete()`  | Hook before DELETE request  |
 | `hookBeforeOptions()` | Hook before OPTIONS request |
 
@@ -140,5 +141,6 @@ You can access hook arguments via the `$args` parameter of the hook handler func
 | `hookAfterPost()`    | Hook after POST request    |
 | `hookAfterHead()`    | Hook after HEAD request    |
 | `hookAfterPut()`     | Hook after PUT request     |
+| `hookAfterPatch()`   | Hook after PATCH request   |
 | `hookAfterDelete()`  | Hook after DELETE request  |
 | `hookAfterOptions()` | Hook after OPTIONS request |

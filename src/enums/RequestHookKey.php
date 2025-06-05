@@ -37,15 +37,15 @@ enum RequestHookKey
   /** After PUT request */
   case AfterPut;
 
+  /** Before PATCH request */
+  case BeforePatch;
+
+  /** After PATCH request */
+  case AfterPatch;
+
   /** Before DELETE request */
   case BeforeDelete;
 
   /** After DELETE request */
   case AfterDelete;
-
-  /** Before OPTIONS request */
-  case BeforeOptions;
-
-  /** After OPTIONS request */
-  case AfterOptions;
 }

@@ -86,6 +86,17 @@ trait HasRequestHooks
   }
 
   /**
+   * Hook before PATCH request
+   *
+   * @param callable(RequestHookReturnBefore): void $handler
+   */
+  public function hookBeforePatch(callable $handler): static
+  {
+    $this->hooks->add(RequestHookKey::BeforePatch, $handler);
+    return $this;
+  }
+
+  /**
    * Hook before DELETE request
    *
    * @param callable(RequestHookReturnBefore): void $handler
@@ -93,17 +104,6 @@ trait HasRequestHooks
   public function hookBeforeDelete(callable $handler): static
   {
     $this->hooks->add(RequestHookKey::BeforeDelete, $handler);
-    return $this;
-  }
-
-  /**
-   * Hook before OPTIONS request
-   *
-   * @param callable(RequestHookReturnBefore): void $handler
-   */
-  public function hookBeforeOptions(callable $handler): static
-  {
-    $this->hooks->add(RequestHookKey::BeforeOptions, $handler);
     return $this;
   }
 
@@ -163,6 +163,17 @@ trait HasRequestHooks
   }
 
   /**
+   * Hook after PATCH request
+   *
+   * @param callable(RequestHookReturnAfter): void $handler
+   */
+  public function hookAfterPatch(callable $handler): static
+  {
+    $this->hooks->add(RequestHookKey::AfterPatch, $handler);
+    return $this;
+  }
+
+  /**
    * Hook after DELETE request
    *
    * @param callable(RequestHookReturnAfter): void $handler
@@ -170,17 +181,6 @@ trait HasRequestHooks
   public function hookAfterDelete(callable $handler): static
   {
     $this->hooks->add(RequestHookKey::AfterDelete, $handler);
-    return $this;
-  }
-
-  /**
-   * Hook after OPTIONS request
-   *
-   * @param callable(RequestHookReturnAfter): void $handler
-   */
-  public function hookAfterOptions(callable $handler): static
-  {
-    $this->hooks->add(RequestHookKey::AfterOptions, $handler);
     return $this;
   }
 }

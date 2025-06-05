@@ -1,5 +1,8 @@
 <?php
 
+// Bootstrap PW
+require __DIR__ . '/../index.php';
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -51,13 +54,14 @@ function getHttp()
 
 function resToJson(\Psr\Http\Message\ResponseInterface $res): array
 {
-  return json_decode((string) $res->getbody(), true);
+  $body = (string) $res->getbody();
+  return json_decode(!empty($body) ? $body : '[]', true);
 }
 
-function getResponse(string $uri): array
+function getResponse(string $uri, string $method = 'get'): array
 {
   $client = getHttp();
-  $res = $client->get($uri);
+  $res = $client->request($method, $uri);
 
   return resToJson($res);
 }
