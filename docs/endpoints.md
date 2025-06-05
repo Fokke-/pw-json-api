@@ -7,7 +7,7 @@ Each endpoint listener must either return a [`Response`](/responses) object or t
 ::: tip
 By default, all request methods are denied, except for `OPTIONS`. You must add listeners for each request method you want to allow. Requests with disallowed methods will be denied with a 405 response.
 
-`OPTIONS` method is always allowed, and will result in an empty response with code `200`.
+`OPTIONS` method is always allowed, and will result in an empty response with code `200`, even if the actual endpoint does not exist.
 :::
 
 The supported listeners are:
@@ -16,6 +16,7 @@ The supported listeners are:
 - `post()`
 - `head()`
 - `put()`
+- `patch()`
 - `delete()`
 
 Like an API instance or service, an endpoint can also contain request hooks. [Read more about hooks](/request-hooks).
