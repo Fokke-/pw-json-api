@@ -53,6 +53,7 @@ if ($page->template->name !== 'admin') {
   $api->addService(new PageService());
   $api->addService(new ExceptionService());
   $api->addService(new HelloWorldService());
+  $api->addService(new MethodService());
   $api->run();
 
   // Add second API instance

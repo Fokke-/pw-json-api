@@ -36,6 +36,32 @@ test('options method is always accepted', function () {
   expect($res->getStatusCode())->toBe(200);
 });
 
+test('request method handlers', function () {
+  $res = getResponse('methods/', 'get');
+  expect($res)->toHaveKey('method');
+  expect($res['method'])->toBe('GET');
+
+  // $res = getResponse('methods/', 'head');
+  // expect($res)->toHaveKey('method');
+  // expect($res['method'])->toBe('HEAD');
+
+  $res = getResponse('methods/', 'put');
+  expect($res)->toHaveKey('method');
+  expect($res['method'])->toBe('PUT');
+
+  $res = getResponse('methods/', 'delete');
+  expect($res)->toHaveKey('method');
+  expect($res['method'])->toBe('DELETE');
+
+  $res = getResponse('methods/', 'post');
+  expect($res)->toHaveKey('method');
+  expect($res['method'])->toBe('POST');
+
+  $res = getResponse('methods/', 'patch');
+  expect($res)->toHaveKey('method');
+  expect($res['method'])->toBe('PATCH');
+});
+
 test('after hook can manipulate response', function () {
   $res = getResponse('food/fruits/apple');
   expect($res)->toHaveKey('food_type');

@@ -62,12 +62,14 @@ class Api
   ): Response {
     // Resolve request method
     $requestMethod = $this->getRequestMethod();
+    if (empty($requestMethod)) {
+      throw (new ApiException())->code(405);
+    }
 
     // Try to find handler matching the request method.
     // If found, get response from handler.
     $handler = $result->endpoint->getHandler($requestMethod);
-
-    if (empty($requestMethod) || empty($handler)) {
+    if (empty($handler)) {
       throw (new ApiException())->code(405);
     }
 
