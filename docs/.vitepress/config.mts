@@ -30,7 +30,7 @@ export default defineConfig({
           { text: 'Services', link: '/services' },
           { text: 'Endpoints', link: '/endpoints' },
           { text: 'Responses', link: '/responses' },
-          { text: 'Exceptions', link: '/exceptions' },
+          { text: 'Error handling', link: '/error-handling' },
           { text: 'Request hooks', link: '/request-hooks' },
         ],
       },

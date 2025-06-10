@@ -1,8 +1,22 @@
 # Request hooks
 
-Request hooks can be used to modify the behavior of endpoints. The most common use cases are to check for authorization before the request is handled, or to modify response data after the request has been handled. For this purpose, [hook arguments](#hook-arguments) will be passed to the hook handler function.
+Request hooks can be used to modify the behavior of endpoints. The most common use cases are to check for authorization before the request is handled, or to modify response data after the request has been handled. For these purposes, [hook arguments](#hook-arguments) will be passed to the hook handler functions.
 
 The examples below use the `hookBefore()` and `hookAfter()` methods, which apply to any request method. There are also [request type-specific hooks](#hook-methods-reference) available.
+
+## Hook execution order
+
+The hooks will be executed in the following order:
+
+1. API before
+2. Service before
+3. Endpoint before
+
+_-- handle request --_
+
+4. Endpoint after
+5. Service after
+6. API after
 
 ## Hook scopes
 
@@ -13,13 +27,14 @@ Defined for the whole API instance. These hooks will apply to all endpoints.
 ```php
 // Simple auth check for all requests, with any request method
 $api->hookBefore(function () {
-  if (
-    $this->wire->user->isLoggedin() === false ||
-    $this->wire->user->hasRole('rabbit') === false
-  ) {
+  if ($this->wire->user->isLoggedin() === false) {
     throw (new ApiException())->code(401)->with([
       'login_url' => 'https://example.com/login',
     ]);
+  }
+
+  if ($this->wire->user->hasRole('rabbit') === false) {
+    throw (new ApiException())->code(403);
   }
 });
 
@@ -30,7 +45,7 @@ $api->hookAfter(function ($args) {
 
   // Include additional top-level keys in the response
   $args->response->with([
-    'baz' => 'qux',
+    'bar' => 'bar',
   ]);
 });
 ```
@@ -69,6 +84,22 @@ $api->findService('HelloWorldService')?->hookAfter(function ($args) {
 
 Defined for a single endpoint. Endpoint hooks can be defined directly when creating an endpoint (which does not make much sense), or they can be injected into the endpoint object.
 
+#### Define directly in endpoint
+
+```php
+$this->addEndpoint('/hello-world')
+  ->get(function () {
+    return new Response([
+      'hello' => 'world',
+    ]);
+  })
+  ->hookAfter(function ($args) {
+    $args->response->data['_foo'] = 'foo';
+  });
+```
+
+#### Find existing endpoint and inject
+
 ```php
 $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
   $args->response->data['_foo'] = 'foo';
@@ -90,6 +121,10 @@ $api->findService('HelloWorldService')?->hookAfter(function ($args) {
 
 $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
   $args->response->data['_baz'] = 'baz';
+});
+
+$api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
+  $args->response->data['_qux'] = 'qux';
 });
 ```
 
