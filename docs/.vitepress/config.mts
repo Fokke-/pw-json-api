@@ -5,6 +5,29 @@ export default defineConfig({
   title: 'ProcessWire JSON API',
   description: '',
   base: '/pw-json-api/',
+  head: [
+    [
+      'meta',
+      {
+        'http-equiv': 'Cache-Control',
+        content: 'no-cache, no-store, must-revalidate',
+      },
+    ],
+    [
+      'meta',
+      {
+        'http-equiv': 'Pragma',
+        content: 'no-cache',
+      },
+    ],
+    [
+      'meta',
+      {
+        'http-equiv': 'Expires',
+        content: '0',
+      },
+    ],
+  ],
   lastUpdated: true,
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
