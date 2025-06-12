@@ -114,18 +114,6 @@ $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
 });
 ```
 
-## Hook execution order
-
-```mermaid
-flowchart TD
-  A[API before]-->
-  B[Service before]-->
-  C[Endpoint before]-->
-  |Request handler|D[Endpoint after]-->
-  E[Service after]-->
-  F[API after]
-```
-
 ## Hook arguments
 
 You can access hook arguments via the `$args` parameter of the hook handler function. The following properties are always included:
@@ -177,3 +165,15 @@ You can access hook arguments via the `$args` parameter of the hook handler func
 | `hookAfterPatch()`   | Hook after PATCH request   |
 | `hookAfterDelete()`  | Hook after DELETE request  |
 | `hookAfterOptions()` | Hook after OPTIONS request |
+
+## Hook execution order
+
+```mermaid
+flowchart TD
+  A[API before]-->
+  B[Service before]-->
+  C[Endpoint before]-->
+  |Request handler|D[Endpoint after]-->
+  E[Service after]-->
+  F[API after]
+```
