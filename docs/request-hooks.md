@@ -116,17 +116,15 @@ $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
 
 ## Hook execution order
 
-The hooks will be executed in the following order:
-
-1. API before
-2. Service before
-3. Endpoint before
-
-_-- handle request --_
-
-4. Endpoint after
-5. Service after
-6. API after
+```mermaid
+flowchart TD
+  A[API before]-->
+  B[Service before]-->
+  C[Endpoint before]-->
+  |Request handler|D[Endpoint after]-->
+  E[Service after]-->
+  F[API after]
+```
 
 ## Hook arguments
 
