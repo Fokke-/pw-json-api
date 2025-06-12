@@ -45,7 +45,7 @@ require __DIR__ . '/../index.php';
 function getHttp()
 {
   $client = new GuzzleHttp\Client([
-    'base_uri' => 'https://pw-json-api.ddev.site/api/',
+    'base_uri' => 'https://pw-json-api.ddev.site/',
     'http_errors' => false,
   ]);
 
