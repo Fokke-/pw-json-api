@@ -109,4 +109,26 @@ class ApiSearchEndpointResult
 
     return [...$endpointHooks, ...$serviceHooks];
   }
+
+  /**
+   * Resolve onError hooks from result endpoint and all of it's services
+   */
+  public function resolveErrorHooks(): array
+  {
+    $serviceHooks = array_reduce(
+      array_reverse($this->serviceSequence),
+      function ($acc, $service) {
+        $acc = [...$acc, ...$service->getRequestHooks(RequestHookKey::OnError)];
+
+        return $acc;
+      },
+      [],
+    );
+
+    $endpointHooks = [
+      ...$this->endpoint->getRequestHooks(RequestHookKey::OnError),
+    ];
+
+    return [...$endpointHooks, ...$serviceHooks];
+  }
 }

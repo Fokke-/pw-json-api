@@ -183,4 +183,15 @@ trait HasRequestHooks
     $this->hooks->add(RequestHookKey::AfterDelete, $handler);
     return $this;
   }
+
+  /**
+   * Hook on error
+   *
+   * @param callable(ApiException): void $handler
+   */
+  public function hookOnError(callable $handler): static
+  {
+    $this->hooks->add(RequestHookKey::OnError, $handler);
+    return $this;
+  }
 }

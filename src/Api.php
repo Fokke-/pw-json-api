@@ -100,14 +100,40 @@ class Api
     }
 
     // Get response from endpoint
-    $response = (function () use ($handler, $event) {
-      $out = call_user_func($handler, $event);
-      if (empty($out)) {
-        return new Response();
-      }
+    $response = (function () use ($handler, $event, $requestMethod, $result) {
+      try {
+        $out = call_user_func($handler, $event);
+        if (empty($out)) {
+          return new Response();
+        }
 
-      if (!($out instanceof Response)) {
-        throw new WireException('Malformed result', 500);
+        if (!($out instanceof Response)) {
+          throw new WireException('Malformed result', 500);
+        }
+      } catch (ApiException $e) {
+        // Inject request data to the exception
+        $e->event = $event;
+        $e->method = $requestMethod->value;
+        $e->endpoint = $result->endpoint;
+        $e->service = $result->service;
+        $e->services = $result->endpoint->services;
+
+        // Error hooks
+        $errorHooks = [
+          // Endpoint with services
+          ...$result->resolveErrorHooks(),
+
+          // API
+          ...$this->getRequestHooks(RequestHookKey::OnError),
+        ];
+
+        if (!empty($errorHooks)) {
+          foreach ($errorHooks as $hookFn) {
+            call_user_func($hookFn, $e);
+          }
+        }
+
+        throw $e;
       }
 
       return $out;
