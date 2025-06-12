@@ -47,4 +47,8 @@ test('endpoint can be found', function () {
   expect($api->findEndpoint('/food/fruits/orange') instanceof Endpoint)->toBe(
     true,
   );
+
+  expect(
+    $api->findService('FoodService')->findEndpoint('/') instanceof Endpoint,
+  )->toBe(true);
 });
