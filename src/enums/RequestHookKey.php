@@ -48,4 +48,7 @@ enum RequestHookKey
 
   /** After DELETE request */
   case AfterDelete;
+
+  /** On error */
+  case OnError;
 }

@@ -48,20 +48,26 @@ export default withMermaid({
         ],
       },
       {
-        text: 'Digging deeper',
+        text: 'Core concepts',
         items: [
           { text: 'API instance', link: '/api-instance' },
           { text: 'Services', link: '/services' },
           { text: 'Endpoints', link: '/endpoints' },
           { text: 'Responses', link: '/responses' },
           { text: 'Error handling', link: '/error-handling' },
-          { text: 'Request hooks', link: '/request-hooks' },
         ],
       },
       {
-        text: 'With the tools in hand',
+        text: 'Hooks',
         items: [
-          { text: 'ProcessWire page parser', link: '/processwire-page-parser' },
+          { text: 'Request hooks', link: '/request-hooks' },
+          { text: 'Error hooks', link: '/error-hooks' },
+        ],
+      },
+      {
+        text: 'Tools',
+        items: [
+          { text: 'ProcessWire Page Parser', link: '/processwire-page-parser' },
         ],
       },
     ],

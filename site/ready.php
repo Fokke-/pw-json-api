@@ -20,9 +20,48 @@ if ($page->template->name !== 'admin') {
       $service->addService(new VegetableService());
     })
     ->addService(new PageService())
-    ->addService(new ExceptionService())
     ->addService(new HelloWorldService())
     ->addService(new MethodService())
+    ->run();
+
+  // Exception tests
+  (new Api())
+    ->setBasePath('/exceptions')
+    ->addService(new ExceptionService())
+    ->run();
+
+  // Exception hook tests
+  (new Api())
+    ->setBasePath('/exception-hooks')
+    ->hookOnError(function ($e) {
+      $e->response->with([
+        '_error_hook_execution_order' => [
+          ...$e->response->additionalData['_error_hook_execution_order'] ?? [],
+          'api',
+        ],
+      ]);
+    })
+    ->addService(new ExceptionService(), function ($service) {
+      $service->hookOnError(function ($e) {
+        $e->response->with([
+          '_error_hook_execution_order' => [
+            ...$e->response->additionalData['_error_hook_execution_order'] ??
+            [],
+            'service',
+          ],
+        ]);
+      });
+
+      $service->getEndpoint('/')->hookOnError(function ($e) {
+        $e->response->with([
+          '_error_hook_execution_order' => [
+            ...$e->response->additionalData['_error_hook_execution_order'] ??
+            [],
+            'endpoint',
+          ],
+        ]);
+      });
+    })
     ->run();
 
   // Hook tests

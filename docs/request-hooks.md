@@ -38,7 +38,7 @@ $api->hookAfter(function ($args) {
 
 ### Service hooks
 
-Defined for a single service branch. These hooks will apply to all endpoints (including child services) within the given service. Service hooks can be defined directly in the service constructor or injected into the service object.
+Defined for a single service branch. These hooks will apply to all endpoints within the given service (including child services). Service hooks can be defined directly in the service constructor or injected into the service object.
 
 #### Define in service constructor
 
