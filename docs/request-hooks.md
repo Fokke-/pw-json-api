@@ -4,20 +4,6 @@ Request hooks can be used to modify the behavior of endpoints. The most common u
 
 The examples below use the `hookBefore()` and `hookAfter()` methods, which apply to any request method. There are also [request type-specific hooks](#hook-methods-reference) available.
 
-## Hook execution order
-
-The hooks will be executed in the following order:
-
-1. API before
-2. Service before
-3. Endpoint before
-
-_-- handle request --_
-
-4. Endpoint after
-5. Service after
-6. API after
-
 ## Hook scopes
 
 ### API hooks
@@ -82,7 +68,7 @@ $api->findService('HelloWorldService')?->hookAfter(function ($args) {
 
 ### Endpoint hooks
 
-Defined for a single endpoint. Endpoint hooks can be defined directly when creating an endpoint (which does not make much sense), or they can be injected into the endpoint object.
+Defined for a single endpoint. Endpoint hooks can be defined directly when creating an endpoint, or they can be injected into the endpoint object.
 
 #### Define directly in endpoint
 
@@ -108,7 +94,7 @@ $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
 
 ## Multiple hooks
 
-If you attach multiple hooks on a single target, all of them will be executed.
+Multiple hooks can affect the single target. [See hook execution order](#hook-execution-order).
 
 ```php
 $api->hookAfter(function ($args) {
@@ -127,6 +113,20 @@ $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
   $args->response->data['_qux'] = 'qux';
 });
 ```
+
+## Hook execution order
+
+The hooks will be executed in the following order:
+
+1. API before
+2. Service before
+3. Endpoint before
+
+_-- handle request --_
+
+4. Endpoint after
+5. Service after
+6. API after
 
 ## Hook arguments
 
