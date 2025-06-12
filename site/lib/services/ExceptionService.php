@@ -10,8 +10,6 @@ class ExceptionService extends Service
   {
     parent::__construct();
 
-    $this->setBasePath('/exception');
-
     $this->addEndpoint('/')->get(function () {
       throw new ApiException('This was doomed to fail!');
     });
