@@ -19,7 +19,7 @@ The supported listeners are:
 - `patch()`
 - `delete()`
 
-Like an API instance or service, an endpoint can also contain request hooks. [Read more about hooks](/request-hooks).
+Like an API instance or service, an endpoint can also contain request hooks. [Read more about request hooks](/request-hooks).
 
 ## Example endpoint
 

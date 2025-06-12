@@ -4,7 +4,7 @@ Services are used to group endpoints. Since services are classes, they can have 
 
 A service can define any number of [endpoints](/endpoints), and services may also contain child services, which will inherit hooks from the parent service.
 
-You can also define service-wide request hooks, which will apply to every endpoint of the service and its child services. [Read more about hooks](/request-hooks).
+You can also define service-wide request hooks, which will apply to every endpoint of the service and its child services. [Read more about request hooks](/request-hooks).
 
 ## Example service
 
