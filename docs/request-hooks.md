@@ -142,29 +142,27 @@ You can access hook arguments via the `$args` parameter of the hook handler func
 
 ### Before request
 
-| Method                | Description                 |
-| --------------------- | --------------------------- |
-| `hookBefore()`        | Hook before any request     |
-| `hookBeforeGet()`     | Hook before GET request     |
-| `hookBeforePost()`    | Hook before POST request    |
-| `hookBeforeHead()`    | Hook before HEAD request    |
-| `hookBeforePut()`     | Hook before PUT request     |
-| `hookBeforePatch()`   | Hook before PATCH request   |
-| `hookBeforeDelete()`  | Hook before DELETE request  |
-| `hookBeforeOptions()` | Hook before OPTIONS request |
+| Method               | Description                |
+| -------------------- | -------------------------- |
+| `hookBefore()`       | Hook before any request    |
+| `hookBeforeGet()`    | Hook before GET request    |
+| `hookBeforePost()`   | Hook before POST request   |
+| `hookBeforeHead()`   | Hook before HEAD request   |
+| `hookBeforePut()`    | Hook before PUT request    |
+| `hookBeforePatch()`  | Hook before PATCH request  |
+| `hookBeforeDelete()` | Hook before DELETE request |
 
 ### After request
 
-| Method               | Description                |
-| -------------------- | -------------------------- |
-| `hookAfter()`        | Hook after any request     |
-| `hookAfterGet()`     | Hook after GET request     |
-| `hookAfterPost()`    | Hook after POST request    |
-| `hookAfterHead()`    | Hook after HEAD request    |
-| `hookAfterPut()`     | Hook after PUT request     |
-| `hookAfterPatch()`   | Hook after PATCH request   |
-| `hookAfterDelete()`  | Hook after DELETE request  |
-| `hookAfterOptions()` | Hook after OPTIONS request |
+| Method              | Description               |
+| ------------------- | ------------------------- |
+| `hookAfter()`       | Hook after any request    |
+| `hookAfterGet()`    | Hook after GET request    |
+| `hookAfterPost()`   | Hook after POST request   |
+| `hookAfterHead()`   | Hook after HEAD request   |
+| `hookAfterPut()`    | Hook after PUT request    |
+| `hookAfterPatch()`  | Hook after PATCH request  |
+| `hookAfterDelete()` | Hook after DELETE request |
 
 ## Hook execution order
 
