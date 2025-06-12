@@ -8,60 +8,95 @@ if (!defined('PROCESSWIRE')) {
 }
 
 if ($page->template->name !== 'admin') {
-  $api = new Api();
-  $api->configure(function ($config) {
-    $config->trailingSlashes = null;
-    $config->jsonFlags =
-      JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT;
-  });
-  $api->setBasePath('/api');
+  (new Api())
+    ->configure(function ($config) {
+      $config->trailingSlashes = null;
+      $config->jsonFlags =
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT;
+    })
+    ->setBasePath('/api')
+    ->addService(new FoodService(), function ($service) {
+      $service->addService(new FruitService());
+      $service->addService(new VegetableService());
+    })
+    ->addService(new PageService())
+    ->addService(new ExceptionService())
+    ->addService(new HelloWorldService())
+    ->addService(new MethodService())
+    ->run();
 
-  $api->hookAfter(function ($args) {
-    $args->response->with([
-      '_after_hook_execution_order' => [
-        ...$args->response->additionalData['_after_hook_execution_order'] ?? [],
-        'api',
-      ],
-    ]);
-  });
-
-  $api->addService(new FoodService(), function ($service) {
-    $service->hookAfter(function ($args) {
+  // Hook tests
+  (new Api())
+    ->setBasePath('/hooks')
+    ->hookBefore(function ($args) {
+      $args->endpoint->hookAfter(function ($args) {
+        $args->response->with([
+          '_before_hook_execution_order' => [
+            ...$args->response->additionalData[
+              '_before_hook_execution_order'
+            ] ?? [],
+            'api',
+          ],
+        ]);
+      });
+    })
+    ->hookAfter(function ($args) {
       $args->response->with([
         '_after_hook_execution_order' => [
           ...$args->response->additionalData['_after_hook_execution_order'] ??
           [],
-          'service',
+          'api',
         ],
       ]);
-    });
+    })
+    ->addService(new HelloWorldService(), function ($service) {
+      $service->hookBefore(function ($args) {
+        $args->endpoint->hookAfter(function ($args) {
+          $args->response->with([
+            '_before_hook_execution_order' => [
+              ...$args->response->additionalData[
+                '_before_hook_execution_order'
+              ] ?? [],
+              'service',
+            ],
+          ]);
+        });
+      });
 
-    $service->getEndpoint('/')->hookafter(function ($args) {
-      $args->response->with([
-        '_after_hook_execution_order' => [
-          ...$args->response->additionalData['_after_hook_execution_order'] ??
-          [],
-          'endpoint',
-        ],
-      ]);
-    });
+      $service->hookAfter(function ($args) {
+        $args->response->with([
+          '_after_hook_execution_order' => [
+            ...$args->response->additionalData['_after_hook_execution_order'] ??
+            [],
+            'service',
+          ],
+        ]);
+      });
 
-    $service->addService(new FruitService());
-    $service->addService(new VegetableService());
-  });
-
-  $api->addService(new PageService());
-  $api->addService(new ExceptionService());
-  $api->addService(new HelloWorldService());
-  $api->addService(new MethodService());
-  $api->run();
-
-  // Add second API instance
-  $parallelApi = new Api(function ($config) {
-    $config->jsonFlags =
-      JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT;
-  });
-  $parallelApi->setBasePath('/parallel-api');
-  $parallelApi->addService(new HelloWorldService());
-  $parallelApi->run();
+      $service
+        ->getEndpoint('/hello-world')
+        ?->hookBefore(function ($args) {
+          $args->endpoint->hookAfter(function ($args) {
+            $args->response->with([
+              '_before_hook_execution_order' => [
+                ...$args->response->additionalData[
+                  '_before_hook_execution_order'
+                ] ?? [],
+                'endpoint',
+              ],
+            ]);
+          });
+        })
+        ->hookafter(function ($args) {
+          $args->response->with([
+            '_after_hook_execution_order' => [
+              ...$args->response->additionalData[
+                '_after_hook_execution_order'
+              ] ?? [],
+              'endpoint',
+            ],
+          ]);
+        });
+    })
+    ->run();
 }

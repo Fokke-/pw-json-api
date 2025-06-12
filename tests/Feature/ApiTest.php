@@ -41,10 +41,6 @@ test('request method handlers', function () {
   expect($res)->toHaveKey('method');
   expect($res['method'])->toBe('GET');
 
-  // $res = getResponse('methods/', 'head');
-  // expect($res)->toHaveKey('method');
-  // expect($res['method'])->toBe('HEAD');
-
   $res = getResponse('methods/', 'put');
   expect($res)->toHaveKey('method');
   expect($res['method'])->toBe('PUT');
@@ -62,20 +58,30 @@ test('request method handlers', function () {
   expect($res['method'])->toBe('PATCH');
 });
 
-test('after hook can manipulate response', function () {
-  $res = getResponse('food/fruits/apple');
-  expect($res)->toHaveKey('food_type');
-  expect($res['food_type'])->toBe('fruit');
-  expect($res)->toHaveKey('fruit');
-  expect($res['fruit'])->toBe('apple');
+test('before hooks are executed in right order', function () {
+  $res = getResponse('/hooks/hello-world');
+
+  expect($res['_before_hook_execution_order'])->toBe([
+    'api',
+    'service',
+    'endpoint',
+  ]);
 });
 
 test('after hooks are executed in right order', function () {
-  $res = getResponse('food');
+  $res = getResponse('/hooks/hello-world');
 
   expect($res['_after_hook_execution_order'])->toBe([
     'endpoint',
     'service',
     'api',
   ]);
+});
+
+test('after hook can manipulate response', function () {
+  $res = getResponse('food/fruits/apple');
+  expect($res)->toHaveKey('food_type');
+  expect($res['food_type'])->toBe('fruit');
+  expect($res)->toHaveKey('fruit');
+  expect($res['fruit'])->toBe('apple');
 });

@@ -57,7 +57,7 @@ $this->setBasePath('/greet');
 
 ## Child services
 
-In most cases, a flat service tree is enough, but for larger APIs you can define child services to further categorize the endpoints. Child services will inherit all hooks from parent service(s), and the base paths of the parent services will apply.
+In many cases, a flat service tree is enough, but for larger APIs you can define child services to further categorize the endpoints. Child services will inherit all hooks from parent service(s), and the base paths of the parent services will apply.
 
 Child services can be defined in the service constructor by calling `addService()`.
 
