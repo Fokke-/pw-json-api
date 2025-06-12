@@ -12,7 +12,7 @@ trait HasApiSearch
    */
   public function findService(string $name): Service|null
   {
-    $search = new ApiSearch($this->services);
+    $search = new ApiSearch();
 
     foreach ($search->iterate($this->services->getItems()) as $result) {
       if (
@@ -31,8 +31,18 @@ trait HasApiSearch
    */
   public function findEndpoint(string $path): Endpoint|null
   {
+    // Try searching from the current service
+    if ($this instanceof Service) {
+      /** @var Service $this */
+      $endpoint = $this->getEndpoint($path);
+      if (!empty($endpoint)) {
+        return $endpoint;
+      }
+    }
+
+    // Continue searching recursively
+    $search = new ApiSearch();
     $path = $this->formatPath($path);
-    $search = new ApiSearch($this->services);
 
     foreach ($search->iterate($this->services->getItems()) as $result) {
       if (
