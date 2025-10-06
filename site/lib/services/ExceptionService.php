@@ -25,5 +25,13 @@ class ExceptionService extends Service
     $this->addEndpoint('/404')->get(function () {
       throw new Api404Exception();
     });
+
+    $this->addEndpoint('/base-exception')->get(function () {
+      throw new \Exception('base-exception');
+    });
+
+    $this->addEndpoint('/wire-exception')->get(function () {
+      throw new WireException('wire-exception');
+    });
   }
 }
