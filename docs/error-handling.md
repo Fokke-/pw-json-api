@@ -3,7 +3,7 @@
 The library catches any exception derived from the `ApiException` class and converts it to a response. You can throw an `ApiException` at any time to halt the process.
 
 ::: tip
-To catch other exceptions, such as `WireException`, you need to add custom handling by wrapping API execution in try-catch block.
+To handle other exceptions, such as `WireException`, you need to specify custom handling function by calling `handleException()` method of the API instance. [Read more about exception handling](api-instance.html#exception-handling).
 :::
 
 ## Example exception

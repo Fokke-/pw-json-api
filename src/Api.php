@@ -21,6 +21,13 @@ class Api
   private ApiConfig $config;
 
   /**
+   * Exception handler
+   *
+   * @param callable(\Throwable): Response|ApiException $exceptionHandler
+   */
+  private $exceptionHandler;
+
+  /**
    * Create a new API instance
    */
   public function __construct()
@@ -42,6 +49,24 @@ class Api
       call_user_func($configure, $this->config);
     }
 
+    return $this;
+  }
+
+  /**
+   * Set exception handler
+   *
+   * Due to the nature of ProcessWire URL hooks, exceptions thrown in hook code
+   * cannot be caught in the main program flow. Use this method to define your own
+   * exception handler for other exception types, such as WireException.
+   *
+   * The API instance will handle all exceptions of type ApiException automatically,
+   * so there is no need to implement custom handling for them.
+   *
+   * @param callable(\Throwable): Response|ApiException $handler Handler function
+   */
+  public function handleException(callable $handler): static
+  {
+    $this->exceptionHandler = $handler;
     return $this;
   }
 
@@ -197,14 +222,14 @@ class Api
 
     $search = new ApiSearch();
 
-    foreach ($search->iterate($this->getServices(), $this->hooks) as $result) {
+    foreach ($search->iterate($this->getServices()) as $result) {
       /** @var ApiSearchServiceResult|ApiSearchEndpointResult $result */
 
       // Prepare service
       if ($result instanceof ApiSearchServiceResult) {
         // Check for duplicated service
         if (in_array($result->service->name, $serviceNames)) {
-          throw new \ProcessWire\WireException(
+          throw new WireException(
             "Duplicated service '{$result->service->name}'",
           );
         }
@@ -259,6 +284,22 @@ class Api
             // Output error
             http_response_code($e->response->code);
             echo $e->response->toJson($this->config->jsonFlags, false);
+          } catch (\Throwable $e) {
+            // For other exception types, try to get response
+            // from custom exception handler function.
+            if (!$this->exceptionHandler) {
+              return;
+            }
+
+            $result = call_user_func($this->exceptionHandler, $e);
+
+            if ($result instanceof Response) {
+              http_response_code($result->code);
+              echo $result->toJson($this->config->jsonFlags);
+            } elseif ($result instanceof ApiException) {
+              http_response_code($result->response->code);
+              echo $result->response->toJson($this->config->jsonFlags, false);
+            }
           }
 
           die();

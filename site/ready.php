@@ -1,7 +1,7 @@
 <?php namespace ProcessWire;
 
 // JSON API
-use PwJsonApi\{Api};
+use PwJsonApi\{Api, ApiException, Response};
 
 if (!defined('PROCESSWIRE')) {
   die();
@@ -27,6 +27,11 @@ if ($page->template->name !== 'admin') {
   // Exception tests
   (new Api())
     ->setBasePath('/exceptions')
+    ->handleException(function ($e) {
+      return (new ApiException())->code(400)->with([
+        'message' => $e->getMessage(),
+      ]);
+    })
     ->addService(new ExceptionService())
     ->run();
 

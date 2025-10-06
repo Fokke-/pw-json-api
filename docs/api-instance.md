@@ -49,6 +49,27 @@ $api->addService(new HelloWorldService(), function ($service) {
 });
 ```
 
+## Exception handling
+
+Due to the nature of ProcessWire URL hooks, exceptions thrown in hook code cannot be caught in the main program flow. Use `handleException` to define your own exception handler for other exception types, such as `WireException`.
+
+In the exception handler, you need to return either a `Response` or an `ApiException` object.
+
+```php
+$api->handleException(function ($e) {
+  // Handle WireExceptions
+  if ($e instanceof WireException) {
+    return (new ApiException())->code(500)->with([
+      'message' => $e->getMessage(),
+    ]);
+  }
+
+  return (new ApiException())->code(400)->with([
+    'message' => $e->getMessage(),
+  ]);
+});
+```
+
 ## Multiple instances
 
 You can create multiple API instances, each with its own configuration, services, and hooks. This can be useful for API versioning.
