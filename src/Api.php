@@ -23,7 +23,7 @@ class Api
   /**
    * Exception handler
    *
-   * @var callable(\Throwable): Response|ApiException $exceptionHandler
+   * @param callable(\Throwable): Response|ApiException $exceptionHandler
    */
   private $exceptionHandler;
 
@@ -56,7 +56,7 @@ class Api
    * Set exception handler
    *
    * Due to the nature of ProcessWire URL hooks, exceptions thrown in hook code
-   * are not catchable in the main program flow. Use this method to define your own
+   * cannot be caught in the main program flow. Use this method to define your own
    * exception handler for other exception types, such as WireException.
    *
    * The API instance will handle all exceptions of type ApiException automatically,
