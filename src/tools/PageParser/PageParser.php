@@ -201,6 +201,11 @@ class PageParser
       [],
     );
 
+    // For repeater matrix items, include item type
+    if ($page->has('repeater_matrix_type')) {
+      $parsedPage['_repeater_matrix_type'] = $page->get('type');
+    }
+
     // Parse child pages
     if (
       $this->config->parseChildren === true &&
