@@ -177,7 +177,7 @@ class PageParser
         $field = $page->getField($fieldName);
 
         // Skip non-existant properties
-        if (!$page->has($fieldName)) {
+        if (!$page->has($fieldName) && !$page->template->hasField($fieldName)) {
           return $acc;
         }
 
