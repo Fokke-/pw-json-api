@@ -101,12 +101,10 @@ class PageParser
 
   /**
    * Clear input
-   *
-   * Alias for calling input() with no arguments
    */
   public function clearInput(): static
   {
-    $this->input = null;
+    $this->input = new PageArray();
     return $this;
   }
 
