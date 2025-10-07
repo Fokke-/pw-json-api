@@ -11,4 +11,7 @@ class HookReturnAfterPageParse
 
   /** Parsed page */
   public array $parsedPage;
+
+  /** Current depth */
+  public int $depth;
 }

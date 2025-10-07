@@ -14,4 +14,7 @@ class HookReturnAfterFieldParse
 
   /** Source page */
   public Page $page;
+
+  /** Current depth */
+  public int $depth;
 }

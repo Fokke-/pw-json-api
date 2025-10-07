@@ -129,7 +129,7 @@ class PageParser
   /**
    * Parse a single page
    */
-  protected function parsePage(\ProcessWire\Page $page): array
+  protected function parsePage(Page $page): array
   {
     $page = clone $page;
 
@@ -150,6 +150,7 @@ class PageParser
         if (is_callable($handler)) {
           $hookRet->page = $page;
           $hookRet->parser = $childPageParser;
+          $hookRet->depth = $this->_currentDepth;
           call_user_func($handler, $hookRet);
           $page = $hookRet->page;
         }
@@ -226,6 +227,7 @@ class PageParser
       foreach ($afterPageParseHooks as $handler) {
         if (is_callable($handler)) {
           $hookRet->parsedPage = $parsedPage;
+          $hookRet->depth = $this->_currentDepth;
           call_user_func($handler, $hookRet);
           $parsedPage = $hookRet->parsedPage;
         }
@@ -278,6 +280,7 @@ class PageParser
         $hookRet = new HookReturnBeforeFieldParse();
         $hookRet->field = $field;
         $hookRet->page = $page;
+        $hookRet->depth = $this->_currentDepth;
 
         foreach ($beforeFieldParseHooks as $handler) {
           if (is_callable($handler)) {
@@ -379,6 +382,7 @@ class PageParser
         $hookRet = new HookReturnAfterFieldParse();
         $hookRet->field = $field;
         $hookRet->page = $page;
+        $hookRet->depth = $this->_currentDepth;
 
         foreach ($afterFieldParseHooks as $handler) {
           if (is_callable($handler)) {
@@ -418,6 +422,7 @@ class PageParser
       $hookRet = new HookReturnBeforeFileParse();
       $hookRet->field = $field;
       $hookRet->page = $page;
+      $hookRet->depth = $this->_currentDepth;
 
       foreach ($beforeFileParseHooks as $handler) {
         if (is_callable($handler)) {
@@ -478,6 +483,7 @@ class PageParser
       $hookRet->file = $file;
       $hookRet->field = $field;
       $hookRet->page = $page;
+      $hookRet->depth = $this->_currentDepth;
 
       foreach ($afterFileParseHooks as $handler) {
         if (is_callable($handler)) {
@@ -513,6 +519,7 @@ class PageParser
       $hookRet = new HookReturnBeforeImageParse();
       $hookRet->field = $field;
       $hookRet->page = $page;
+      $hookRet->depth = $this->_currentDepth;
 
       foreach ($beforeImageParseHooks as $handler) {
         if (is_callable($handler)) {
@@ -545,6 +552,7 @@ class PageParser
       $hookRet->field = $field;
       $hookRet->page = $page;
       $hookRet->parser = $parser;
+      $hookRet->depth = $this->_currentDepth;
 
       foreach ($afterImageParseHooks as $handler) {
         if (is_callable($handler)) {

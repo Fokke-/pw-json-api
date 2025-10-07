@@ -17,4 +17,7 @@ class HookReturnAfterFileParse
 
   /** Source page */
   public Page $page;
+
+  /** Current depth */
+  public int $depth;
 }

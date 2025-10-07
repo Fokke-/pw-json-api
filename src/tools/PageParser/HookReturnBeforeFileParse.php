@@ -17,4 +17,7 @@ class HookReturnBeforeFileParse
 
   /** Parser for custom fields */
   public PageParser $parser;
+
+  /** Current depth */
+  public int $depth;
 }

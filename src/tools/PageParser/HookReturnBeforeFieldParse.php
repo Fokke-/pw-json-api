@@ -17,4 +17,7 @@ class HookReturnBeforeFieldParse
 
   /** Parser for any field with any page reference as a value */
   public PageParser $parser;
+
+  /** Current depth */
+  public int $depth;
 }
