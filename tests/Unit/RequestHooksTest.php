@@ -12,21 +12,21 @@ test('all keys in enum are defined', function () {
       $acc[] = $item->name;
       return $acc;
     },
-    []
+    [],
   );
 
-  $hooks = new RequestHooks(RequestHookKey::cases());
+  $hooks = new RequestHooks();
   expect(array_keys($hooks->getItems()))->toBe($keys);
 });
 
 test('get()', function () {
-  $hooks = new RequestHooks(RequestHookKey::cases());
+  $hooks = new RequestHooks();
 
   expect($hooks->get(RequestHookKey::After))->toBe([]);
 });
 
 test('add()', function () {
-  $hooks = new RequestHooks(RequestHookKey::cases());
+  $hooks = new RequestHooks();
   $hooks->add(RequestHookKey::After, function () {});
   $hooks->add(RequestHookKey::After, function () {});
 
@@ -34,7 +34,7 @@ test('add()', function () {
 });
 
 test('find()', function () {
-  $hooks = new RequestHooks(RequestHookKey::cases());
+  $hooks = new RequestHooks();
   $hooks->add(RequestHookKey::Before, function () {});
   $hooks->add(RequestHookKey::After, function () {});
   $hooks->add(RequestHookKey::BeforePost, function () {});
