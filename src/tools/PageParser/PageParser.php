@@ -182,8 +182,7 @@ class PageParser
 
         // Skip certain field types
         if (
-          !empty($field) &&
-          in_array($field->type, [
+          in_array($field?->type, [
             'FieldtypeCache',
             'FieldtypeComments',
             'FieldtypeFieldsetOpen',
@@ -411,7 +410,7 @@ class PageParser
     $file = clone $file;
 
     // Parser for custom fields of the file,
-    $parser = $parser ?? new PageParser();
+    $parser ??= new PageParser();
     $parser->excludeFields('id', 'name');
 
     // Run BeforeFileParse hooks
@@ -509,7 +508,7 @@ class PageParser
     $image = clone $image;
 
     // Parser for custom fields of the file,
-    $parser = $parser ?? new PageParser();
+    $parser ??= new PageParser();
 
     // Run BeforeImageParse hooks
     $beforeImageParseHooks = $this->getPageParserHooks(

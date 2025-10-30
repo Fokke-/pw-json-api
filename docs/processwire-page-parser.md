@@ -29,28 +29,28 @@ Configure the parser using the `configure()` method, which allows you to control
 ```php
 $parser->configure(function ($config) {
   /** Recursively parse child pages? */
-  $config->parseChildren = false;
-
-  /** Recursively parse children of page field references? */
-  $config->parsePageReferenceChildren = false;
-
-  /** Maximum depth for recursive parsing */
-  $config->maxDepth = 3;
+  public bool $parseChildren = false;
 
   /** Selector for child pages */
-  $config->childrenSelector = '';
+  public string $childrenSelector = '';
 
   /** Key name for child pages */
-  $config->childrenKey = '_children';
+  public string $childrenKey = '_children';
+
+  /** Recursively parse children of page field references? */
+  public bool $parsePageReferenceChildren = false;
+
+  /** Maximum depth for recursive parsing */
+  public int $maxDepth = 3;
 
   /** Output full file URLs */
-  $config->fullFileUrls = true;
+  public bool $fullFileUrls = true;
 
   /** Parse custom fields of files? */
-  $config->parseFileCustomFields = true;
+  public bool $parseFileCustomFields = false;
 
   /** Key name for custom fields of files */
-  $config->fileCustomFieldsKey = '_custom_fields';
+  public string $fileCustomFieldsKey = '_custom_fields';
 });
 ```
 
