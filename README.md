@@ -1,7 +1,5 @@
 # ProcessWire JSON API
 
-**NOT READY FOR PRODUCTION USE**
-
 [Click here for documentation](https://fokke-.github.io/pw-json-api/)
 
 ## Tests
