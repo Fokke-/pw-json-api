@@ -21,35 +21,10 @@ class PageService extends Service
     return (new PageParser())
       ->configure(function ($config) {
         $config->parseChildren = true;
-        $config->parsePageReferenceChildren = false;
-        $config->maxDepth = 3;
-        $config->fullFileUrls = true;
+        $config->parseFileCustomFields = true;
+        $config->parsePageReferenceChildren = true;
       })
-      ->input(
-        $this->wire->pages->findOne(1017)->children('template=basic-page'),
-      )
-      ->hookBeforePageParse(function ($args) {
-        $args->parser->fields('float', 'integer');
-      })
-      ->hookBeforeFieldParse(function ($args) {
-        // For the field named "tags", reconfigure parser
-        if (
-          $args->page->template->name === 'basic-page' &&
-          $args->field->name === 'multiple_pages'
-        ) {
-          $args->parser->fields('title');
-        }
-      })
-      ->hookAfterFieldParse(function ($args) {
-        if ($args->field->name === 'title') {
-          $args->parsedValue = ucfirst($args->parsedValue);
-        }
-      })
-      ->hookAfterFileParse(function ($args) {
-        if ($args->field->name === 'single_file') {
-          $args->parsedFile['_foo'] = 'bar';
-        }
-      })
+      ->input($this->wire->pages->findOne(1017))
       ->toArray();
   }
 }
