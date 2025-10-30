@@ -1,5 +1,8 @@
 <?php
 
+use ProcessWire\{Page, PageArray};
+use function ProcessWire\wire;
+
 // Bootstrap PW
 require __DIR__ . '/../index.php';
 
@@ -64,4 +67,48 @@ function getResponse(string $uri, string $method = 'get'): array
   $res = $client->request($method, $uri);
 
   return resToJson($res);
+}
+
+function getMultiplePages(): PageArray
+{
+  $pages = new PageArray();
+  $pages->add(getPage());
+  $pages->add(getEmptyPage());
+
+  return $pages;
+}
+
+function getPage(): Page
+{
+  $page = clone wire()->pages->get(1018);
+  $page->of(true);
+
+  return $page;
+}
+
+function getEmptyPage(): Page
+{
+  $page = clone wire()->pages->get(1072);
+  $page->of(true);
+
+  return $page;
+}
+
+function getPageWithChildren(): Page
+{
+  $page = clone wire()->pages->get(1029);
+  $page->of(true);
+
+  return $page;
+}
+
+function getPageStackKeys(array $pages, string $key): \Generator
+{
+  foreach ($pages as $page) {
+    yield $page[$key];
+
+    if (!empty($page['_children'])) {
+      yield from getPageStackKeys($page['_children'], $key);
+    }
+  }
 }
