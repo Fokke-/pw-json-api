@@ -1,7 +1,7 @@
 <?php namespace ProcessWire;
 
 // JSON API
-use PwJsonApi\{Api, ApiException, Service};
+use PwJsonApi\{Api, ApiException};
 
 if (!defined('PROCESSWIRE')) {
   die();
