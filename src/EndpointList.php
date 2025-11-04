@@ -57,11 +57,11 @@ class EndpointList
   /**
    * Return paths of endpoints, without list base path
    *
-   * @return string[]
+   * @return array<string|null>
    */
   public function getPaths(): array
   {
-    return array_map(function ($item) {
+    return array_map(function (Endpoint $item) {
       return $item->getPath();
     }, $this->items);
   }
@@ -86,13 +86,20 @@ class EndpointList
         : $this->get($endpointOrPath);
 
     if (empty($endpoint)) {
+      $path =
+        $endpointOrPath instanceof Endpoint
+          ? $endpointOrPath->getPath()
+          : $endpointOrPath;
+
       throw new WireException(
-        "Unable to remove endpoint. Endpoint with path '{$endpointOrPath}' was not found.",
+        "Unable to remove endpoint. Endpoint with path '{$path}' was not found.",
       );
     }
 
     $idx = array_search($endpoint, $this->items);
-    array_splice($this->items, $idx, 1);
+    if (is_int($idx)) {
+      array_splice($this->items, $idx, 1);
+    }
 
     return $this;
   }
