@@ -11,6 +11,11 @@ test('toArray()', function () {
   expect($result)->toBeArray();
 });
 
+test('toArray() with empty input', function () {
+  $result = (new PageParser())->toArray();
+  expect($result)->toBeArray();
+});
+
 test('toResponse()', function () {
   $result = (new PageParser())->input(getPage())->toResponse();
   expect($result)->toBeInstanceOf(Response::class);

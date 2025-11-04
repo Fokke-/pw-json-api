@@ -569,6 +569,10 @@ class PageParser
    */
   public function toArray(): array
   {
+    if ($this->input === null) {
+      return [];
+    }
+
     if ($this->input instanceof Page) {
       return $this->parsePage($this->input);
     }

@@ -9,7 +9,8 @@
 
 ### Bug fixes
 
-- API instance no longer eat exceptions when exception handler is not defined
+- API instance no longer eats exceptions when exception handler is not defined
+- Fixed `PageParser::toArray()` behaviour when parser has no input defined
 
 ## 1.0.0
 
