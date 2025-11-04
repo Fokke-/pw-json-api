@@ -18,7 +18,7 @@ trait Utils
     $path = mb_strtolower($path);
 
     // Replace multiple slashes with a single slash
-    $path = preg_replace('#/+#', '/', $path);
+    $path = (string) preg_replace('#/+#', '/', $path);
 
     // Remove leading slash
     $path = ltrim($path, '/');
