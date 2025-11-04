@@ -281,15 +281,17 @@ class Api
 
             http_response_code($response->code);
             echo $response->toJson($this->config->jsonFlags);
+            die();
           } catch (ApiException $e) {
             // Output error
             http_response_code($e->response->code);
             echo $e->response->toJson($this->config->jsonFlags, false);
+            die();
           } catch (\Throwable $e) {
             // For other exception types, try to get response
             // from custom exception handler function.
             if (!$this->exceptionHandler) {
-              return;
+              throw $e;
             }
 
             $result = call_user_func($this->exceptionHandler, $e);
@@ -297,13 +299,15 @@ class Api
             if ($result instanceof Response) {
               http_response_code($result->code);
               echo $result->toJson($this->config->jsonFlags);
+              die();
             } elseif ($result instanceof ApiException) {
               http_response_code($result->response->code);
               echo $result->response->toJson($this->config->jsonFlags, false);
+              die();
+            } else {
+              throw $e;
             }
           }
-
-          die();
         });
       }
     }
