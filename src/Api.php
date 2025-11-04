@@ -33,7 +33,6 @@ class Api
   public function __construct()
   {
     $this->config = new ApiConfig();
-    $this->services = new ServiceList();
     $this->hooks = new RequestHooks();
     $this->wire = wire();
   }

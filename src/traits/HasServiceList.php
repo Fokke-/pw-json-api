@@ -12,7 +12,19 @@ trait HasServiceList
    *
    * @var ServiceList
    */
-  protected ServiceList|null $services = null;
+  protected ServiceList $services;
+
+  /**
+   * Initialise Service list
+   */
+  private function initServiceList(): static
+  {
+    if (empty($this->services)) {
+      $this->services = new ServiceList();
+    }
+
+    return $this;
+  }
 
   /**
    * Get services
@@ -21,6 +33,7 @@ trait HasServiceList
    */
   public function getServices(): array
   {
+    $this->initServiceList();
     return $this->services->getItems();
   }
 
@@ -32,6 +45,7 @@ trait HasServiceList
    */
   public function getService(string $name): Service|null
   {
+    $this->initServiceList();
     return $this->services->get($name);
   }
 
@@ -48,6 +62,7 @@ trait HasServiceList
     Service $service,
     callable|null $setup = null,
   ): static {
+    $this->initServiceList();
     $this->services->add($service, $setup);
     return $this;
   }
