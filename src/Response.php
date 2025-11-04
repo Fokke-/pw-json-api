@@ -80,6 +80,7 @@ class Response
       return null;
     }
 
-    return json_encode($this->toArray($withData), $jsonOptions);
+    $json = json_encode($this->toArray($withData), $jsonOptions);
+    return is_string($json) ? $json : null;
   }
 }
