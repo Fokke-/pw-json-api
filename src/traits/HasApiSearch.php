@@ -34,6 +34,7 @@ trait HasApiSearch
     // Try searching from the current service
     if ($this instanceof Service) {
       /** @var Service $this */
+      // @phpstan-ignore varTag.nativeType
       $endpoint = $this->getEndpoint($path);
       if (!empty($endpoint)) {
         return $endpoint;

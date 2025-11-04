@@ -26,6 +26,9 @@ abstract class Service
   public function __construct()
   {
     $this->name = (new \ReflectionClass($this))->getShortName();
-    $this->wire = wire();
+
+    /** @var \ProcessWire\ProcessWire */
+    $wire = wire();
+    $this->wire = $wire;
   }
 }

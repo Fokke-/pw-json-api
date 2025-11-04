@@ -6,7 +6,11 @@ use ProcessWire\{Page, Field, Pagefile};
 
 class HookReturnAfterFileParse
 {
-  /** Parsed file */
+  /**
+   * Parsed file
+   *
+   * @var array<string, mixed>
+   */
   public array $parsedFile;
 
   /** Source file */
@@ -16,7 +20,7 @@ class HookReturnAfterFileParse
   public Field|null $field;
 
   /** Source page */
-  public Page $page;
+  public Page|null $page;
 
   /** Current depth */
   public int $depth;

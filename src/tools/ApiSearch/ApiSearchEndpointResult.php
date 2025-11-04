@@ -26,6 +26,8 @@ class ApiSearchEndpointResult
 
   /**
    * Constructor
+   *
+   * @param Service[] $serviceSequence
    */
   public function __construct(
     Endpoint $endpoint,
@@ -55,7 +57,7 @@ class ApiSearchEndpointResult
           // Service tree base paths
           ...array_reduce(
             $this->serviceSequence,
-            function ($acc, $service) {
+            function (array $acc, Service $service) {
               $acc[] = $service->getBasePath();
               return $acc;
             },
@@ -112,6 +114,8 @@ class ApiSearchEndpointResult
 
   /**
    * Resolve onError hooks from result endpoint and all of it's services
+   *
+   * @return callable[]
    */
   public function resolveErrorHooks(): array
   {

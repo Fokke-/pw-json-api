@@ -21,6 +21,8 @@ class ApiSearchServiceResult
 
   /**
    * Constructor
+   *
+   * @param Service[] $serviceSequence
    */
   public function __construct(Service $service, array $serviceSequence)
   {

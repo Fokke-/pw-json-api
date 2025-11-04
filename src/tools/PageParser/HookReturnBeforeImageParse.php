@@ -2,7 +2,7 @@
 
 namespace PwJsonApi;
 
-use ProcessWire\{Page, Field, Pageimage};
+use \ProcessWire\{Page, Field, Pageimage};
 
 class HookReturnBeforeImageParse
 {
@@ -13,10 +13,10 @@ class HookReturnBeforeImageParse
   public Field|null $field;
 
   /** Source page */
-  public Page $page;
+  public Page|null $page;
 
   /** Parser for custom fields */
-  public PageParser $parser;
+  public PageParser|null $parser;
 
   /** Current depth */
   public int $depth;

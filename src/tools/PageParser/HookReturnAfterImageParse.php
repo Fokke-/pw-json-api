@@ -6,7 +6,11 @@ use ProcessWire\{Page, Field, Pageimage};
 
 class HookReturnAfterImageParse
 {
-  /** Parsed image */
+  /**
+   * Parsed image
+   *
+   * @var array<string, mixed>
+   */
   public array $parsedImage;
 
   /** Source image */
@@ -19,10 +23,10 @@ class HookReturnAfterImageParse
   public Field|null $field;
 
   /** Source page */
-  public Page $page;
+  public Page|null $page;
 
   /** Parser for custom fields */
-  public PageParser $parser;
+  public PageParser|null $parser;
 
   /** Current depth */
   public int $depth;

@@ -57,6 +57,8 @@ class ApiException extends \Exception
 
   /**
    * Add top-level keys and values to the response
+   *
+   * @param array<string, mixed> $data
    */
   public function with(array $data): static
   {

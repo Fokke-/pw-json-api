@@ -23,9 +23,9 @@ class Api
   /**
    * Exception handler
    *
-   * @param callable(\Throwable): Response|ApiException $exceptionHandler
+   * @var callable(\Throwable): (Response|ApiException)|null $exceptionHandler
    */
-  private $exceptionHandler;
+  private $exceptionHandler = null;
 
   /**
    * Create a new API instance
@@ -33,7 +33,10 @@ class Api
   public function __construct()
   {
     $this->config = new ApiConfig();
-    $this->wire = wire();
+
+    /** @var \ProcessWire\ProcessWire */
+    $wire = wire();
+    $this->wire = $wire;
   }
 
   /**
@@ -60,7 +63,7 @@ class Api
    * The API instance will handle all exceptions of type ApiException automatically,
    * so there is no need to implement custom handling for them.
    *
-   * @param callable(\Throwable): Response|ApiException $handler Handler function
+   * @param callable(\Throwable): (Response|ApiException) $handler Handler function
    */
   public function handleException(callable $handler): static
   {
@@ -73,7 +76,12 @@ class Api
    */
   protected function getRequestMethod(): ?RequestMethod
   {
-    return RequestMethod::tryFrom($_SERVER['REQUEST_METHOD'] ?? '');
+    $method = $_SERVER['REQUEST_METHOD'] ?? null;
+    if (!is_string($method)) {
+      return null;
+    }
+
+    return RequestMethod::tryFrom($method);
   }
 
   /**
@@ -290,7 +298,7 @@ class Api
           } catch (\Throwable $e) {
             // For other exception types, try to get response
             // from custom exception handler function.
-            if (!$this->exceptionHandler) {
+            if (!is_callable($this->exceptionHandler)) {
               throw $e;
             }
 

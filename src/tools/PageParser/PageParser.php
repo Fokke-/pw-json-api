@@ -6,11 +6,14 @@ use \ProcessWire\{
   PageArray,
   Page,
   Template,
+  Fieldtype,
+  FieldtypeFile,
   Field,
   Pagefile,
   Pagefiles,
   Pageimage,
   Pageimages,
+  SelectableOption,
   SelectableOptionArray,
 };
 
@@ -72,12 +75,9 @@ class PageParser
    *
    * @param callable(PageParserConfig): void $configure Configuration function
    */
-  public function configure(callable|null $configure = null): static
+  public function configure(callable $configure): static
   {
-    if (is_callable($configure)) {
-      call_user_func($configure, $this->config);
-    }
-
+    call_user_func($configure, $this->config);
     return $this;
   }
 
@@ -93,7 +93,7 @@ class PageParser
   /**
    * Get current input
    */
-  public function getInput(): PageArray|Page
+  public function getInput(): PageArray|Page|null
   {
     return $this->input;
   }
@@ -127,6 +127,8 @@ class PageParser
 
   /**
    * Parse a single page
+   *
+   * @return array<string, mixed>
    */
   protected function parsePage(Page $page): array
   {
@@ -146,13 +148,11 @@ class PageParser
       $hookRet = new HookReturnBeforePageParse();
 
       foreach ($beforePageParseHooks as $handler) {
-        if (is_callable($handler)) {
-          $hookRet->page = $page;
-          $hookRet->parser = $childPageParser;
-          $hookRet->depth = $this->_currentDepth;
-          call_user_func($handler, $hookRet);
-          $page = $hookRet->page;
-        }
+        $hookRet->page = $page;
+        $hookRet->parser = $childPageParser;
+        $hookRet->depth = $this->_currentDepth;
+        call_user_func($handler, $hookRet);
+        $page = $hookRet->page;
       }
     }
 
@@ -171,11 +171,13 @@ class PageParser
     // Parse page data
     $parsedPage = array_reduce(
       $fields,
-      function ($acc, $fieldName) use ($page) {
+      function (array $acc, string $fieldName) use ($page) {
         $field = $page->getField($fieldName);
 
-        // Skip non-existant properties
-        if (!$page->has($fieldName) && !$page->template->hasField($fieldName)) {
+        /** @var Template */
+        $template = $page->template;
+
+        if (!$page->has($fieldName) && !$template->hasField($fieldName)) {
           return $acc;
         }
 
@@ -209,8 +211,11 @@ class PageParser
       $page->numChildren($this->config->childrenSelector) &&
       $this->_currentDepth < $this->config->maxDepth
     ) {
+      /** @var PageArray */
+      $children = $page->children($this->config->childrenSelector);
+
       $parsedPage[$this->config->childrenKey] = $childPageParser
-        ->input($page->children($this->config->childrenSelector))
+        ->input($children)
         ->toArray();
     }
 
@@ -223,12 +228,10 @@ class PageParser
       $hookRet->page = $page;
 
       foreach ($afterPageParseHooks as $handler) {
-        if (is_callable($handler)) {
-          $hookRet->parsedPage = $parsedPage;
-          $hookRet->depth = $this->_currentDepth;
-          call_user_func($handler, $hookRet);
-          $parsedPage = $hookRet->parsedPage;
-        }
+        $hookRet->parsedPage = $parsedPage;
+        $hookRet->depth = $this->_currentDepth;
+        call_user_func($handler, $hookRet);
+        $parsedPage = $hookRet->parsedPage;
       }
     }
 
@@ -237,6 +240,8 @@ class PageParser
 
   /**
    * Parse multiple pages
+   *
+   * @return array<int, array<string, mixed>>
    */
   protected function parsePageArray(PageArray $input): array
   {
@@ -254,158 +259,163 @@ class PageParser
     $value = $page->{$fieldName};
 
     // If field was not found, try to parse as property
-    if (empty($field) && $page->has($fieldName)) {
-      if ($value instanceof Template) {
-        return $value->name;
+    if (empty($field)) {
+      if ($page->has($fieldName)) {
+        if ($value instanceof Template) {
+          return $value->name;
+        }
+
+        return $value;
       }
 
-      return $value;
+      return null;
     }
 
-    if (!empty($field)) {
-      // Clone current parser. This will be used for fields with
-      // any sort of page reference as a value.
-      $parser = clone $this;
-      $parser->config = clone $this->config;
-      $parser->config->parseChildren =
-        $parser->config->parsePageReferenceChildren;
+    // Clone current parser. This will be used for fields with
+    // any sort of page reference as a value.
+    $parser = clone $this;
+    $parser->config = clone $this->config;
+    $parser->config->parseChildren =
+      $parser->config->parsePageReferenceChildren;
 
-      // Run BeforeFieldParse hooks
-      $beforeFieldParseHooks = $this->getPageParserHooks(
-        PageParserHookKey::BeforeFieldParse,
-      );
-      if (!empty($beforeFieldParseHooks)) {
-        $hookRet = new HookReturnBeforeFieldParse();
-        $hookRet->field = $field;
-        $hookRet->page = $page;
-        $hookRet->depth = $this->_currentDepth;
+    // Run BeforeFieldParse hooks
+    $beforeFieldParseHooks = $this->getPageParserHooks(
+      PageParserHookKey::BeforeFieldParse,
+    );
+    if (!empty($beforeFieldParseHooks)) {
+      $hookRet = new HookReturnBeforeFieldParse();
+      $hookRet->field = $field;
+      $hookRet->page = $page;
+      $hookRet->depth = $this->_currentDepth;
 
-        foreach ($beforeFieldParseHooks as $handler) {
-          if (is_callable($handler)) {
-            $hookRet->value = $value;
-            $hookRet->parser = $parser;
-            call_user_func($handler, $hookRet);
-            $value = $hookRet->value;
-            $parser = $hookRet->parser;
-          }
-        }
+      foreach ($beforeFieldParseHooks as $handler) {
+        $hookRet->value = $value;
+        $hookRet->parser = $parser;
+        call_user_func($handler, $hookRet);
+        $value = $hookRet->value;
+        $parser = $hookRet->parser;
       }
+    }
 
-      $parsedValue = (function () use ($value, $field, $page, $parser) {
-        $fieldClassName = (new \ReflectionClass($field->type))->getShortName();
+    $parsedValue = (function () use ($value, $field, $page, $parser) {
+      /** @var Fieldtype */
+      $fieldType = $field->type;
 
-        if ($fieldClassName === 'FieldtypeCheckbox') {
-          return (bool) $value;
-        } elseif ($fieldClassName === 'FieldtypeFloat') {
-          return $value === '' ? null : (float) $value;
-        } elseif ($fieldClassName === 'FieldtypeDecimal') {
-          return $value === '' ? null : (float) $value;
-        } elseif ($fieldClassName === 'FieldtypeInteger') {
-          return $value === '' ? null : (int) $value;
-        } elseif ($fieldClassName === 'FieldtypeToggle') {
-          return $value === '' ? null : $value;
-        } elseif ($value instanceof Pageimage) {
-          return $this->parseImage($value, $field, $page);
-        } elseif ($value instanceof Pageimages) {
-          return array_reduce(
-            $value->getArray(),
-            function ($acc, $image) use ($field, $page) {
-              $acc[] = $this->parseImage($image, $field, $page);
-              return $acc;
-            },
-            [],
-          );
-        } elseif ($value instanceof Pagefile) {
-          return $this->parseFile($value, $field, $page);
-        } elseif ($value instanceof Pagefiles) {
-          return array_reduce(
-            $value->getArray(),
-            function ($acc, $file) use ($field, $page) {
-              $acc[] = $this->parseFile($file, $field, $page);
-              return $acc;
-            },
-            [],
-          );
-        } elseif ($value instanceof Page) {
-          if ($value === false || !$value->id) {
+      $fieldClassName = (new \ReflectionClass($fieldType))->getShortName();
+
+      if ($value === null) {
+        return null;
+      } elseif ($fieldClassName === 'FieldtypeCheckbox') {
+        return (bool) $value;
+      } elseif ($fieldClassName === 'FieldtypeFloat') {
+        return $value === '' ? null : (float) $value;
+      } elseif ($fieldClassName === 'FieldtypeDecimal') {
+        return $value === '' ? null : (float) $value;
+      } elseif ($fieldClassName === 'FieldtypeInteger') {
+        return $value === '' ? null : (int) $value;
+      } elseif ($fieldClassName === 'FieldtypeToggle') {
+        return $value === '' ? null : $value;
+      } elseif ($value instanceof Pageimage) {
+        return $this->parseImage($value, $field, $page);
+      } elseif ($value instanceof Pageimages) {
+        return array_reduce(
+          $value->getArray(),
+          function (array $acc, Pageimage $image) use ($field, $page) {
+            $acc[] = $this->parseImage($image, $field, $page);
+            return $acc;
+          },
+          [],
+        );
+      } elseif ($value instanceof Pagefile) {
+        return $this->parseFile($value, $field, $page);
+      } elseif ($value instanceof Pagefiles) {
+        return array_reduce(
+          $value->getArray(),
+          function (array $acc, Pagefile $file) use ($field, $page) {
+            $acc[] = $this->parseFile($file, $field, $page);
+            return $acc;
+          },
+          [],
+        );
+      } elseif ($value instanceof Page) {
+        if (!$value->id) {
+          return null;
+        }
+
+        return $parser->input($value)->toArray();
+      } elseif ($value instanceof PageArray) {
+        return $parser->input($value)->toArray();
+      } elseif ($value instanceof SelectableOptionArray) {
+        // Single option
+        if (
+          // @phpstan-ignore property.notFound
+          in_array($field->inputfieldClass, [
+            'InputfieldRadios',
+            'InputfieldSelect',
+          ])
+        ) {
+          /** @var SelectableOption|null $option */
+          $option = $value->first();
+          if (!$option) {
             return null;
           }
 
-          return $parser->input($value)->toArray();
-        } elseif ($value instanceof PageArray) {
-          return $parser->input($value)->toArray();
-        } elseif ($value instanceof SelectableOptionArray) {
-          // Single option
-          if (
-            in_array($field->inputfieldClass, [
-              'InputfieldRadios',
-              'InputfieldSelect',
-            ])
-          ) {
-            $option = $value->first();
-            if (!$option) {
-              return null;
-            }
+          return [
+            'id' => $option->id,
+            'value' => $option->value,
+            'title' => $option->title,
+          ];
+        }
 
-            return [
+        // Multiple options
+        return array_reduce(
+          $value->getArray(),
+          function (array $acc, SelectableOption $option) {
+            $acc[] = [
               'id' => $option->id,
               'value' => $option->value,
               'title' => $option->title,
             ];
-          }
-
-          // Multiple options
-          return array_reduce(
-            $value->getArray(),
-            function ($acc, $option) {
-              $acc[] = [
-                'id' => $option->id,
-                'value' => $option->value,
-                'title' => $option->title,
-              ];
-              return $acc;
-            },
-            [],
-          );
-        } else {
-          return $value;
-        }
-      })();
-
-      // Run AfterFieldParse hooks
-      $afterFieldParseHooks = $this->getPageParserHooks(
-        PageParserHookKey::AfterFieldParse,
-      );
-      if (!empty($afterFieldParseHooks)) {
-        $hookRet = new HookReturnAfterFieldParse();
-        $hookRet->field = $field;
-        $hookRet->page = $page;
-        $hookRet->depth = $this->_currentDepth;
-
-        foreach ($afterFieldParseHooks as $handler) {
-          if (is_callable($handler)) {
-            $hookRet->parsedValue = $parsedValue;
-            call_user_func($handler, $hookRet);
-            $parsedValue = $hookRet->parsedValue;
-          }
-        }
+            return $acc;
+          },
+          [],
+        );
+      } else {
+        return $value;
       }
+    })();
 
-      return $parsedValue;
+    // Run AfterFieldParse hooks
+    $afterFieldParseHooks = $this->getPageParserHooks(
+      PageParserHookKey::AfterFieldParse,
+    );
+    if (!empty($afterFieldParseHooks)) {
+      $hookRet = new HookReturnAfterFieldParse();
+      $hookRet->field = $field;
+      $hookRet->page = $page;
+      $hookRet->depth = $this->_currentDepth;
+
+      foreach ($afterFieldParseHooks as $handler) {
+        $hookRet->parsedValue = $parsedValue;
+        call_user_func($handler, $hookRet);
+        $parsedValue = $hookRet->parsedValue;
+      }
     }
 
-    return null;
+    return $parsedValue;
   }
 
   /**
    * Parse Pagefile object
+   *
+   * @return array<string, mixed>
    */
   public function parseFile(
     Pagefile $file,
     ?Field $field = null,
     ?Page $page = null,
     ?PageParser $parser = null,
-  ) {
+  ): array {
     $file = clone $file;
 
     // Parser for custom fields of the file,
@@ -423,13 +433,11 @@ class PageParser
       $hookRet->depth = $this->_currentDepth;
 
       foreach ($beforeFileParseHooks as $handler) {
-        if (is_callable($handler)) {
-          $hookRet->file = $file;
-          $hookRet->parser = $parser;
-          call_user_func($handler, $hookRet);
-          $file = $hookRet->file;
-          $parser = $hookRet->parser;
-        }
+        $hookRet->file = $file;
+        $hookRet->parser = $parser;
+        call_user_func($handler, $hookRet);
+        $file = $hookRet->file;
+        $parser = $hookRet->parser;
       }
     }
 
@@ -445,10 +453,11 @@ class PageParser
     ];
 
     if ($this->config->parseFileCustomFields === true) {
-      /** @var \ProcessWire\Template|null */
-      $customFieldsTpl = $file->field
-        ->getFieldtype()
-        ->getFieldsTemplate($file->field);
+      /** @var FieldtypeFile|null */
+      $fieldType = $file->field->getFieldtype();
+
+      /** @var Template|null */
+      $customFieldsTpl = $fieldType?->getFieldsTemplate($file->field);
 
       if ($customFieldsTpl?->fields->count()) {
         // Create temporary page for custom fields
@@ -484,11 +493,9 @@ class PageParser
       $hookRet->depth = $this->_currentDepth;
 
       foreach ($afterFileParseHooks as $handler) {
-        if (is_callable($handler)) {
-          $hookRet->parsedFile = $out;
-          call_user_func($handler, $hookRet);
-          $out = $hookRet->parsedFile;
-        }
+        $hookRet->parsedFile = $out;
+        call_user_func($handler, $hookRet);
+        $out = $hookRet->parsedFile;
       }
     }
 
@@ -497,13 +504,15 @@ class PageParser
 
   /**
    * Parse Pageimage object
+   *
+   * @return array<string, mixed>
    */
   public function parseImage(
     Pageimage $image,
     ?Field $field = null,
     ?Page $page = null,
     ?PageParser $parser = null,
-  ) {
+  ): array {
     $image = clone $image;
 
     // Parser for custom fields of the file,
@@ -520,13 +529,11 @@ class PageParser
       $hookRet->depth = $this->_currentDepth;
 
       foreach ($beforeImageParseHooks as $handler) {
-        if (is_callable($handler)) {
-          $hookRet->image = $image;
-          $hookRet->parser = $parser;
-          call_user_func($handler, $hookRet);
-          $image = $hookRet->image;
-          $parser = $hookRet->parser;
-        }
+        $hookRet->image = $image;
+        $hookRet->parser = $parser;
+        call_user_func($handler, $hookRet);
+        $image = $hookRet->image;
+        $parser = $hookRet->parser;
       }
     }
 
@@ -553,11 +560,9 @@ class PageParser
       $hookRet->depth = $this->_currentDepth;
 
       foreach ($afterImageParseHooks as $handler) {
-        if (is_callable($handler)) {
-          $hookRet->parsedImage = $out;
-          call_user_func($handler, $hookRet);
-          $out = $hookRet->parsedImage;
-        }
+        $hookRet->parsedImage = $out;
+        call_user_func($handler, $hookRet);
+        $out = $hookRet->parsedImage;
       }
     }
 
@@ -566,6 +571,8 @@ class PageParser
 
   /**
    * Parse data and return as array
+   *
+   * @return array<string, mixed>|array<int, array<string, mixed>>
    */
   public function toArray(): array
   {

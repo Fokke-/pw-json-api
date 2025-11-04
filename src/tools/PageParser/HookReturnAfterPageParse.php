@@ -9,7 +9,11 @@ class HookReturnAfterPageParse
   /** Source page */
   public Page $page;
 
-  /** Parsed page */
+  /**
+   * Parsed page
+   *
+   * @var array<string, mixed>
+   */
   public array $parsedPage;
 
   /** Current depth */

@@ -7,15 +7,28 @@ namespace PwJsonApi;
  */
 class Response
 {
-  /** Response data */
+  /**
+   * Response data
+   *
+   * @var array<string, mixed>|array<int, array<string, mixed>>|null
+   */
   public array|null $data;
 
   /** Response code */
   public int $code = 200;
 
-  /** Additional top-level key-value pairs */
+  /**
+   * Additional top-level key-value pairs
+   *
+   * @var array<string, mixed>
+   */
   public array $additionalData = [];
 
+  /**
+   * Constructor
+   *
+   * @param array<string, mixed>|array<int, array<string, mixed>>|null $data
+   */
   public function __construct(?array $data = [])
   {
     $this->data = $data;
@@ -32,6 +45,8 @@ class Response
 
   /**
    * Add top-level keys and values to the response
+   *
+   * @param array<string, mixed> $data
    */
   public function with(array $data): static
   {
@@ -41,6 +56,8 @@ class Response
 
   /**
    * Return response as an array
+   *
+   * @return array<string, mixed>|null
    */
   public function toArray(bool $withData = true): ?array
   {
@@ -56,7 +73,7 @@ class Response
       })(),
       ...array_reduce(
         array_keys($this->additionalData),
-        function ($acc, $key) {
+        function (array $acc, string $key) {
           if (!is_null($this->additionalData[$key])) {
             $acc[$key] = $this->additionalData[$key];
           }

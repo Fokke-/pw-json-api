@@ -26,15 +26,19 @@ trait HasRequestHooks
 
   /**
    * Get hooks by key
+   *
+   * @return callable[]
    */
   public function getRequestHooks(RequestHookKey $key): array
   {
     $this->initRequestHooks();
-    return $this->hooks->getItems()[$key->name];
+    return $this->hooks->get($key);
   }
 
   /**
    * Find hooks by timing and request method
+   *
+   * @return callable[]
    */
   public function findRequestHooks(
     HookTiming $timing,

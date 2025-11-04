@@ -16,12 +16,14 @@ abstract class Hooks
 
   /**
    * Constructor
+   *
+   * @param \UnitEnum[] $keys
    */
   public function __construct(array $keys)
   {
     $this->items = array_reduce(
       $keys,
-      function ($acc, $item) {
+      function (array $acc, \UnitEnum $item) {
         $acc[$item->name] = [];
         return $acc;
       },
@@ -31,6 +33,8 @@ abstract class Hooks
 
   /**
    * Get all hook keys and handlers
+   *
+   * @return array<string, callable[]>
    */
   public function getItems(): array
   {
@@ -39,6 +43,8 @@ abstract class Hooks
 
   /**
    * Get hooks by key
+   *
+   * @return callable[]
    */
   public function get(\UnitEnum $key): array
   {
@@ -48,13 +54,16 @@ abstract class Hooks
   /**
    * Add a new hook
    */
-  public function add(\UnitEnum $key, callable $handler)
+  public function add(\UnitEnum $key, callable $handler): static
   {
     $this->items[$key->name][] = $handler;
+    return $this;
   }
 
   /**
    * Find hooks by timing and method
+   *
+   * @return callable[]
    */
   public function find(\UnitEnum $timing, \UnitEnum|null $method = null): array
   {
