@@ -13,7 +13,7 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "*": "prettier --write",
+    "*.{ts,js,mjs,vue,html,json,md,php}": "prettier --write",
     "*.php": "vendor/bin/phpstan analyse --memory-limit 1G"
   },
   "devDependencies": {
