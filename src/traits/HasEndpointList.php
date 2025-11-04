@@ -12,13 +12,26 @@ trait HasEndpointList
    *
    * @var EndpointList
    */
-  protected EndpointList|null $endpoints = null;
+  protected EndpointList $endpoints;
+
+  /**
+   * Initialise Endpoint list
+   */
+  private function initEndpointList(): static
+  {
+    if (empty($this->endpoints)) {
+      $this->endpoints = new EndpointList();
+    }
+
+    return $this;
+  }
 
   /**
    * Get base path
    */
   public function getBasePath(): string|null
   {
+    $this->initEndpointList();
     return $this->endpoints->getBasePath();
   }
 
@@ -27,6 +40,7 @@ trait HasEndpointList
    */
   public function setBasePath(string|null $path): static
   {
+    $this->initEndpointList();
     $this->endpoints->setBasePath($path);
     return $this;
   }
@@ -38,6 +52,7 @@ trait HasEndpointList
    */
   public function getEndpoints(): array
   {
+    $this->initEndpointList();
     return $this->endpoints->getItems();
   }
 
@@ -49,6 +64,7 @@ trait HasEndpointList
    */
   public function getEndpoint(string $path): Endpoint|null
   {
+    $this->initEndpointList();
     return $this->endpoints->get($path);
   }
 
@@ -61,6 +77,7 @@ trait HasEndpointList
    */
   public function addEndpoint(string $path): Endpoint
   {
+    $this->initEndpointList();
     $endpoint = new Endpoint($path);
     $this->endpoints->add($endpoint);
 
@@ -72,6 +89,7 @@ trait HasEndpointList
    */
   public function removeEndpoint(string $path): static
   {
+    $this->initEndpointList();
     $this->endpoints->remove($path);
     return $this;
   }
