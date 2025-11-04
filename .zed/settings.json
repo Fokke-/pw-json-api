@@ -4,5 +4,15 @@
 // see the documentation: https://zed.dev/docs/configuring-zed#settings-files
 {
   "hard_tabs": false,
-  "format_on_save": "on"
+  "format_on_save": "on",
+  "languages": {
+    "PHP": {
+      "show_edit_predictions": true,
+      "language_servers": ["intelephense", "!phpactor"],
+      "inlay_hints": {
+        "enabled": false,
+        "show_parameter_hints": true
+      }
+    }
+  }
 }

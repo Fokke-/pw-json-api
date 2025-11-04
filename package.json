@@ -9,7 +9,12 @@
     "format": "prettier --write src/",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*": "prettier --write",
+    "*.php": "vendor/bin/phpstan analyse --memory-limit 1G"
   },
   "devDependencies": {
     "@braintree/sanitize-url": "7.1.1",
@@ -18,6 +23,8 @@
     "cytoscape-cose-bilkent": "4.1.0",
     "dayjs": "1.11.13",
     "debug": "4.4.1",
+    "husky": "9.1.7",
+    "lint-staged": "16.2.6",
     "mermaid": "11.6.0",
     "prettier": "3.5.3",
     "sass-embedded": "1.89.1",
