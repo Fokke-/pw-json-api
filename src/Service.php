@@ -27,7 +27,6 @@ abstract class Service
   {
     $this->name = (new \ReflectionClass($this))->getShortName();
     $this->endpoints = new EndpointList();
-    $this->hooks = new RequestHooks();
     $this->wire = wire();
   }
 }

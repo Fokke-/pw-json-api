@@ -10,13 +10,26 @@ trait HasRequestHooks
   /**
    * Hooks
    */
-  protected RequestHooks|null $hooks = null;
+  protected RequestHooks $hooks;
+
+  /**
+   * Initialise request hooks
+   */
+  private function initRequestHooks(): static
+  {
+    if (empty($this->hooks)) {
+      $this->hooks = new RequestHooks();
+    }
+
+    return $this;
+  }
 
   /**
    * Get hooks by key
    */
   public function getRequestHooks(RequestHookKey $key): array
   {
+    $this->initRequestHooks();
     return $this->hooks->getItems()[$key->name];
   }
 
@@ -27,6 +40,7 @@ trait HasRequestHooks
     HookTiming $timing,
     RequestMethod|null $requestMethod = null,
   ): array {
+    $this->initRequestHooks();
     return $this->hooks->find($timing, $requestMethod);
   }
 
@@ -37,6 +51,7 @@ trait HasRequestHooks
    */
   public function hookBefore(callable $handler): static
   {
+    $this->initRequestHooks();
     $this->hooks->add(RequestHookKey::Before, $handler);
     return $this;
   }
@@ -48,6 +63,7 @@ trait HasRequestHooks
    */
   public function hookBeforeGet(callable $handler): static
   {
+    $this->initRequestHooks();
     $this->hooks->add(RequestHookKey::BeforeGet, $handler);
     return $this;
   }
@@ -59,6 +75,7 @@ trait HasRequestHooks
    */
   public function hookBeforePost(callable $handler): static
   {
+    $this->initRequestHooks();
     $this->hooks->add(RequestHookKey::BeforePost, $handler);
     return $this;
   }
@@ -70,6 +87,7 @@ trait HasRequestHooks
    */
   public function hookBeforeHead(callable $handler): static
   {
+    $this->initRequestHooks();
     $this->hooks->add(RequestHookKey::BeforeHead, $handler);
     return $this;
   }
@@ -81,6 +99,7 @@ trait HasRequestHooks
    */
   public function hookBeforePut(callable $handler): static
   {
+    $this->initRequestHooks();
     $this->hooks->add(RequestHookKey::BeforePut, $handler);
     return $this;
   }
@@ -92,6 +111,7 @@ trait HasRequestHooks
    */
   public function hookBeforePatch(callable $handler): static
   {
+    $this->initRequestHooks();
     $this->hooks->add(RequestHookKey::BeforePatch, $handler);
     return $this;
   }
@@ -103,6 +123,7 @@ trait HasRequestHooks
    */
   public function hookBeforeDelete(callable $handler): static
   {
+    $this->initRequestHooks();
     $this->hooks->add(RequestHookKey::BeforeDelete, $handler);
     return $this;
   }
@@ -114,6 +135,7 @@ trait HasRequestHooks
    */
   public function hookAfter(callable $handler): static
   {
+    $this->initRequestHooks();
     $this->hooks->add(RequestHookKey::After, $handler);
     return $this;
   }
@@ -125,6 +147,7 @@ trait HasRequestHooks
    */
   public function hookAfterGet(callable $handler): static
   {
+    $this->initRequestHooks();
     $this->hooks->add(RequestHookKey::AfterGet, $handler);
     return $this;
   }
@@ -136,6 +159,7 @@ trait HasRequestHooks
    */
   public function hookAfterPost(callable $handler): static
   {
+    $this->initRequestHooks();
     $this->hooks->add(RequestHookKey::AfterPost, $handler);
     return $this;
   }
@@ -147,6 +171,7 @@ trait HasRequestHooks
    */
   public function hookAfterHead(callable $handler): static
   {
+    $this->initRequestHooks();
     $this->hooks->add(RequestHookKey::AfterHead, $handler);
     return $this;
   }
@@ -158,6 +183,7 @@ trait HasRequestHooks
    */
   public function hookAfterPut(callable $handler): static
   {
+    $this->initRequestHooks();
     $this->hooks->add(RequestHookKey::AfterPut, $handler);
     return $this;
   }
@@ -169,6 +195,7 @@ trait HasRequestHooks
    */
   public function hookAfterPatch(callable $handler): static
   {
+    $this->initRequestHooks();
     $this->hooks->add(RequestHookKey::AfterPatch, $handler);
     return $this;
   }
@@ -180,6 +207,7 @@ trait HasRequestHooks
    */
   public function hookAfterDelete(callable $handler): static
   {
+    $this->initRequestHooks();
     $this->hooks->add(RequestHookKey::AfterDelete, $handler);
     return $this;
   }
@@ -191,6 +219,7 @@ trait HasRequestHooks
    */
   public function hookOnError(callable $handler): static
   {
+    $this->initRequestHooks();
     $this->hooks->add(RequestHookKey::OnError, $handler);
     return $this;
   }
