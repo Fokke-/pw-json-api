@@ -30,7 +30,7 @@ class Endpoint
   /**
    * Constructor
    */
-  public function __construct(string|null $path = null)
+  public function __construct(string $path)
   {
     $this->setPath($path);
     $this->handlers = array_reduce(
