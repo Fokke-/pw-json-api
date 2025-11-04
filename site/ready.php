@@ -1,7 +1,7 @@
 <?php namespace ProcessWire;
 
 // JSON API
-use PwJsonApi\{Api, ApiException, Response};
+use PwJsonApi\{Api, ApiException, Service};
 
 if (!defined('PROCESSWIRE')) {
   die();
@@ -44,6 +44,15 @@ if ($page->template->name !== 'admin') {
           ...$e->response->additionalData['_error_hook_execution_order'] ?? [],
           'api',
         ],
+        'hook_args' => [
+          'event' => get_class($e->event),
+          'response' => get_class($e->response),
+          'method' => $e->method,
+          'endpoint' => get_class($e->endpoint),
+          'service' => get_class($e->service),
+          'services' => get_class($e->services),
+          'api' => get_class($e->api),
+        ],
       ]);
     })
     ->addService(new ExceptionService(), function ($service) {
@@ -80,6 +89,14 @@ if ($page->template->name !== 'admin') {
               '_before_hook_execution_order'
             ] ?? [],
             'api',
+          ],
+          'hook_args' => [
+            'event' => get_class($args->event),
+            'method' => $args->method,
+            'endpoint' => get_class($args->endpoint),
+            'service' => get_class($args->service),
+            'services' => get_class($args->services),
+            'api' => get_class($args->api),
           ],
         ]);
       });
