@@ -8,15 +8,28 @@ namespace PwJsonApi;
 trait HasPageParserHooks
 {
   /**
-   * Hooks
+   * Page parser hooks
    */
-  protected PageParserHooks|null $hooks = null;
+  protected PageParserHooks $hooks;
+
+  /**
+   * Initialise page parser hooks
+   */
+  private function initPageParserHooks(): static
+  {
+    if (empty($this->hooks)) {
+      $this->hooks = new PageParserHooks();
+    }
+
+    return $this;
+  }
 
   /**
    * Get hooks by key
    */
   public function getPageParserHooks(PageParserHookKey $key): array
   {
+    $this->initPageParserHooks();
     return $this->hooks->getItems()[$key->name];
   }
 
@@ -27,6 +40,7 @@ trait HasPageParserHooks
    */
   public function hookBeforePageParse(callable $handler): static
   {
+    $this->initPageParserHooks();
     $this->hooks->add(PageParserHookKey::BeforePageParse, $handler);
     return $this;
   }
@@ -38,6 +52,7 @@ trait HasPageParserHooks
    */
   public function hookAfterPageParse(callable $handler): static
   {
+    $this->initPageParserHooks();
     $this->hooks->add(PageParserHookKey::AfterPageParse, $handler);
     return $this;
   }
@@ -49,6 +64,7 @@ trait HasPageParserHooks
    */
   public function hookBeforeFieldParse(callable $handler): static
   {
+    $this->initPageParserHooks();
     $this->hooks->add(PageParserHookKey::BeforeFieldParse, $handler);
     return $this;
   }
@@ -60,6 +76,7 @@ trait HasPageParserHooks
    */
   public function hookAfterFieldParse(callable $handler): static
   {
+    $this->initPageParserHooks();
     $this->hooks->add(PageParserHookKey::AfterFieldParse, $handler);
     return $this;
   }
@@ -71,6 +88,7 @@ trait HasPageParserHooks
    */
   public function hookBeforeImageParse(callable $handler): static
   {
+    $this->initPageParserHooks();
     $this->hooks->add(PageParserHookKey::BeforeImageParse, $handler);
     return $this;
   }
@@ -82,6 +100,7 @@ trait HasPageParserHooks
    */
   public function hookAfterImageParse(callable $handler): static
   {
+    $this->initPageParserHooks();
     $this->hooks->add(PageParserHookKey::AfterImageParse, $handler);
     return $this;
   }
@@ -93,6 +112,7 @@ trait HasPageParserHooks
    */
   public function hookBeforeFileParse(callable $handler): static
   {
+    $this->initPageParserHooks();
     $this->hooks->add(PageParserHookKey::BeforeFileParse, $handler);
     return $this;
   }
@@ -104,6 +124,7 @@ trait HasPageParserHooks
    */
   public function hookAfterFileParse(callable $handler): static
   {
+    $this->initPageParserHooks();
     $this->hooks->add(PageParserHookKey::AfterFileParse, $handler);
     return $this;
   }

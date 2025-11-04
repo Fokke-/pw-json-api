@@ -65,7 +65,6 @@ class PageParser
   public function __construct()
   {
     $this->config = new PageParserConfig();
-    $this->hooks = new PageParserHooks();
   }
 
   /**
