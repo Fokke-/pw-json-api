@@ -118,6 +118,7 @@ class Api
       $hookReturnBefore->endpoint = $result->endpoint;
       $hookReturnBefore->service = $result->service;
       $hookReturnBefore->services = $result->endpoint->services;
+      $hookReturnBefore->api = $this;
 
       foreach ($beforeHooks as $hookFn) {
         call_user_func($hookFn, $hookReturnBefore);
@@ -142,6 +143,7 @@ class Api
         $e->endpoint = $result->endpoint;
         $e->service = $result->service;
         $e->services = $result->endpoint->services;
+        $e->api = $this;
 
         // Error hooks
         $errorHooks = [
@@ -184,6 +186,7 @@ class Api
       $hookReturnAfter->endpoint = $result->endpoint;
       $hookReturnAfter->service = $result->service;
       $hookReturnAfter->services = $result->endpoint->services;
+      $hookReturnAfter->api = $this;
 
       foreach ($afterHooks as $hookFn) {
         call_user_func($hookFn, $hookReturnAfter);

@@ -93,11 +93,12 @@ $api->findEndpoint('/api/hello-world')?->hookOnError(function ($e) {
 
 You can access hook arguments via the `$e` parameter of the hook handler function.
 
-| Property       | Type                     | Description                 |
-| -------------- | ------------------------ | --------------------------- |
-| `$e->response` | `Response`               | Error Response object       |
-| `$e->event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
-| `$e->method`   | `string`                 | Request method              |
-| `$e->endpoint` | `Endpoint`               | Requested endpoint          |
-| `$e->service`  | `Service`                | Requested service           |
-| `$e->services` | `ServiceList`            | List of all parent services |
+| Property       | Type                     | Description                                   |
+| -------------- | ------------------------ | --------------------------------------------- |
+| `$e->response` | `Response`               | Error Response object                         |
+| `$e->event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event                    |
+| `$e->method`   | `string`                 | Request method                                |
+| `$e->endpoint` | `Endpoint`               | Requested endpoint                            |
+| `$e->service`  | `Service`                | Requested service                             |
+| `$e->services` | `ServiceList`            | List of all parent services                   |
+| `$e->api`      | `Api`                    | API instance <Badge type="tip" text="1.1+" /> |

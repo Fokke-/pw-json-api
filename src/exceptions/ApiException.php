@@ -25,6 +25,9 @@ class ApiException extends \Exception
   /** List of all parent services */
   public ServiceList $services;
 
+  /** API instance */
+  public Api $api;
+
   /**
    * Constructor
    *
