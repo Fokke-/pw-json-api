@@ -19,6 +19,7 @@
   "scripts": {
     "test": "./scripts/test.sh",
     "export-test-db": "ddev export-db --file=./tests/fixtures/test-db.sql.gz",
+    "analyse": "vendor/bin/phpstan analyse --level 9 src --memory-limit 1G",
     "post-install-cmd": [
       "cp -fr vendor/processwire/processwire/wire wire-new && mkdir -p wire && mv wire wire-old && mv wire-new wire && rm -fr wire-old"
     ],
@@ -38,7 +39,8 @@
   },
   "require-dev": {
     "pestphp/pest": "^3.8",
-    "guzzlehttp/guzzle": "^7.9"
+    "guzzlehttp/guzzle": "^7.9",
+    "phpstan/phpstan": "^2.1"
   },
   "config": {
     "allow-plugins": {
