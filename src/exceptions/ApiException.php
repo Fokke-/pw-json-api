@@ -14,7 +14,7 @@ class ApiException extends \Exception
   public \ProcessWire\HookEvent $event;
 
   /** Request method */
-  public string $method;
+  public string|null $method;
 
   /** Request endpoint */
   public Endpoint $endpoint;

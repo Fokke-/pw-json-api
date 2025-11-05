@@ -91,112 +91,104 @@ class Api
     ApiSearchEndpointResult $result,
     \ProcessWire\HookEvent $event,
   ): Response {
-    // Resolve request method
     $requestMethod = $this->getRequestMethod();
-    if (empty($requestMethod)) {
-      throw (new ApiException())->code(405);
-    }
-
-    // Try to find handler matching the request method.
-    // If found, get response from handler.
-    $handler = $result->endpoint->getHandler($requestMethod);
-    if (empty($handler)) {
-      throw (new ApiException())->code(405);
-    }
-
-    // Before hooks
-    $beforeHooks = [
-      // API
-      ...$this->findRequestHooks(HookTiming::Before),
-
-      // API by request method
-      ...$this->findRequestHooks(HookTiming::Before, $requestMethod),
-
-      // Endpoint with services
-      ...$result->resolveHooks(HookTiming::Before, $requestMethod),
-    ];
-
-    if (!empty($beforeHooks)) {
-      $hookReturnBefore = new RequestHookReturnBefore();
-      $hookReturnBefore->event = $event;
-      $hookReturnBefore->handler = $handler;
-      $hookReturnBefore->method = $requestMethod->value;
-      $hookReturnBefore->endpoint = $result->endpoint;
-      $hookReturnBefore->service = $result->service;
-      $hookReturnBefore->services = $result->endpoint->services;
-      $hookReturnBefore->api = $this;
-
-      foreach ($beforeHooks as $hookFn) {
-        call_user_func($hookFn, $hookReturnBefore);
-      }
-    }
 
     // Get response from endpoint
-    $response = (function () use ($handler, $event, $requestMethod, $result) {
-      try {
-        $out = call_user_func($handler, $event);
-        if (empty($out)) {
-          return new Response();
-        }
-
-        if (!($out instanceof Response)) {
-          throw new WireException('Malformed result', 500);
-        }
-      } catch (ApiException $e) {
-        // Inject request data to the exception
-        $e->event = $event;
-        $e->method = $requestMethod->value;
-        $e->endpoint = $result->endpoint;
-        $e->service = $result->service;
-        $e->services = $result->endpoint->services;
-        $e->api = $this;
-
-        // Error hooks
-        $errorHooks = [
-          // Endpoint with services
-          ...$result->resolveErrorHooks(),
-
-          // API
-          ...$this->getRequestHooks(RequestHookKey::OnError),
-        ];
-
-        if (!empty($errorHooks)) {
-          foreach ($errorHooks as $hookFn) {
-            call_user_func($hookFn, $e);
-          }
-        }
-
-        throw $e;
+    try {
+      if (empty($requestMethod)) {
+        throw (new ApiException())->code(405);
       }
 
-      return $out;
-    })();
-
-    // After hooks
-    $afterHooks = [
-      // Endpoint with services
-      ...$result->resolveHooks(HookTiming::After, $requestMethod),
-
-      // API by request method
-      ...$this->findRequestHooks(HookTiming::After, $requestMethod),
-
-      // API
-      ...$this->findRequestHooks(HookTiming::After),
-    ];
-
-    if (!empty($afterHooks)) {
-      $hookReturnAfter = new RequestHookReturnAfter();
-      $hookReturnAfter->event = $event;
-      $hookReturnAfter->response = $response;
-      $hookReturnAfter->method = $requestMethod->value;
-      $hookReturnAfter->endpoint = $result->endpoint;
-      $hookReturnAfter->service = $result->service;
-      $hookReturnAfter->services = $result->endpoint->services;
-      $hookReturnAfter->api = $this;
-
-      foreach ($afterHooks as $hookFn) {
-        call_user_func($hookFn, $hookReturnAfter);
+      // Try to find handler matching the request method.
+      // If found, get response from handler.
+      $handler = $result->endpoint->getHandler($requestMethod);
+      if (empty($handler)) {
+        throw (new ApiException())->code(405);
       }
+
+      // Before hooks
+      $beforeHooks = [
+        // API
+        ...$this->findRequestHooks(HookTiming::Before),
+
+        // API by request method
+        ...$this->findRequestHooks(HookTiming::Before, $requestMethod),
+
+        // Endpoint with services
+        ...$result->resolveHooks(HookTiming::Before, $requestMethod),
+      ];
+
+      if (!empty($beforeHooks)) {
+        $hookReturnBefore = new RequestHookReturnBefore();
+        $hookReturnBefore->event = $event;
+        $hookReturnBefore->handler = $handler;
+        $hookReturnBefore->method = $requestMethod->value;
+        $hookReturnBefore->endpoint = $result->endpoint;
+        $hookReturnBefore->service = $result->service;
+        $hookReturnBefore->services = $result->endpoint->services;
+        $hookReturnBefore->api = $this;
+
+        foreach ($beforeHooks as $hookFn) {
+          call_user_func($hookFn, $hookReturnBefore);
+        }
+      }
+
+      $response = call_user_func($handler, $event);
+      if (!($response instanceof Response)) {
+        throw new WireException('Malformed result', 500);
+      }
+
+      // After hooks
+      $afterHooks = [
+        // Endpoint with services
+        ...$result->resolveHooks(HookTiming::After, $requestMethod),
+
+        // API by request method
+        ...$this->findRequestHooks(HookTiming::After, $requestMethod),
+
+        // API
+        ...$this->findRequestHooks(HookTiming::After),
+      ];
+
+      if (!empty($afterHooks)) {
+        $hookReturnAfter = new RequestHookReturnAfter();
+        $hookReturnAfter->event = $event;
+        $hookReturnAfter->response = $response;
+        $hookReturnAfter->method = $requestMethod->value;
+        $hookReturnAfter->endpoint = $result->endpoint;
+        $hookReturnAfter->service = $result->service;
+        $hookReturnAfter->services = $result->endpoint->services;
+        $hookReturnAfter->api = $this;
+
+        foreach ($afterHooks as $hookFn) {
+          call_user_func($hookFn, $hookReturnAfter);
+        }
+      }
+    } catch (ApiException $e) {
+      // Inject request data to the exception
+      $e->event = $event;
+      $e->method = $requestMethod?->value;
+      $e->endpoint = $result->endpoint;
+      $e->service = $result->service;
+      $e->services = $result->endpoint->services;
+      $e->api = $this;
+
+      // Error hooks
+      $errorHooks = [
+        // Endpoint with services
+        ...$result->resolveErrorHooks(),
+
+        // API
+        ...$this->getRequestHooks(RequestHookKey::OnError),
+      ];
+
+      if (!empty($errorHooks)) {
+        foreach ($errorHooks as $hookFn) {
+          call_user_func($hookFn, $e);
+        }
+      }
+
+      throw $e;
     }
 
     return $response;
