@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.1.1
+
+### Bug fixes
+
+- Fixed an issue where error hooks would not be executed
+
 ## 1.1.0
 
 ### New features
