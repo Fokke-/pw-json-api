@@ -442,6 +442,7 @@ class PageParser
     }
 
     $out = [
+      'basename' => $file->basename,
       'url' =>
         $this->config->fullFileUrls === true ? $file->httpUrl : $file->url,
       'filesize' => $file->filesize,
