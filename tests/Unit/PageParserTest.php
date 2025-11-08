@@ -141,9 +141,85 @@ test('SelectableOptionArray', function () {
   expect($result['multiple_options'])->toBeArray()->toBeEmpty();
 });
 
+test('properties()', function () {
+  $result = (new PageParser())->input(getPage())->toArray();
+  expect(array_keys($result))->toContain('id');
+  expect(array_keys($result))->toContain('name');
+  expect(array_keys($result))->toContain('template');
+
+  $result = (new PageParser())
+    ->input(getPage())
+    ->properties('numChildren', 'bogus')
+    ->toArray();
+  expect(array_keys($result))->toContain('id');
+  expect(array_keys($result))->toContain('name');
+  expect(array_keys($result))->toContain('template');
+  expect(array_keys($result))->toContain('numChildren');
+  expect(array_keys($result))->not()->toContain('bogus');
+});
+
+test('properties() data type handling', function () {
+  $result = (new PageParser())
+    ->input(getPage())
+    ->properties(
+      'template',
+      'parent',
+      'rootParent',
+      'numChildren',
+      'hasChildren',
+      'numParents',
+    )
+    ->toArray();
+
+  expect($result['template'])->toBeString();
+  expect($result['parent']['id'])->toBeInt();
+  expect($result['rootParent']['id'])->toBeInt();
+  expect($result['numChildren'])->toBeInt();
+  expect($result['hasChildren'])->toBeInt();
+  expect($result['numParents'])->toBeInt();
+});
+
+test('properties() ignores fields', function () {
+  $result = (new PageParser())
+    ->input(getPage())
+    ->properties('checkbox')
+    ->fields('title')
+    ->toArray();
+
+  expect(array_keys($result))->toContain('id');
+  expect(array_keys($result))->toContain('name');
+  expect(array_keys($result))->toContain('template');
+  expect(array_keys($result))->not()->toContain('checkbox');
+});
+
+test('excludeProperties()', function () {
+  $result = (new PageParser())
+    ->input(getPage())
+    ->excludeProperties('id', 'template')
+    ->toArray();
+
+  expect(array_keys($result))->toContain('name');
+  expect(array_keys($result))->not()->toContain('id');
+  expect(array_keys($result))->not()->toContain('template');
+});
+
+test('properties() and excludeProperties() combined', function () {
+  $result = (new PageParser())
+    ->input(getPage())
+    ->properties('numChildren', 'hasChildren')
+    ->excludeProperties('hasChildren')
+    ->toArray();
+
+  expect(array_keys($result))->toContain('id');
+  expect(array_keys($result))->toContain('name');
+  expect(array_keys($result))->toContain('template');
+  expect(array_keys($result))->toContain('numChildren');
+  expect(array_keys($result))->not()->toContain('hasChildren');
+});
+
 test('fields()', function () {
   $result = (new PageParser())->input(getPage())->fields('title')->toArray();
-  expect(array_keys($result))->toBe(['id', 'name', 'title']);
+  expect(array_keys($result))->toBe(['id', 'name', 'template', 'title']);
 });
 
 test('excludeFields()', function () {
@@ -164,7 +240,7 @@ test('fields() and excludeFields() combined', function () {
     ->excludeFields('title')
     ->toArray();
 
-  expect(array_keys($result))->toBe(['id', 'name']);
+  expect(array_keys($result))->toBe(['id', 'name', 'template']);
 });
 
 test('PageParserConfig::parseChildren', function () {
@@ -312,7 +388,7 @@ test('PageParserConfig::fileCustomFieldsKey', function () {
   expect($result['single_file']['_overwritten_custom_fields_key'])->toBeArray();
 });
 
-test('hookBeforePageParse', function () {
+test('hookBeforePageParse()', function () {
   $result = (new PageParser())
     ->input(getPage())
     ->hookBeforePageParse(function ($args) {
@@ -323,7 +399,7 @@ test('hookBeforePageParse', function () {
   expect($result['title'])->toBe('bogus');
 });
 
-test('hookAfterPageParse', function () {
+test('hookAfterPageParse()', function () {
   $result = (new PageParser())
     ->input(getPage())
     ->hookAfterPageParse(function ($args) {
@@ -334,7 +410,33 @@ test('hookAfterPageParse', function () {
   expect($result['title'])->toBe('bogus');
 });
 
-test('hookBeforeFieldParse', function () {
+test('hookBeforePropertyParse()', function () {
+  $result = (new PageParser())
+    ->input(getPage())
+    ->hookBeforePropertyParse(function ($args) {
+      if ($args->propertyName === 'id') {
+        $args->value = 99999;
+      }
+    })
+    ->toArray();
+
+  expect($result['id'])->toBe(99999);
+});
+
+test('hookAfterPropertyParse()', function () {
+  $result = (new PageParser())
+    ->input(getPage())
+    ->hookAfterPropertyParse(function ($args) {
+      if ($args->propertyName === 'id') {
+        $args->parsedValue = 99999;
+      }
+    })
+    ->toArray();
+
+  expect($result['id'])->toBe(99999);
+});
+
+test('hookBeforeFieldParse()', function () {
   $result = (new PageParser())
     ->input(getPage())
     ->hookBeforeFieldParse(function ($args) {
@@ -345,10 +447,15 @@ test('hookBeforeFieldParse', function () {
     ->toArray();
 
   expect($result['single_page'])->toBeArray();
-  expect(array_keys($result['single_page']))->toBe(['id', 'name', 'title']);
+  expect(array_keys($result['single_page']))->toBe([
+    'id',
+    'name',
+    'template',
+    'title',
+  ]);
 });
 
-test('hookAfterFieldParse', function () {
+test('hookAfterFieldParse()', function () {
   $result = (new PageParser())
     ->input(getPage())
     ->hookAfterFieldParse(function ($args) {
@@ -361,7 +468,7 @@ test('hookAfterFieldParse', function () {
   expect($result['title'])->toBe('bogus');
 });
 
-test('hookBeforeImageParse', function () {
+test('hookBeforeImageParse()', function () {
   $result = (new PageParser())
     ->input(getPage())
     ->hookBeforeImageParse(function ($args) {
@@ -375,7 +482,7 @@ test('hookBeforeImageParse', function () {
   expect($result['single_image']['height'])->toBe(100);
 });
 
-test('hookAfterImageParse', function () {
+test('hookAfterImageParse()', function () {
   $result = (new PageParser())
     ->input(getPage())
     ->hookAfterImageParse(function ($args) {
@@ -389,7 +496,7 @@ test('hookAfterImageParse', function () {
   expect($result['single_image']['_foo'])->toBe('foo');
 });
 
-test('hookAfterFileParse', function () {
+test('hookAfterFileParse()', function () {
   $result = (new PageParser())
     ->input(getPage())
     ->hookAfterFileParse(function ($args) {

@@ -60,6 +60,30 @@ trait HasPageParserHooks
   }
 
   /**
+   * Hook before property parse
+   *
+   * @param callable(HookReturnBeforePropertyParse): void $handler
+   */
+  public function hookBeforePropertyParse(callable $handler): static
+  {
+    $this->initPageParserHooks();
+    $this->hooks->add(PageParserHookKey::BeforePropertyParse, $handler);
+    return $this;
+  }
+
+  /**
+   * Hook after property parse
+   *
+   * @param callable(HookReturnAfterPropertyParse): void $handler
+   */
+  public function hookAfterPropertyParse(callable $handler): static
+  {
+    $this->initPageParserHooks();
+    $this->hooks->add(PageParserHookKey::AfterPropertyParse, $handler);
+    return $this;
+  }
+
+  /**
    * Hook before field parse
    *
    * @param callable(HookReturnBeforeFieldParse): void $handler

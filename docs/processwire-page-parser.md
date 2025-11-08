@@ -62,6 +62,26 @@ Specify the pages to parse with `input()`. Accepts a `Page` or `PageArray`.
 $parser->input($this->wire->pages->find('template=basic-page'));
 ```
 
+## Property selection
+
+By default, `id`, `name`, and `template` will be included.
+
+### Include properties
+
+Use `properties()` to include additional `Page` properties beyond the defaults.
+
+```php
+$parser->properties('url', 'numChildren');
+```
+
+### Exclude properties
+
+Use `excludeProperties()` to omit certain properties.
+
+```php
+$parser->excludeProperties('template');
+```
+
 ## Field Selection
 
 ### Include fields
@@ -147,6 +167,38 @@ $parser->hookAfterPageParse(function ($args) {
 
   if ($args->page->template->name === 'bar') {
     $args->parsedPage['_bar'] = 'bar';
+  }
+});
+```
+
+### hookBeforePropertyParse()
+
+Use this to modify property value before it's parsed.
+
+::: tip
+This hook applies only to page properties, such as `id`. Use the [hookBeforeFieldParse()](#hookbeforefieldparse) hook for fields.
+:::
+
+```php
+$parser->hookBeforePropertyParse(function ($args) {
+  if ($args->propertyName === 'id') {
+    $args->value = 99999;
+  }
+});
+```
+
+### hookAfterPropertyParse()
+
+Use this to modify final parsed output of property.
+
+::: tip
+This hook applies only to page properties, such as `id`. Use the [hookAfterFieldParse()](#hookafterfieldparse) hook for fields.
+:::
+
+```php
+$parser->hookAfterPropertyParse(function ($args) {
+  if ($args->propertyName === 'id') {
+    $args->parsedValue = 99999;
   }
 });
 ```

@@ -5,6 +5,7 @@ namespace PwJsonApi;
 use \ProcessWire\{
   PageArray,
   Page,
+  NullPage,
   Template,
   Fieldtype,
   FieldtypeFile,
@@ -24,10 +25,34 @@ class PageParser
 {
   use HasPageParserHooks;
 
-  /**
-   * Configuration
-   */
+  /** Default properties to parse */
+  protected const PROPERTIES_DEFAULT = ['id', 'name', 'template'];
+
+  /** Field types to skip */
+  protected const SKIP_FIELDTYPES = [
+    'FieldtypeCache',
+    'FieldtypeComments',
+    'FieldtypeFieldsetOpen',
+    'FieldtypeFieldsetTabOpen',
+    'FieldtypeFieldsetClose',
+  ];
+
+  /** Configuration */
   private PageParserConfig $config;
+
+  /**
+   * Property names to parse
+   *
+   * @var string[]
+   */
+  protected array $properties = [];
+
+  /**
+   * Property names to exclude
+   *
+   * @var string[]
+   */
+  protected array $excludeProperties = [];
 
   /**
    * Fields names to parse
@@ -42,13 +67,6 @@ class PageParser
    * @var string[]
    */
   protected array $excludeFields = [];
-
-  /**
-   * Properties to parse
-   *
-   * @var string[]
-   */
-  protected array $properties = ['id', 'name'];
 
   /**
    * Page or pages to parse
@@ -108,6 +126,27 @@ class PageParser
   }
 
   /**
+   * Specify properties to parse. By default, id, name, and template will be included.
+   * Any values specified here will be included with the defaults.
+   *
+   * Note that you can also pass method names, such as numChildren.
+   */
+  public function properties(string ...$properties): static
+  {
+    $this->properties = array_unique($properties);
+    return $this;
+  }
+
+  /**
+   * Specify properties to exclude
+   */
+  public function excludeProperties(string ...$excludeProperties): static
+  {
+    $this->excludeProperties = array_unique($excludeProperties);
+    return $this;
+  }
+
+  /**
    * Specify fields to parse
    */
   public function fields(string ...$fields): static
@@ -156,49 +195,57 @@ class PageParser
       }
     }
 
-    // Gather fields to parse
-    $fields = (function () use ($page) {
-      $resolvedFields = !empty($this->fields)
-        ? $this->fields
-        : $page->getFields()->explode('name');
-
-      return array_diff(
-        [...$this->properties, ...$resolvedFields],
-        $this->excludeFields,
-      );
-    })();
-
-    // Parse page data
-    $parsedPage = array_reduce(
-      $fields,
-      function (array $acc, string $fieldName) use ($page) {
-        $field = $page->getField($fieldName);
-
-        /** @var Template */
-        $template = $page->template;
-
-        if (!$page->has($fieldName) && !$template->hasField($fieldName)) {
-          return $acc;
-        }
-
-        // Skip certain field types
-        if (
-          in_array($field?->type, [
-            'FieldtypeCache',
-            'FieldtypeComments',
-            'FieldtypeFieldsetOpen',
-            'FieldtypeFieldsetTabOpen',
-            'FieldtypeFieldsetClose',
-          ])
-        ) {
-          return $acc;
-        }
-
-        $acc[$fieldName] = $this->parseField($fieldName, $page);
-        return $acc;
-      },
-      [],
+    // Gather properties and fields to parse
+    $properties = array_diff(
+      array_unique([...self::PROPERTIES_DEFAULT, ...$this->properties]),
+      $this->excludeProperties,
     );
+    $fields = array_diff(
+      !empty($this->fields)
+        ? $this->fields
+        : $page->getFields()->explode('name'),
+      $this->excludeFields,
+    );
+
+    $parsedPage = [
+      // Properties
+      ...array_reduce(
+        $properties,
+        function (array $acc, string $propertyName) use ($page) {
+          if (
+            $page->template instanceof Template &&
+            $page->template->hasField($propertyName)
+          ) {
+            return $acc;
+          }
+
+          if ($page->has($propertyName)) {
+            $acc[$propertyName] = $this->parseProperty($propertyName, $page);
+          }
+
+          return $acc;
+        },
+        [],
+      ),
+
+      // Fields
+      ...array_reduce(
+        $fields,
+        function (array $acc, string $fieldName) use ($page) {
+          $field = $page->getField($fieldName);
+          if (
+            $field === null ||
+            in_array($field->type, self::SKIP_FIELDTYPES)
+          ) {
+            return $acc;
+          }
+
+          $acc[$fieldName] = $this->parseField($field, $page);
+          return $acc;
+        },
+        [],
+      ),
+    ];
 
     // For repeater matrix items, include item type
     if ($page->has('repeater_matrix_type')) {
@@ -251,25 +298,69 @@ class PageParser
   }
 
   /**
+   * Parse property
+   */
+  protected function parseProperty(string $propertyName, Page $page): mixed
+  {
+    $value = $page->get($propertyName);
+
+    // Run BeforePropertyParse hooks
+    $beforePropertyParseHooks = $this->getPageParserHooks(
+      PageParserHookKey::BeforePropertyParse,
+    );
+
+    if (!empty($beforePropertyParseHooks)) {
+      $hookRet = new HookReturnBeforePropertyParse();
+      $hookRet->propertyName = $propertyName;
+      $hookRet->page = $page;
+      $hookRet->depth = $this->_currentDepth;
+
+      foreach ($beforePropertyParseHooks as $handler) {
+        $hookRet->value = $value;
+        call_user_func($handler, $hookRet);
+        $value = $hookRet->value;
+      }
+    }
+
+    if ($value instanceof NullPage) {
+      $value = null;
+    } elseif ($value instanceof Page) {
+      return [
+        'id' => $value->id,
+        'name' => $value->name,
+        'title' => $value->title,
+      ];
+    } elseif ($value instanceof Template) {
+      return $value->name;
+    }
+
+    // Run AfterPropertyParse hooks
+    $afterPropertyParseHooks = $this->getPageParserHooks(
+      PageParserHookKey::AfterPropertyParse,
+    );
+
+    if (!empty($afterPropertyParseHooks)) {
+      $hookRet = new HookReturnAfterPropertyParse();
+      $hookRet->propertyName = $propertyName;
+      $hookRet->page = $page;
+      $hookRet->depth = $this->_currentDepth;
+
+      foreach ($afterPropertyParseHooks as $handler) {
+        $hookRet->parsedValue = $value;
+        call_user_func($handler, $hookRet);
+        $value = $hookRet->parsedValue;
+      }
+    }
+
+    return $value;
+  }
+
+  /**
    * Parse field
    */
-  protected function parseField(string $fieldName, Page $page): mixed
+  protected function parseField(Field $field, Page $page): mixed
   {
-    $field = $page->getField($fieldName);
-    $value = $page->{$fieldName};
-
-    // If field was not found, try to parse as property
-    if (empty($field)) {
-      if ($page->has($fieldName)) {
-        if ($value instanceof Template) {
-          return $value->name;
-        }
-
-        return $value;
-      }
-
-      return null;
-    }
+    $value = $page->{$field->name};
 
     // Clone current parser. This will be used for fields with
     // any sort of page reference as a value.

@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 1.2.0
+
+### New features
+
+- **Page Parser:** Added new methods:
+  - `properties()`
+  - `excludeProperties()`
+  - `hookBeforePropertyParse()`
+  - `hookAfterPropertyParse()`
+- **Page Parser:** Include base file name in parsed file data
+- **Page Parser:** Include file extension in parsed file data
+
 ## 1.1.1
 
 ### Bug fixes

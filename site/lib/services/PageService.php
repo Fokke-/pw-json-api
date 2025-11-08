@@ -25,6 +25,14 @@ class PageService extends Service
         $config->parsePageReferenceChildren = true;
       })
       ->input($this->wire->pages->findOne(1017))
+      ->properties(
+        'hasChildren',
+        'parent',
+        'rootParent',
+        'numChildren',
+        'next',
+        'prev',
+      )
       ->toArray();
   }
 }

@@ -13,6 +13,12 @@ enum PageParserHookKey
   /** After page parse */
   case AfterPageParse;
 
+  /** Before property parse */
+  case BeforePropertyParse;
+
+  /** After property parse */
+  case AfterPropertyParse;
+
   /** Before field parse */
   case BeforeFieldParse;
 

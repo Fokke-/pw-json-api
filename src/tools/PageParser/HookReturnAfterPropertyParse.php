@@ -2,15 +2,15 @@
 
 namespace PwJsonApi;
 
-use ProcessWire\{Page, Field};
+use ProcessWire\{Page};
 
-class HookReturnAfterFieldParse
+class HookReturnAfterPropertyParse
 {
-  /** Parsed value */
+  /** Parsed property value */
   public mixed $parsedValue;
 
-  /** Source field */
-  public Field $field;
+  /** Property name */
+  public string $propertyName;
 
   /** Source page */
   public Page $page;
