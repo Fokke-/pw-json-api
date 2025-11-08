@@ -10,7 +10,7 @@ class HookReturnAfterFieldParse
   public mixed $parsedValue;
 
   /** Source field */
-  public Field|null $field;
+  public Field $field;
 
   /** Source page */
   public Page $page;
