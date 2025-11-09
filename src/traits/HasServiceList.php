@@ -55,8 +55,9 @@ trait HasServiceList
    * In optional setup function you can access the added service to
    * modify it's behavior by adding hooks.
    *
-   * @param Service $service
-   * @param callable(Service): void $setup
+   * @template TService of Service
+   * @param TService $service
+   * @param (callable(TService): void)|null $setup
    */
   public function addService(
     Service $service,
