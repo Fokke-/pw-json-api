@@ -15,6 +15,7 @@ class Api
   use HasServiceList;
   use HasRequestHooks;
   use HasApiSearch;
+  use HasPluginSupport;
   use HasWire;
 
   /** Configuration */

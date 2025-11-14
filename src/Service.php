@@ -17,6 +17,7 @@ abstract class Service
   use HasEndpointList;
   use HasRequestHooks;
   use HasApiSearch;
+  use HasPluginSupport;
   use HasWire;
 
   /** Service name */

@@ -4,6 +4,7 @@
 
 ### New features
 
+- New plugin interface
 - **Page Parser:** Added new methods:
   - `properties()`
   - `excludeProperties()`
