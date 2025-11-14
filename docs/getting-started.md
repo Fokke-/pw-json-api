@@ -27,9 +27,11 @@ class HelloWorldService extends Service
     parent::__construct();
 
     // Listen to path /hello-world with GET handler
-    $this->addEndpoint('/hello-world')->get(function () {
+    $this->addEndpoint('/hello-world')->get(function ($request) {
       return new Response([
         'hello' => 'world',
+        'request_method' => $request->method,
+        'path' => $request->path,
       ]);
     });
   }
@@ -64,7 +66,9 @@ Open the URL `/api/hello-world`. The server should respond with status code 200 
 ```json
 {
   "data": {
-    "hello": "world"
+    "hello": "world",
+    "request_method": "GET",
+    "path": "/api/hello-world"
   }
 }
 ```
