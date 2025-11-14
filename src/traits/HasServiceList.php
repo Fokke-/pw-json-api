@@ -53,7 +53,7 @@ trait HasServiceList
    * Add service
    *
    * In optional setup function you can access the added service to
-   * modify it's behavior by adding hooks.
+   * configure it or modify it's behavior by adding hooks.
    *
    * @template TService of Service
    * @param TService $service
