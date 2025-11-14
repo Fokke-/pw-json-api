@@ -5,6 +5,7 @@
 ### New features
 
 - New plugin interface
+- CSRF protection plugin
 - **Page Parser:** Added new methods:
   - `properties()`
   - `excludeProperties()`
