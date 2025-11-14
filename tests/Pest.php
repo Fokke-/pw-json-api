@@ -45,11 +45,12 @@ require __DIR__ . '/../index.php';
 |
 */
 
-function getHttp()
+function getHttp(string $prefix = 'api')
 {
   $client = new GuzzleHttp\Client([
-    'base_uri' => 'https://pw-json-api.ddev.site/',
+    'base_uri' => 'https://pw-json-api.ddev.site/' . $prefix . '/',
     'http_errors' => false,
+    'cookies' => true,
   ]);
 
   return $client;
@@ -59,14 +60,6 @@ function resToJson(\Psr\Http\Message\ResponseInterface $res): array
 {
   $body = (string) $res->getbody();
   return json_decode(!empty($body) ? $body : '[]', true);
-}
-
-function getResponse(string $uri, string $method = 'get'): array
-{
-  $client = getHttp();
-  $res = $client->request($method, $uri);
-
-  return resToJson($res);
 }
 
 function getMultiplePages(): PageArray
@@ -111,4 +104,9 @@ function getPageStackKeys(array $pages, string $key): \Generator
       yield from getPageStackKeys($page['_children'], $key);
     }
   }
+}
+
+function getFile(string $filename)
+{
+  return fopen("/var/www/html/tests/fixtures/files/{$filename}", 'r');
 }

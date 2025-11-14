@@ -10,6 +10,7 @@ class FoodService extends Service
     parent::__construct();
 
     $this->setBasePath('/food');
+
     $this->addEndpoint('/')->get(function () {
       return new Response([
         'food' => null,

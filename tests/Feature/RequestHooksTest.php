@@ -1,30 +1,55 @@
 <?php
 
-test('request hook arguments', function () {
-  $res = getResponse('hooks/hello-world');
+test('before hook arguments', function () {
+  $client = getHttp();
+  $res = $client->get('hooks');
+  $json = resToJson($res);
 
-  expect($res['hook_args']['event'])->toBe('ProcessWire\\HookEvent');
-  expect($res['hook_args']['method'])->toBe('GET');
-  expect($res['hook_args']['endpoint'])->toBe('PwJsonApi\\Endpoint');
-  expect($res['hook_args']['service'])->toBe('ProcessWire\\HelloWorldService');
-  expect($res['hook_args']['services'])->toBe('PwJsonApi\\ServiceList');
-  expect($res['hook_args']['api'])->toBe('PwJsonApi\\Api');
+  expect($json['before_hook_args'])->toBe([
+    'type' => 'PwJsonApi\\RequestHookReturnBefore',
+    'request' => 'PwJsonApi\\Request',
+    'endpoint' => 'PwJsonApi\\Endpoint',
+    'service' => 'ProcessWire\\HooksService',
+    'services' => 'PwJsonApi\\ServiceList',
+    'api' => 'PwJsonApi\\Api',
+    'handler' => 'object',
+  ]);
 });
 
-test('before hooks are executed in right order', function () {
-  $res = getResponse('hooks/hello-world');
+test('after hook arguments', function () {
+  $client = getHttp();
+  $res = $client->get('hooks');
+  $json = resToJson($res);
 
-  expect($res['_before_hook_execution_order'])->toBe([
+  expect($json['after_hook_args'])->toBe([
+    'type' => 'PwJsonApi\\RequestHookReturnAfter',
+    'request' => 'PwJsonApi\\Request',
+    'endpoint' => 'PwJsonApi\\Endpoint',
+    'service' => 'ProcessWire\\HooksService',
+    'services' => 'PwJsonApi\\ServiceList',
+    'api' => 'PwJsonApi\\Api',
+    'response' => 'PwJsonApi\\Response',
+  ]);
+});
+
+test('before hooks execution order', function () {
+  $client = getHttp();
+  $res = $client->get('hooks');
+  $json = resToJson($res);
+
+  expect($json['before_hook_execution_order'])->toBe([
     'api',
     'service',
     'endpoint',
   ]);
 });
 
-test('after hooks are executed in right order', function () {
-  $res = getResponse('hooks/hello-world');
+test('after hooks execution order', function () {
+  $client = getHttp();
+  $res = $client->get('hooks');
+  $json = resToJson($res);
 
-  expect($res['_after_hook_execution_order'])->toBe([
+  expect($json['after_hook_execution_order'])->toBe([
     'endpoint',
     'service',
     'api',
@@ -32,31 +57,46 @@ test('after hooks are executed in right order', function () {
 });
 
 test('after hook can manipulate response', function () {
-  $res = getResponse('api/food/fruits/apple');
-  expect($res)->toHaveKey('food_type');
-  expect($res['food_type'])->toBe('fruit');
-  expect($res)->toHaveKey('fruit');
-  expect($res['fruit'])->toBe('apple');
+  $client = getHttp();
+  $res = $client->get('hooks/manipulate-response');
+  $json = resToJson($res);
+
+  expect($json['data']['foo'])->toBe('bar');
+  expect($json['data']['fruits'])->toContain('banana');
 });
 
 test('error hook arguments', function () {
-  $res = getResponse('exception-hooks/');
+  $client = getHttp();
+  $res = $client->get('exceptions');
+  $json = resToJson($res);
 
-  expect($res['hook_args']['event'])->toBe('ProcessWire\\HookEvent');
-  expect($res['hook_args']['response'])->toBe('PwJsonApi\\Response');
-  expect($res['hook_args']['method'])->toBe('GET');
-  expect($res['hook_args']['endpoint'])->toBe('PwJsonApi\\Endpoint');
-  expect($res['hook_args']['service'])->toBe('ProcessWire\\ExceptionService');
-  expect($res['hook_args']['services'])->toBe('PwJsonApi\\ServiceList');
-  expect($res['hook_args']['api'])->toBe('PwJsonApi\\Api');
+  expect($json['error_hook_args'])->toBe([
+    'type' => 'PwJsonApi\\ApiException',
+    'request' => 'PwJsonApi\\Request',
+    'response' => 'PwJsonApi\\Response',
+    'endpoint' => 'PwJsonApi\\Endpoint',
+    'service' => 'ProcessWire\\ExceptionService',
+    'services' => 'PwJsonApi\\ServiceList',
+    'api' => 'PwJsonApi\\Api',
+  ]);
 });
 
 test('error hooks are executed in right order', function () {
-  $res = getResponse('exception-hooks/');
+  $client = getHttp();
+  $res = $client->get('exceptions');
+  $json = resToJson($res);
 
-  expect($res['_error_hook_execution_order'])->toBe([
+  expect($json['error_hook_execution_order'])->toBe([
     'endpoint',
     'service',
     'api',
   ]);
+});
+
+test('error hook can manipulate response', function () {
+  $client = getHttp();
+  $res = $client->get('exceptions/manipulate-response');
+  $json = resToJson($res);
+
+  expect($json['error'])->toBe('updated');
 });

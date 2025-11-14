@@ -8,8 +8,9 @@ class HelloWorldService extends Service
   {
     parent::__construct();
 
-    // Listen to path /hello-world with GET handler
-    $this->addEndpoint('/hello-world')->get(function () {
+    $this->setBasePath('/hello-world');
+
+    $this->addEndpoint('/')->get(function () {
       return new Response([
         'hello' => 'world',
       ]);

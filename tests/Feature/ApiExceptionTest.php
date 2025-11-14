@@ -2,7 +2,7 @@
 
 test('default response code', function () {
   $client = getHttp();
-  $res = $client->get('exceptions/');
+  $res = $client->get('exceptions');
 
   expect($res->getStatusCode())->toBe(400);
 });
@@ -23,11 +23,12 @@ test('if message is passed, response includes it', function () {
   expect($data['error'])->toBe('This was doomed to fail!');
 });
 
-test('if message is not passed, response is empty', function () {
+test('if message is not passed, response does not include it', function () {
   $client = getHttp();
   $res = $client->get('exceptions/without-message');
+  $data = resToJson($res);
 
-  expect((string) $res->getBody())->toBeEmpty();
+  expect($data)->not()->toHaveKey('error');
 });
 
 test('Api404Exception is a shorthand', function () {

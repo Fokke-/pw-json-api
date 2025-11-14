@@ -2,6 +2,7 @@
 
 // JSON API
 use PwJsonApi\{Api, ApiException};
+use PwJsonApi\Plugins\{CSRFPlugin};
 
 if (!defined('PROCESSWIRE')) {
   die();
@@ -15,149 +16,79 @@ if ($page->template->name !== 'admin') {
         JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT;
     })
     ->setBasePath('/api')
+    ->hookBefore(function ($args) {
+      if ($args->service instanceof HooksService) {
+        $args->endpoint->hookAfter(function ($args) {
+          $args->response->with([
+            'before_hook_execution_order' => [
+              ...$args->response->additionalData[
+                'before_hook_execution_order'
+              ] ?? [],
+              'api',
+            ],
+          ]);
+        });
+      }
+    })
+    ->hookAfter(function ($args) {
+      $args->response->with([
+        'request' => $args->request->toArray(),
+      ]);
+
+      if ($args->service instanceof HooksService) {
+        $args->response->with([
+          'after_hook_execution_order' => [
+            ...$args->response->additionalData['after_hook_execution_order'] ??
+            [],
+            'api',
+          ],
+        ]);
+      }
+    })
+    ->hookOnError(function ($args) {
+      $args->response->with([
+        'request' => $args->request->toArray(),
+      ]);
+    })
+    ->handleException(function ($e, $request) {
+      throw (new ApiException())->code(400)->with([
+        'message' => $e->getMessage(),
+        'request' => $request->toArray(),
+      ]);
+    })
     ->addService(new FoodService(), function ($service) {
       $service->addService(new FruitService());
       $service->addService(new VegetableService());
     })
     ->addService(new PageService())
     ->addService(new HelloWorldService())
-    ->addService(new MethodService())
-    ->run();
-
-  // Exception tests
-  (new Api())
-    ->setBasePath('/exceptions')
-    ->handleException(function ($e) {
-      return (new ApiException())->code(400)->with([
-        'message' => $e->getMessage(),
-      ]);
-    })
+    ->addService(new RequestService())
+    ->addService(new HooksService())
     ->addService(new ExceptionService())
     ->run();
 
-  // Exception hook tests
   (new Api())
-    ->setBasePath('/exception-hooks')
-    ->hookOnError(function ($e) {
-      $e->response->with([
-        '_error_hook_execution_order' => [
-          ...$e->response->additionalData['_error_hook_execution_order'] ?? [],
-          'api',
-        ],
-        'hook_args' => [
-          'event' => get_class($e->event),
-          'response' => get_class($e->response),
-          'method' => $e->method,
-          'endpoint' => get_class($e->endpoint),
-          'service' => get_class($e->service),
-          'services' => get_class($e->services),
-          'api' => get_class($e->api),
-        ],
-      ]);
-    })
-    ->addService(new ExceptionService(), function ($service) {
-      $service->hookOnError(function ($e) {
-        $e->response->with([
-          '_error_hook_execution_order' => [
-            ...$e->response->additionalData['_error_hook_execution_order'] ??
-            [],
-            'service',
-          ],
-        ]);
-      });
-
-      $service->getEndpoint('/')->hookOnError(function ($e) {
-        $e->response->with([
-          '_error_hook_execution_order' => [
-            ...$e->response->additionalData['_error_hook_execution_order'] ??
-            [],
-            'endpoint',
-          ],
-        ]);
-      });
+    ->setBasePath('plugins')
+    ->addPlugin(new TestPlugin())
+    ->addService(new RequestService(), function ($service) {
+      $service->setBasePath(null);
+      $service->addPlugin(new TestPlugin());
+      $service->findEndpoint('/')?->addPlugin(new TestPlugin());
     })
     ->run();
 
-  // Hook tests
   (new Api())
-    ->setBasePath('/hooks')
-    ->hookBefore(function ($args) {
-      $args->endpoint->hookAfter(function ($args) {
-        $args->response->with([
-          '_before_hook_execution_order' => [
-            ...$args->response->additionalData[
-              '_before_hook_execution_order'
-            ] ?? [],
-            'api',
-          ],
-          'hook_args' => [
-            'event' => get_class($args->event),
-            'method' => $args->method,
-            'endpoint' => get_class($args->endpoint),
-            'service' => get_class($args->service),
-            'services' => get_class($args->services),
-            'api' => get_class($args->api),
-          ],
-        ]);
-      });
-    })
-    ->hookAfter(function ($args) {
-      $args->response->with([
-        '_after_hook_execution_order' => [
-          ...$args->response->additionalData['_after_hook_execution_order'] ??
-          [],
-          'api',
-        ],
-      ]);
-    })
-    ->addService(new HelloWorldService(), function ($service) {
-      $service->hookBefore(function ($args) {
-        $args->endpoint->hookAfter(function ($args) {
-          $args->response->with([
-            '_before_hook_execution_order' => [
-              ...$args->response->additionalData[
-                '_before_hook_execution_order'
-              ] ?? [],
-              'service',
-            ],
-          ]);
-        });
-      });
+    ->setBasePath('csrf')
+    ->addPlugin(new CSRFPlugin(), function ($plugin) {
+      // Token name
+      $plugin->tokenName = 'pw_json_api_csrf_token';
 
-      $service->hookAfter(function ($args) {
-        $args->response->with([
-          '_after_hook_execution_order' => [
-            ...$args->response->additionalData['_after_hook_execution_order'] ??
-            [],
-            'service',
-          ],
-        ]);
-      });
+      // Token key name in responses
+      $plugin->tokenKey = 'csrf_token';
 
-      $service
-        ->getEndpoint('/hello-world')
-        ?->hookBefore(function ($args) {
-          $args->endpoint->hookAfter(function ($args) {
-            $args->response->with([
-              '_before_hook_execution_order' => [
-                ...$args->response->additionalData[
-                  '_before_hook_execution_order'
-                ] ?? [],
-                'endpoint',
-              ],
-            ]);
-          });
-        })
-        ->hookafter(function ($args) {
-          $args->response->with([
-            '_after_hook_execution_order' => [
-              ...$args->response->additionalData[
-                '_after_hook_execution_order'
-              ] ?? [],
-              'endpoint',
-            ],
-          ]);
-        });
+      // Endpoint path for retrieving the current token
+      $plugin->endpointPath = '/csrf-token';
     })
+    ->addService(new CSRFService())
     ->run();
 }
