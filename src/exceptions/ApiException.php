@@ -10,10 +10,18 @@ class ApiException extends \Exception
   /** Response object */
   public readonly Response $response;
 
-  /** ProcessWire URL hook event */
+  /**
+   * ProcessWire URL hook event
+   *
+   * @deprecated 1.2.0 Use $request->event instead
+   */
   public \ProcessWire\HookEvent $event;
 
-  /** Request method */
+  /**
+   * Request method
+   *
+   * @deprecated 1.2.0 Use $request->method instead
+   */
   public string|null $method;
 
   /** Request endpoint */

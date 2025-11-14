@@ -19,6 +19,15 @@
 - Api::$wire is now public property
 - Service::$wire is now public property
 
+### Deprecations
+
+The following deprecations will be removed in the next major version.
+
+- `RequestHookReturn::$event` property - Use `RequestHookReturn::$request->event` instead.
+- `RequestHookReturn::$method` property - Use `RequestHookReturn::$request->method` instead.
+- `ApiException::$event` property - Use `ApiException::$request->event` instead
+- `ApiException::$method` property- Use `ApiException::$request->method` instead
+
 ## 1.1.1
 
 ### Bug fixes
