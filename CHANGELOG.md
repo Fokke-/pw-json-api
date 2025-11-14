@@ -4,6 +4,7 @@
 
 ### New features
 
+- New `Request` object is exposed in request handlers and hooks
 - New plugin interface
 - CSRF protection plugin
 - **Page Parser:** Added new methods:
