@@ -10,6 +10,9 @@ class ApiException extends \Exception
   /** Response object */
   public readonly Response $response;
 
+  /** Request object */
+  public Request $request;
+
   /**
    * ProcessWire URL hook event
    *

@@ -2,7 +2,7 @@
 
 namespace PwJsonApi;
 
-use \ProcessWire\{WireException};
+use \ProcessWire\{WireException, HookEvent};
 use function ProcessWire\wire;
 
 /**
@@ -24,7 +24,7 @@ class Api
   /**
    * Exception handler
    *
-   * @var callable(\Throwable): (Response|ApiException)|null $exceptionHandler
+   * @var callable(\Throwable, Request): (Response|ApiException)|null $exceptionHandler
    */
   private $exceptionHandler = null;
 
@@ -64,7 +64,7 @@ class Api
    * The API instance will handle all exceptions of type ApiException automatically,
    * so there is no need to implement custom handling for them.
    *
-   * @param callable(\Throwable): (Response|ApiException) $handler Handler function
+   * @param callable(\Throwable, Request): (Response|ApiException) $handler Handler function
    */
   public function handleException(callable $handler): static
   {
@@ -73,36 +73,25 @@ class Api
   }
 
   /**
-   * Get the current request method
-   */
-  protected function getRequestMethod(): ?RequestMethod
-  {
-    $method = $_SERVER['REQUEST_METHOD'] ?? null;
-    if (!is_string($method)) {
-      return null;
-    }
-
-    return RequestMethod::tryFrom($method);
-  }
-
-  /**
    * Handle request
    */
   protected function handleRequest(
     ApiSearchEndpointResult $result,
-    \ProcessWire\HookEvent $event,
+    HookEvent $event,
   ): Response {
-    $requestMethod = $this->getRequestMethod();
+    $request = new Request();
 
     // Get response from endpoint
     try {
-      if (empty($requestMethod)) {
+      $request->_init($event);
+
+      if ($request->methodEnum === null) {
         throw (new ApiException())->code(405);
       }
 
       // Try to find handler matching the request method.
       // If found, get response from handler.
-      $handler = $result->endpoint->getHandler($requestMethod);
+      $handler = $result->endpoint->getHandler($request->methodEnum);
       if (empty($handler)) {
         throw (new ApiException())->code(405);
       }
@@ -113,17 +102,18 @@ class Api
         ...$this->findRequestHooks(HookTiming::Before),
 
         // API by request method
-        ...$this->findRequestHooks(HookTiming::Before, $requestMethod),
+        ...$this->findRequestHooks(HookTiming::Before, $request->methodEnum),
 
         // Endpoint with services
-        ...$result->resolveHooks(HookTiming::Before, $requestMethod),
+        ...$result->resolveHooks(HookTiming::Before, $request->methodEnum),
       ];
 
       if (!empty($beforeHooks)) {
         $hookReturnBefore = new RequestHookReturnBefore();
-        $hookReturnBefore->event = $event;
+        $hookReturnBefore->request = $request;
+        $hookReturnBefore->event = $request->event;
         $hookReturnBefore->handler = $handler;
-        $hookReturnBefore->method = $requestMethod->value;
+        $hookReturnBefore->method = $request->method;
         $hookReturnBefore->endpoint = $result->endpoint;
         $hookReturnBefore->service = $result->service;
         $hookReturnBefore->services = $result->endpoint->services;
@@ -134,18 +124,48 @@ class Api
         }
       }
 
-      $response = call_user_func($handler, $event);
-      if (!($response instanceof Response)) {
-        throw new WireException('Malformed result', 500);
+      // Get response from handler
+      try {
+        $response = call_user_func($handler, $request);
+        if (!($response instanceof Response)) {
+          throw new WireException(
+            'Malformed result. You must return a Response object from the handler.',
+            500,
+          );
+        }
+      } catch (\Throwable $e) {
+        if ($e instanceof ApiException) {
+          throw $e;
+        }
+
+        // For other exception types, try to get response
+        // from custom exception handler function.
+        if (!is_callable($this->exceptionHandler)) {
+          throw $e;
+        }
+
+        $exceptionHandlerResult = call_user_func(
+          $this->exceptionHandler,
+          $e,
+          $request,
+        );
+
+        if ($exceptionHandlerResult instanceof Response) {
+          $response = $exceptionHandlerResult;
+        } elseif ($exceptionHandlerResult instanceof ApiException) {
+          throw $exceptionHandlerResult;
+        } else {
+          throw $e;
+        }
       }
 
       // After hooks
       $afterHooks = [
         // Endpoint with services
-        ...$result->resolveHooks(HookTiming::After, $requestMethod),
+        ...$result->resolveHooks(HookTiming::After, $request->methodEnum),
 
         // API by request method
-        ...$this->findRequestHooks(HookTiming::After, $requestMethod),
+        ...$this->findRequestHooks(HookTiming::After, $request->methodEnum),
 
         // API
         ...$this->findRequestHooks(HookTiming::After),
@@ -153,9 +173,10 @@ class Api
 
       if (!empty($afterHooks)) {
         $hookReturnAfter = new RequestHookReturnAfter();
-        $hookReturnAfter->event = $event;
+        $hookReturnAfter->request = $request;
+        $hookReturnAfter->event = $request->event;
         $hookReturnAfter->response = $response;
-        $hookReturnAfter->method = $requestMethod->value;
+        $hookReturnAfter->method = $request->method;
         $hookReturnAfter->endpoint = $result->endpoint;
         $hookReturnAfter->service = $result->service;
         $hookReturnAfter->services = $result->endpoint->services;
@@ -167,8 +188,9 @@ class Api
       }
     } catch (ApiException $e) {
       // Inject request data to the exception
-      $e->event = $event;
-      $e->method = $requestMethod?->value;
+      $e->request = $request;
+      $e->event = $request->event;
+      $e->method = $request->method;
       $e->endpoint = $result->endpoint;
       $e->service = $result->service;
       $e->services = $result->endpoint->services;
@@ -200,15 +222,13 @@ class Api
    *
    * - Resolves all services and endpoints and creates listeners for them
    * - Catches ApiExceptions and renders errors as JSON
-   *
-   * Note that this method will NOT catch any other exceptions, such as WireExceptions.
    */
   public function run(): void
   {
     // Special handling for OPTIONS requests.
     // To avoid false positives with CORS errors, always return 200,
     // regardless of the path.
-    if ($this->getRequestMethod() === RequestMethod::Options) {
+    if (($_SERVER['REQUEST_METHOD'] ?? null) == 'OPTIONS') {
       $response = new Response();
 
       header('Content-Type: application/json');
@@ -272,42 +292,20 @@ class Api
         }
 
         // Listen to path
-        $this->wire->addHook($path, function (
-          \ProcessWire\HookEvent $event,
-        ) use ($result) {
-          header('Content-Type: application/json');
-
+        $this->wire->addHook($path, function (HookEvent $event) use ($result) {
           try {
             $response = $this->handleRequest($result, $event);
 
+            header('Content-Type: application/json');
             http_response_code($response->code);
             echo $response->toJson($this->config->jsonFlags);
             die();
           } catch (ApiException $e) {
             // Output error
+            header('Content-Type: application/json');
             http_response_code($e->response->code);
             echo $e->response->toJson($this->config->jsonFlags, false);
             die();
-          } catch (\Throwable $e) {
-            // For other exception types, try to get response
-            // from custom exception handler function.
-            if (!is_callable($this->exceptionHandler)) {
-              throw $e;
-            }
-
-            $result = call_user_func($this->exceptionHandler, $e);
-
-            if ($result instanceof Response) {
-              http_response_code($result->code);
-              echo $result->toJson($this->config->jsonFlags);
-              die();
-            } elseif ($result instanceof ApiException) {
-              http_response_code($result->response->code);
-              echo $result->response->toJson($this->config->jsonFlags, false);
-              die();
-            } else {
-              throw $e;
-            }
           }
         });
       }

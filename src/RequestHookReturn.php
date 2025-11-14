@@ -7,6 +7,9 @@ namespace PwJsonApi;
  */
 abstract class RequestHookReturn
 {
+  /** Request object */
+  public Request $request;
+
   /**
    * ProcessWire URL hook event
    *
