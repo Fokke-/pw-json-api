@@ -8,5 +8,5 @@ namespace PwJsonApi;
 trait HasWire
 {
   /** ProcessWire API */
-  protected \ProcessWire\ProcessWire $wire;
+  public \ProcessWire\ProcessWire $wire;
 }
