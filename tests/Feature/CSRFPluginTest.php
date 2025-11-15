@@ -55,8 +55,8 @@ test('successful post rotates the token', function () {
   $token = resToJson($tokenRes)['csrf_token'];
 
   $res = $client->post('', [
-    'form_params' => [
-      $token['name'] => $token['value'],
+    'headers' => [
+      'X-' . $token['name'] => $token['value'],
     ],
   ]);
   $json = resToJson($res);

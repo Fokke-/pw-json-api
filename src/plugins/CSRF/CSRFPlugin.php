@@ -90,6 +90,12 @@ class CSRFPlugin extends ApiPlugin implements ApiPluginInterface
    */
   protected function checkToken(): void
   {
+    // This is a dirty move, but it's required
+    // to allow passing token as a header.
+    // Otherwise the plugin would force the end-user to define
+    // form payload as FormData.
+    $this->wire->config->ajax = true;
+
     try {
       $this->wire->session->CSRF->validate($this->tokenName);
     } catch (WireCSRFException $e) {

@@ -40,7 +40,7 @@ Front-end implementation is outside the scope of this guide, but here is a basic
 3. Pass the token as a header
 4. If the response is successful, read the new token from the response data using the `csrf_token` key and update your store.
 
-```js
+```js{8-11}
 const token = {
   name: 'TOKEN1727703112X1763204571',
   value: 'mw4aFl6fFDoE58I90hn.oL7SQQWoAbA7',
@@ -50,12 +50,6 @@ const response = await fetch('https://example.com/my-post-endpoint', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-
-    // Trigger ProcessWire $config->ajax.
-    // Required to allow passing token as a header
-    'X-Requested-With': 'XMLHttpRequest',
-
-    // CSRF token
     [`X-${token.name}`]: token.value,
   },
   body: JSON.stringify({
