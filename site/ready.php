@@ -89,6 +89,16 @@ if ($page->template->name !== 'admin') {
       // Endpoint path for retrieving the current token
       $plugin->endpointPath = '/csrf-token';
     })
+    ->hookAfter(function ($args) {
+      $args->response->with([
+        'request' => $args->request->toArray(),
+      ]);
+    })
+    ->hookOnError(function ($args) {
+      $args->response->with([
+        'request' => $args->request->toArray(),
+      ]);
+    })
     ->addService(new CSRFService())
     ->run();
 }

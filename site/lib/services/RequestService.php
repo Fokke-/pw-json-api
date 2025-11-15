@@ -9,11 +9,8 @@ class RequestService extends Service
   {
     parent::__construct();
 
-    $this->addPlugin(new TestPlugin());
-
     $this->setBasePath('/request');
     $this->addEndpoint('/')
-      ->addPlugin(new TestPlugin())
       ->get(function ($request) {
         return new Response([
           'method' => $request->method,
