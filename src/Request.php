@@ -3,35 +3,36 @@
 namespace PwJsonApi;
 
 use PwJsonApi\RequestMethod;
-use ProcessWire\{WireArray, HookEvent};
+use ProcessWire\{HookEvent};
 
 /**
  * API request
  */
 class Request
 {
-  /** Method */
+  /** Request method */
   public string $method;
 
   /** Method as enum */
   public RequestMethod|null $methodEnum;
 
-  /** Path */
+  /** Requested path */
   public string|null $path;
 
   /**
-   * Route parameters
+   * Route parameters of dynamic paths
    *
    * @var array<string, string>
+   * @see https://fokke-.github.io/pw-json-api/endpoints.html#dynamic-paths
    */
-  public array $params;
+  public array $routeParams;
 
   /**
    * Query parameters
    *
    * @var array<string, mixed>
    */
-  public array $query;
+  public array $queryParams;
 
   /**
    * Headers
@@ -40,32 +41,32 @@ class Request
    */
   public array $headers;
 
-  /** Content-type */
+  /** Content-Type header */
   public string|null $contentType;
 
   /** Accept header */
   public string|null $accept;
 
   /**
-   * $_COOKIES
+   * Shorthand for $_COOKIES
    *
    * @var array<string, string>
    */
   public array $cookies;
 
-  /** $_SERVER['REMOTE_ADDR'] */
+  /** Shorthand for $_SERVER['REMOTE_ADDR'] */
   public string|null $ip;
 
-  /** $_SERVER['HTTP_USER_AGENT'] */
+  /** Shorthand for $_SERVER['HTTP_USER_AGENT'] */
   public string|null $userAgent;
 
-  /** $_SERVER['SERVER_PROTOCOL'] */
+  /** Shorthand for $_SERVER['SERVER_PROTOCOL'] */
   public string|null $protocol;
 
   /** ProcessWire URL hook event */
   public HookEvent $event;
 
-  /** Body */
+  /** Request body */
   public mixed $body;
 
   /**
@@ -80,7 +81,7 @@ class Request
     $this->method = $this->getServerVar('REQUEST_METHOD') ?? '';
     $this->methodEnum = RequestMethod::tryFrom($this->method);
     $this->path = $this->getPath($this->getServerVar('REQUEST_URI'));
-    $this->query = $this->getQueryParams();
+    $this->queryParams = $this->getQueryParams();
     $this->headers = $this->getHeaders();
     $this->contentType = $this->headers['Content-Type'] ?? null;
     $this->accept = $this->headers['Accept'] ?? null;
@@ -100,11 +101,13 @@ class Request
 
   /**
    * Initialize request
+   *
+   * @internal
    */
   public function _init(HookEvent $event): static
   {
     $this->event = $event;
-    $this->params = $this->getRouteParams($event);
+    $this->routeParams = $this->getRouteParams($event);
     $this->body = $this->getBody($this->contentType);
     return $this;
   }
@@ -170,9 +173,19 @@ class Request
   /**
    * Get route parameter
    */
-  public function params(string $key): string|null
+  public function routeParam(string $key): string|null
   {
-    return $this->params[$key] ?? null;
+    return $this->routeParams[$key] ?? null;
+  }
+
+  /**
+   * Get query parameter
+   *
+   * @return mixed
+   */
+  public function queryParam(string $key): mixed
+  {
+    return $this->queryParams[$key] ?? null;
   }
 
   /**
