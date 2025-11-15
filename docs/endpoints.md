@@ -42,7 +42,7 @@ $this->addEndpoint('/user')
   // Handle POST request
   ->post(function ($request) {
     // Validate post data etc.
-    // $data = $this->wire->input->post;
+    // $data = $request->body;
 
     // If something goes wrong...
     // throw new ApiException('Snap, crackle and pop!');
