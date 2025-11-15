@@ -15,11 +15,11 @@
   - `hookAfterPropertyParse()`
 - **Page Parser:** Include base file name in parsed file data
 - **Page Parser:** Include file extension in parsed file data
+- Api::$wire is now public property
+- Service::$wire is now public property
 
 ### Bug fixes
 
-- Api::$wire is now public property
-- Service::$wire is now public property
 - Error hooks will be applied to `ApiException` thrown from `handleException()` method
 - Fixed incorrect `Content-Type` header when an unhandled exception was thrown
 
