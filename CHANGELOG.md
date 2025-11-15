@@ -15,8 +15,8 @@
   - `hookAfterPropertyParse()`
 - **Page Parser:** Include base file name in parsed file data
 - **Page Parser:** Include file extension in parsed file data
-- Api::$wire is now public property
-- Service::$wire is now public property
+- `Api::$wire` is now public property
+- `Service::$wire` is now public property
 
 ### Bug fixes
 
