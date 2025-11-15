@@ -40,7 +40,7 @@ $this->addEndpoint('/user')
   })
 
   // Handle POST request
-  ->post(function () {
+  ->post(function ($request) {
     // Validate post data etc.
     // $data = $this->wire->input->post;
 
@@ -58,16 +58,37 @@ $this->addEndpoint('/user')
   });
 ```
 
+## Access request data in handler
+
+Use the `$request` object to access request data. [Read more about requests](/requests).
+
+```php{1}
+$this->addEndpoint('/test-request')->get(function ($request) {
+  return new Response([
+    'request_path' => $request->path,
+    'request_method' => $request->method,
+  ]);
+});
+```
+
 ## Dynamic paths
 
-You can use named arguments or regular expressions to allow dynamic paths. Use the `$event` argument of the response handler to access named arguments.
+You can use named arguments to allow dynamic paths. Use `$request->params()` to access named arguments.
 
 ```php{3}
-$this->addEndpoint('/products/{product}')
-  // Use $event->arguments to access named arguments
-  ->get(function ($event) {
-    return new Response([
-      'product_name' => $event->arguments('product'),
-    ]);
-  });
+$this->addEndpoint('/products/{product}')->get(function ($request) {
+  return new Response([
+    'product_name' => $request->routeParam('product'),
+  ]);
+});
+```
+
+Querying `/products/bunny-rabbit` results in a following JSON:
+
+```json
+{
+  "data": {
+    "product_name": "bunny-rabbit"
+  }
+}
 ```

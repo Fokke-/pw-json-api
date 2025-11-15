@@ -12,9 +12,9 @@ Defined for the whole API instance. These hooks will apply to all errors.
 
 ```php
 // For 401 errors, provide login URL
-$api->hookOnError(function ($e) {
-  if ($e->response->code === 401) {
-    $e->response->with([
+$api->hookOnError(function ($args) {
+  if ($args->response->code === 401) {
+    $args->response->with([
       'login_url' => 'https://example.com/login',
     ]);
   }
@@ -28,9 +28,9 @@ Defined for a single service branch. These hooks will apply to all errors thrown
 #### Define in service constructor
 
 ```php
-$this->hookOnError(function ($e) {
-  if ($e->response->code === 401) {
-    $e->response->with([
+$this->hookOnError(function ($args) {
+  if ($args->response->code === 401) {
+    $args->response->with([
       'login_url' => 'https://example.com/login',
     ]);
   }
@@ -41,9 +41,9 @@ $this->hookOnError(function ($e) {
 
 ```php
 $api->addService(new HelloWorldService(), function ($service) {
-  $service->hookOnError(function ($e) {
-    if ($e->response->code === 401) {
-      $e->response->with([
+  $service->hookOnError(function ($args) {
+    if ($args->response->code === 401) {
+      $args->response->with([
         'login_url' => 'https://example.com/login',
       ]);
     }
@@ -54,9 +54,9 @@ $api->addService(new HelloWorldService(), function ($service) {
 #### Find installed service and inject
 
 ```php
-$api->findService('HelloWorldService')?->hookOnError(function ($e) {
-  if ($e->response->code === 401) {
-    $e->response->with([
+$api->findService('HelloWorldService')?->hookOnError(function ($args) {
+  if ($args->response->code === 401) {
+    $args->response->with([
       'login_url' => 'https://example.com/login',
     ]);
   }
@@ -76,29 +76,30 @@ $this->addEndpoint('/hello-world')
       'hello' => 'world',
     ]);
   })
-  ->hookOnError(function ($e) {
-    $e->response->data['_foo'] = 'foo';
+  ->hookOnError(function ($args) {
+    $args->response->data['_foo'] = 'foo';
   });
 ```
 
 #### Find existing endpoint and inject
 
 ```php
-$api->findEndpoint('/api/hello-world')?->hookOnError(function ($e) {
-  $e->response->data['_foo'] = 'foo';
+$api->findEndpoint('/api/hello-world')?->hookOnError(function ($args) {
+  $args->response->data['_foo'] = 'foo';
 });
 ```
 
 ## Error hook arguments
 
-You can access hook arguments via the `$e` parameter of the hook handler function.
+You can access hook arguments via the `$args` parameter of the hook handler function.
 
-| Property       | Type                     | Description                                   |
-| -------------- | ------------------------ | --------------------------------------------- |
-| `$e->response` | `Response`               | Error Response object                         |
-| `$e->event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event                    |
-| `$e->method`   | `string`                 | Request method                                |
-| `$e->endpoint` | `Endpoint`               | Requested endpoint                            |
-| `$e->service`  | `Service`                | Requested service                             |
-| `$e->services` | `ServiceList`            | List of all parent services                   |
-| `$e->api`      | `Api`                    | API instance <Badge type="tip" text="1.1+" /> |
+| Property          | Type                     | Description                                                          |
+| ----------------- | ------------------------ | -------------------------------------------------------------------- |
+| `$args->request`  | `Request`                | Request object <Badge type="tip" text="^1.2" />                      |
+| `$args->response` | `Response`               | Error Response object                                                |
+| `$args->event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event <Badge type="danger" text="deprecated" /> |
+| `$args->method`   | `string`                 | Request method <Badge type="danger" text="deprecated" />             |
+| `$args->endpoint` | `Endpoint`               | Requested endpoint                                                   |
+| `$args->service`  | `Service`                | Requested service                                                    |
+| `$args->services` | `ServiceList`            | List of all parent services                                          |
+| `$args->api`      | `Api`                    | API instance <Badge type="tip" text="1.1+" />                        |

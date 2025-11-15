@@ -53,10 +53,10 @@ $api->addService(new HelloWorldService(), function ($service) {
 
 Due to the nature of ProcessWire URL hooks, exceptions thrown in hook code cannot be caught in the main program flow. Use `handleException` to define your own exception handler for other exception types, such as `WireException`.
 
-In the exception handler, you need to return either a `Response` or an `ApiException` object.
+`Exception` and `Request` will be passed to the handler function. You need to return either a `Response` or an `ApiException` object from the handler.
 
 ```php
-$api->handleException(function ($e) {
+$api->handleException(function ($e, $request) {
   // Handle WireExceptions
   if ($e instanceof WireException) {
     return (new ApiException())->code(500)->with([

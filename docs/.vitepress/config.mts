@@ -53,6 +53,7 @@ export default withMermaid({
           { text: 'API instance', link: '/api-instance' },
           { text: 'Services', link: '/services' },
           { text: 'Endpoints', link: '/endpoints' },
+          { text: 'Requests', link: '/requests' },
           { text: 'Responses', link: '/responses' },
           { text: 'Error handling', link: '/error-handling' },
         ],
