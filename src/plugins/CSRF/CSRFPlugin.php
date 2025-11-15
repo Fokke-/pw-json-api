@@ -7,16 +7,10 @@ use PwJsonApi\{Api, Service, ApiException, Endpoint};
 use ProcessWire\{WireException, WireCSRFException};
 
 /**
- * Provides CSRF token validation and rotation
+ * This plugin adds cross-site request forgery (CSRF) protection for your endpoints,
+ * utilising ProcessWire’s built-in token validation.
  *
- * - ProcessWire token handling is utilized
- * - Can be installed for an API instance or Service
- * - Provides an endpoint at /csrf-token for retrieving the current token
- * - Validates the token before every POST, PUT, PATCH, or DELETE request
- * - After a successful request, a new token will be injected into the response
- * - If token validation fails, the request will fail and the current token will be injected into the response
- *
- * @see TODO
+ * @see https://fokke-.github.io/pw-json-api/plugins/csrf.html
  */
 class CSRFPlugin extends ApiPlugin implements ApiPluginInterface
 {

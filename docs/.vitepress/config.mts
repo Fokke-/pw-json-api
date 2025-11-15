@@ -66,6 +66,10 @@ export default withMermaid({
         ],
       },
       {
+        text: 'Plugins',
+        items: [{ text: 'CSRF protection', link: '/plugins/csrf' }],
+      },
+      {
         text: 'Tools',
         items: [
           { text: 'ProcessWire Page Parser', link: '/processwire-page-parser' },
