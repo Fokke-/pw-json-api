@@ -7,6 +7,7 @@
 - New `Request` object is exposed in request handlers and hooks
 - New plugin interface
 - CSRF protection plugin
+- Better type hinting for `addService()` method
 - **Page Parser:** Added new methods:
   - `properties()`
   - `excludeProperties()`
