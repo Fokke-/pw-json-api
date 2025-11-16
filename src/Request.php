@@ -180,7 +180,7 @@ class Request
   /**
    * Get route arguments
    *
-   * @deprecated 1.2.0 Use params() instead.
+   * @deprecated 1.2.0 Use routeParam() instead.
    */
   public function arguments(string|null $key = null): mixed
   {
