@@ -26,7 +26,7 @@ class PageParser
   use HasPageParserHooks;
 
   /** Default properties to parse */
-  protected const PROPERTIES_DEFAULT = ['id', 'name', 'template'];
+  protected const PROPERTIES_DEFAULT = ['id', 'name'];
 
   /** Field types to skip */
   protected const SKIP_FIELDTYPES = [
@@ -511,7 +511,7 @@ class PageParser
 
     // Parser for custom fields of the file,
     $parser ??= new PageParser();
-    $parser->excludeFields('id', 'name');
+    $parser->excludeProperties('id', 'name');
 
     // Run BeforeFileParse hooks
     $beforeFileParseHooks = $this->getPageParserHooks(

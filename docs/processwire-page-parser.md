@@ -64,7 +64,7 @@ $parser->input($this->wire->pages->find('template=basic-page'));
 
 ## Property selection
 
-By default, `id`, `name`, and `template` will be included.
+By default, `id` and `name` will be included.
 
 ### Include properties
 
@@ -79,7 +79,7 @@ $parser->properties('url', 'numChildren');
 Use `excludeProperties()` to omit certain properties.
 
 ```php
-$parser->excludeProperties('template');
+$parser->excludeProperties('name');
 ```
 
 ## Field Selection
