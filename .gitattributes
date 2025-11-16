@@ -4,6 +4,7 @@
 .github export-ignore
 .gitignore export-ignore
 .htaccess export-ignore
+.husky export-ignore
 .prettierrc.json export-ignore
 .zed export-ignore
 docs export-ignore
@@ -11,15 +12,10 @@ index.php export-ignore
 node_modules export-ignore
 package.json export-ignore
 phpunit.xml export-ignore
+phpstan.neon export-ignore
 pnpm-lock.yaml export-ignore
 scripts export-ignore
-site/assets export-ignore
-site/lib/services export-ignore
-site/modules export-ignore
-site/templates export-ignore
-site/.htaccess export-ignore
-site/config.php export-ignore
-site/ready.php export-ignore
+site export-ignore
 tests export-ignore
 vendor export-ignore
 wire export-ignore
