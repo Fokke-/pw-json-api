@@ -36,5 +36,23 @@ class RequestService extends Service
           'method' => $request->method,
         ]);
       });
+
+    $this->addEndpoint('/dynamic-path/name/{name}')->get(function () {
+      return new Response();
+    });
+
+    $this->addEndpoint('/dynamic-path/name/{name}/{another}')->get(function () {
+      return new Response();
+    });
+
+    $this->addEndpoint('/dynamic-path/predefined-name/(name:foo|bar|baz)')->get(
+      function () {
+        return new Response();
+      },
+    );
+
+    $this->addEndpoint('/dynamic-path/regex/(.*)')->get(function () {
+      return new Response();
+    });
   }
 }

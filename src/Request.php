@@ -22,7 +22,7 @@ class Request
   /**
    * Route parameters of dynamic paths
    *
-   * @var array<string, string>
+   * @var array<string|int, string>
    * @see https://fokke-.github.io/pw-json-api/endpoints.html#dynamic-paths
    */
   public array $routeParams;
@@ -135,22 +135,11 @@ class Request
   /**
    * Get route parameters
    *
-   * @return array<string, string>
+   * @return array<string|int, string>
    */
   protected function getRouteParams(HookEvent $event): array
   {
-    return array_reduce(
-      array_keys($event->arguments),
-      function (array $acc, mixed $key) use ($event) {
-        if (is_int($key) || $key === 'path') {
-          return $acc;
-        }
-
-        $acc[$key] = $event->argumentsByName((string) $key);
-        return $acc;
-      },
-      [],
-    );
+    return $event->arguments;
   }
 
   /**

@@ -9,7 +9,7 @@ const UPLOADED_FILE_KEYS = [
   'size',
 ];
 
-test('query endpoint of service without base path', function () {
+test('endpoint of service without base path', function () {
   $client = getHttp();
 
   $res = $client->get('food/carrot');
@@ -19,7 +19,7 @@ test('query endpoint of service without base path', function () {
   expect($res->getStatusCode())->toBe(404);
 });
 
-test('query endpoint of service with base path', function () {
+test('endpoint of service with base path', function () {
   $client = getHttp();
 
   $res = $client->get('food/fruits/apple');
@@ -67,6 +67,48 @@ test('request method handlers', function () {
   $res = $client->patch('request');
   $json = resToJson($res);
   expect($json['request']['method'])->toBe('PATCH');
+});
+
+test('dynamic path with one named argument', function () {
+  $client = getHttp();
+
+  $res = $client->get('request/dynamic-path/name/foo');
+  $json = resToJson($res);
+
+  expect($json['request']['routeParams']['name'])->toBe('foo');
+});
+
+test('dynamic path with two named arguments', function () {
+  $client = getHttp();
+
+  $res = $client->get('request/dynamic-path/name/foo/bar');
+  $json = resToJson($res);
+  expect($json['request']['routeParams']['name'])->toBe('foo');
+  expect($json['request']['routeParams']['another'])->toBe('bar');
+});
+
+test('dynamic path with predefined argument', function () {
+  $client = getHttp();
+
+  $res = $client->get('request/dynamic-path/predefined-name/bar');
+  $json = resToJson($res);
+  expect($json['request']['routeParams']['name'])->toBe('bar');
+});
+
+test('dynamic path with regex', function () {
+  $client = getHttp();
+
+  $res = $client->get('request/dynamic-path/regex/foo');
+  $json = resToJson($res);
+  expect($json['request']['routeParams'][1])->toBe('foo');
+
+  $res = $client->get('request/dynamic-path/regex/foo/bar');
+  $json = resToJson($res);
+  expect($json['request']['routeParams'][1])->toBe('foo/bar');
+
+  $res = $client->get('request/dynamic-path/regex/foo/bar/baz');
+  $json = resToJson($res);
+  expect($json['request']['routeParams'][1])->toBe('foo/bar/baz');
 });
 
 test('payload as json', function () {
