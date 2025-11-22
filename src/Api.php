@@ -24,7 +24,7 @@ class Api
   /**
    * Exception handler
    *
-   * @var callable(\Throwable, Request): (Response|ApiException)|null $exceptionHandler
+   * @var callable(ExceptionHandlerArgs): (Response|ApiException)|null $exceptionHandler
    */
   private $exceptionHandler = null;
 
@@ -64,7 +64,7 @@ class Api
    * The API instance will handle all exceptions of type ApiException automatically,
    * so there is no need to implement custom handling for them.
    *
-   * @param callable(\Throwable, Request): (Response|ApiException) $handler Handler function
+   * @param callable(ExceptionHandlerArgs): (Response|ApiException) $handler Handler function
    */
   public function handleException(callable $handler): static
   {
@@ -137,30 +137,36 @@ class Api
           );
         }
       } catch (\Throwable $e) {
+        // Pass ApiExceptions through
         if ($e instanceof ApiException) {
           throw $e;
         }
 
         // For other exception types, try to get response
         // from custom exception handler function.
-        if (!is_callable($this->exceptionHandler)) {
-          throw $e;
+        if (is_callable($this->exceptionHandler)) {
+          $exceptionHandlerArgs = new ExceptionHandlerArgs();
+          $exceptionHandlerArgs->exception = $e;
+          $exceptionHandlerArgs->request = $request;
+          $exceptionHandlerArgs->event = $event;
+          $exceptionHandlerArgs->endpoint = $result->endpoint;
+          $exceptionHandlerArgs->service = $result->service;
+          $exceptionHandlerArgs->services = $result->endpoint->services;
+          $exceptionHandlerArgs->api = $this;
+
+          $exceptionHandlerResult = call_user_func(
+            $this->exceptionHandler,
+            $exceptionHandlerArgs,
+          );
+
+          if ($exceptionHandlerResult instanceof Response) {
+            $response = $exceptionHandlerResult;
+          } elseif ($exceptionHandlerResult instanceof ApiException) {
+            throw $exceptionHandlerResult;
+          }
         }
 
-        // TODO: use ExceptionHandlerArgs
-        $exceptionHandlerResult = call_user_func(
-          $this->exceptionHandler,
-          $e,
-          $request,
-        );
-
-        if ($exceptionHandlerResult instanceof Response) {
-          $response = $exceptionHandlerResult;
-        } elseif ($exceptionHandlerResult instanceof ApiException) {
-          throw $exceptionHandlerResult;
-        } else {
-          throw $e;
-        }
+        throw $e;
       }
 
       // After hooks

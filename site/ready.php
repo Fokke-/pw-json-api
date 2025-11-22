@@ -50,10 +50,10 @@ if ($page->template->name !== 'admin') {
         'request' => $args->request->toArray(),
       ]);
     })
-    ->handleException(function ($e, $request) {
+    ->handleException(function ($args) {
       throw (new ApiException())->code(400)->with([
-        'message' => $e->getMessage(),
-        'request' => $request->toArray(),
+        'message' => $args->exception->getMessage(),
+        'request' => $args->request->toArray(),
       ]);
     })
     ->addService(new FoodService(), function ($service) {

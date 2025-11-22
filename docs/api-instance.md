@@ -51,21 +51,33 @@ $api->addService(new HelloWorldService(), function ($service) {
 
 ## Exception handling
 
-Due to the nature of ProcessWire URL hooks, exceptions thrown in hook code cannot be caught in the main program flow. Use `handleException` to define your own exception handler for other exception types, such as `WireException`.
+Due to the nature of ProcessWire URL hooks, exceptions thrown in hook code cannot be caught in the main program flow. Use `handleException()` to define your own exception handler for other exception types, such as `WireException`.
 
-`Exception` and `Request` will be passed to the handler function. You need to return either a `Response` or an `ApiException` object from the handler.
+You can access the following properties via the `$args` parameter of the handler function.
+
+| Property    | Type                     | Description                 |
+| ----------- | ------------------------ | --------------------------- |
+| `exception` | `\Throwable`             | Exception                   |
+| `request`   | `Request`                | [Request object](/requests) |
+| `event`     | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
+| `endpoint`  | `Endpoint`               | Requested endpoint          |
+| `service`   | `Service`                | Requested service           |
+| `services`  | `ServiceList`            | List of all parent services |
+| `api`       | `Api`                    | API instance                |
+
+You need to either return a `Response` or throw an `ApiException` from the handler.
 
 ```php
-$api->handleException(function ($e, $request) {
+$api->handleException(function ($args) {
   // Handle WireExceptions
-  if ($e instanceof WireException) {
+  if ($args->exception instanceof WireException) {
     return (new ApiException())->code(500)->with([
-      'message' => $e->getMessage(),
+      'message' => $args->exception->getMessage(),
     ]);
   }
 
   return (new ApiException())->code(400)->with([
-    'message' => $e->getMessage(),
+    'message' => $args->exception->getMessage(),
   ]);
 });
 ```

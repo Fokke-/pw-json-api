@@ -4,10 +4,11 @@
 
 ### Breaking changes
 
-- `$event` argument is no longer passed directly to the endpoint handler. Use `$args->event` instead.
-- RequestHookReturn::$method` property has been removed. Use `RequestHookReturn::$request->method` instead.
-- ApiException::$method` property has been removed. Use `ApiException::$request->method` instead.
-- **Page parser:** Page properties, such as `template` are no longer defined by using `fields()` method. Use `properties()` instead.
+- `$event` argument is no longer passed directly to the endpoint handler. Use [`$args->event` instead](https://fokke-.github.io/pw-json-api/endpoints.html#endpoint-handler-arguments).
+- `$e` and `$request` are no longer passed directly to the `handleException()` callback function. [Use `$args->exception` and `$args->request` instead](https://fokke-.github.io/pw-json-api/api-instance.html#exception-handling).
+- `RequestHookReturn::$method` property has been removed. Use [`RequestHookReturn::$request->method` instead](https://fokke-.github.io/pw-json-api/request-hooks.html#hook-arguments).
+- `ApiException::$method` property has been removed. [Use `ApiException::$request->method` instead](https://fokke-.github.io/pw-json-api/error-hooks.html#error-hook-arguments).
+- **Page parser:** Page properties, such as `template` are no longer defined by using `fields()` method. [Use `properties()` instead](https://fokke-.github.io/pw-json-api/processwire-page-parser.html#property-selection).
 
 ### New features
 
