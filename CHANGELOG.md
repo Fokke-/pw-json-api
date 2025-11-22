@@ -6,6 +6,7 @@
 
 - RequestHookReturn::$method` property has been removed. Use `RequestHookReturn::$request->method` instead.
 - ApiException::$method` property has been removed. Use `ApiException::$request->method` instead.
+- **Page parser:** Page properties, such as `template` are no longer defined by using `fields()` method. Use `properties()` instead.
 
 ### New features
 
