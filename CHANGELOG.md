@@ -4,16 +4,16 @@
 
 ### Breaking changes
 
+- `$event` argument is no longer passed directly to the endpoint handler. Use `$args->event` instead.
 - RequestHookReturn::$method` property has been removed. Use `RequestHookReturn::$request->method` instead.
 - ApiException::$method` property has been removed. Use `ApiException::$request->method` instead.
 - **Page parser:** Page properties, such as `template` are no longer defined by using `fields()` method. Use `properties()` instead.
 
 ### New features
 
-- New `Request` object is exposed in request handlers and hooks
+- New `Request` object is exposed in arguments of request handlers and hooks
 - New plugin interface
 - CSRF protection plugin
-- Better type hinting for `addService()` method
 - `Api::$wire` is now public property
 - `Service::$wire` is now public property
 - **Page Parser:** Added new methods:

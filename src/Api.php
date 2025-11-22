@@ -111,7 +111,7 @@ class Api
       if (!empty($beforeHooks)) {
         $hookReturnBefore = new RequestHookReturnBefore();
         $hookReturnBefore->request = $request;
-        $hookReturnBefore->event = $request->event;
+        $hookReturnBefore->event = $event;
         $hookReturnBefore->handler = $handler;
         $hookReturnBefore->endpoint = $result->endpoint;
         $hookReturnBefore->service = $result->service;
@@ -125,7 +125,11 @@ class Api
 
       // Get response from handler
       try {
-        $response = call_user_func($handler, $request);
+        $handlerArgs = new EndpointHandlerArgs();
+        $handlerArgs->request = $request;
+        $handlerArgs->event = $event;
+
+        $response = call_user_func($handler, $handlerArgs);
         if (!($response instanceof Response)) {
           throw new WireException(
             'Malformed result. You must return a Response object from the handler.',
@@ -143,6 +147,7 @@ class Api
           throw $e;
         }
 
+        // TODO: use ExceptionHandlerArgs
         $exceptionHandlerResult = call_user_func(
           $this->exceptionHandler,
           $e,
@@ -173,7 +178,7 @@ class Api
       if (!empty($afterHooks)) {
         $hookReturnAfter = new RequestHookReturnAfter();
         $hookReturnAfter->request = $request;
-        $hookReturnAfter->event = $request->event;
+        $hookReturnAfter->event = $event;
         $hookReturnAfter->response = $response;
         $hookReturnAfter->endpoint = $result->endpoint;
         $hookReturnAfter->service = $result->service;
@@ -187,7 +192,7 @@ class Api
     } catch (ApiException $e) {
       // Inject request data to the exception
       $e->request = $request;
-      $e->event = $request->event;
+      $e->event = $event;
       $e->endpoint = $result->endpoint;
       $e->service = $result->service;
       $e->services = $result->endpoint->services;

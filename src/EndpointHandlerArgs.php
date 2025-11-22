@@ -1,0 +1,15 @@
+<?php
+
+namespace PwJsonApi;
+
+/**
+ * Endpoint handler arguments
+ */
+class EndpointHandlerArgs
+{
+  /** Request */
+  public Request $request;
+
+  /** ProcessWire URL hook event */
+  public \ProcessWire\HookEvent $event;
+}

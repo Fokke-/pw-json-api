@@ -63,9 +63,6 @@ class Request
   /** Shorthand for $_SERVER['SERVER_PROTOCOL'] */
   public string|null $protocol;
 
-  /** ProcessWire URL hook event */
-  public HookEvent $event;
-
   /** Request body */
   public mixed $body;
 
@@ -106,7 +103,6 @@ class Request
    */
   public function _init(HookEvent $event): static
   {
-    $this->event = $event;
     $this->routeParams = $this->getRouteParams($event);
     $this->body = $this->getBody($this->contentType);
     return $this;

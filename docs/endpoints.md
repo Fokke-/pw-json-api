@@ -40,9 +40,9 @@ $this->addEndpoint('/user')
   })
 
   // Handle POST request
-  ->post(function ($request) {
+  ->post(function ($args) {
     // Validate post data etc.
-    // $data = $request->body;
+    // $data = $args->request->body;
 
     // If something goes wrong...
     // throw new ApiException('Snap, crackle and pop!');
@@ -58,27 +58,32 @@ $this->addEndpoint('/user')
   });
 ```
 
-## Access request data in handler
+## Endpoint handler arguments
 
-Use the `$request` object to access request data. [Read more about requests](/requests).
+You can access endpoint handler arguments via the `$args` parameter of the handler function.
+
+| Property  | Type                     | Description                 |
+| --------- | ------------------------ | --------------------------- |
+| `request` | `Request`                | [Request object](/requests) |
+| `event`   | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
 
 ```php{1}
-$this->addEndpoint('/test-request')->get(function ($request) {
+$this->addEndpoint('/test-request')->get(function ($args) {
   return new Response([
-    'request_path' => $request->path,
-    'request_method' => $request->method,
+    'request_path' => $args->request->path,
+    'request_method' => $args->request->method,
   ]);
 });
 ```
 
 ## Dynamic paths
 
-You can use named arguments to allow dynamic paths. Use `$request->params()` to access named arguments.
+You can use named arguments to allow dynamic paths. Use `$args->request->routeParam()` to access named arguments.
 
 ```php{3}
-$this->addEndpoint('/products/{product}')->get(function ($request) {
+$this->addEndpoint('/products/{product}')->get(function ($args) {
   return new Response([
-    'product_name' => $request->routeParam('product'),
+    'product_name' => $args->request->routeParam('product'),
   ]);
 });
 ```

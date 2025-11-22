@@ -11,29 +11,29 @@ class RequestService extends Service
 
     $this->setBasePath('/request');
     $this->addEndpoint('/')
-      ->get(function ($request) {
+      ->get(function ($args) {
         return new Response([
-          'method' => $request->method,
+          'method' => $args->request->method,
         ]);
       })
-      ->put(function ($request) {
+      ->put(function ($args) {
         return new Response([
-          'method' => $request->method,
+          'method' => $args->request->method,
         ]);
       })
-      ->delete(function ($request) {
+      ->delete(function ($args) {
         return new Response([
-          'method' => $request->method,
+          'method' => $args->request->method,
         ]);
       })
-      ->post(function ($request) {
+      ->post(function ($args) {
         return new Response([
-          'method' => $request->method,
+          'method' => $args->request->method,
         ]);
       })
-      ->patch(function ($request) {
+      ->patch(function ($args) {
         return new Response([
-          'method' => $request->method,
+          'method' => $args->request->method,
         ]);
       });
 

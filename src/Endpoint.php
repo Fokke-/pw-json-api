@@ -19,7 +19,7 @@ class Endpoint
   /**
    * Endpoint handlers
    *
-   * @var array<string, callable(Request): Response>
+   * @var array<string, callable(EndpointHandlerArgs): Response>
    */
   protected array $handlers = [];
 
@@ -75,7 +75,7 @@ class Endpoint
   /**
    * Handle GET requests
    *
-   * @param callable(Request): Response $handler
+   * @param callable(EndpointHandlerArgs): Response $handler
    */
   public function get(callable $handler): static
   {
@@ -86,7 +86,7 @@ class Endpoint
   /**
    * Handle POST requests
    *
-   * @param callable(Request): Response $handler
+   * @param callable(EndpointHandlerArgs): Response $handler
    */
   public function post(callable $handler): static
   {
@@ -97,7 +97,7 @@ class Endpoint
   /**
    * Handle HEAD requests
    *
-   * @param callable(Request): Response $handler
+   * @param callable(EndpointHandlerArgs): Response $handler
    */
   public function head(callable $handler): static
   {
@@ -108,7 +108,7 @@ class Endpoint
   /**
    * Handle PUT requests
    *
-   * @param callable(Request): Response $handler
+   * @param callable(EndpointHandlerArgs): Response $handler
    */
   public function put(callable $handler): static
   {
@@ -119,7 +119,7 @@ class Endpoint
   /**
    * Handle PATCH requests
    *
-   * @param callable(Request): Response $handler
+   * @param callable(EndpointHandlerArgs): Response $handler
    */
   public function patch(callable $handler): static
   {
@@ -130,7 +130,7 @@ class Endpoint
   /**
    * Handle DELETE requests
    *
-   * @param callable(Request): Response $handler
+   * @param callable(EndpointHandlerArgs): Response $handler
    */
   public function delete(callable $handler): static
   {

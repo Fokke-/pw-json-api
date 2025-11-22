@@ -118,26 +118,26 @@ $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
 
 You can access hook arguments via the `$args` parameter of the hook handler function. The following properties are always included:
 
-| Property          | Type                     | Description                                     |
-| ----------------- | ------------------------ | ----------------------------------------------- |
-| `$args->request`  | `Request`                | Request object <Badge type="tip" text="^2.0" /> |
-| `$args->event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event                      |
-| `$args->endpoint` | `Endpoint`               | Requested endpoint                              |
-| `$args->service`  | `Service`                | Requested service                               |
-| `$args->services` | `ServiceList`            | List of all parent services                     |
-| `$args->api`      | `Api`                    | API instance                                    |
+| Property   | Type                     | Description                                     |
+| ---------- | ------------------------ | ----------------------------------------------- |
+| `request`  | `Request`                | Request object <Badge type="tip" text="^2.0" /> |
+| `event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event                      |
+| `endpoint` | `Endpoint`               | Requested endpoint                              |
+| `service`  | `Service`                | Requested service                               |
+| `services` | `ServiceList`            | List of all parent services                     |
+| `api`      | `Api`                    | API instance                                    |
 
 ### hookBefore\* arguments
 
-| Property         | Type       | Description              |
-| ---------------- | ---------- | ------------------------ |
-| `$args->handler` | `callable` | Endpoint request handler |
+| Property  | Type       | Description              |
+| --------- | ---------- | ------------------------ |
+| `handler` | `callable` | Endpoint request handler |
 
 ### hookAfter\* arguments
 
-| Property          | Type     | Description                            |
-| ----------------- | -------- | -------------------------------------- |
-| `$args->response` | Response | Response from endpoint request handler |
+| Property   | Type     | Description                            |
+| ---------- | -------- | -------------------------------------- |
+| `response` | Response | Response from endpoint request handler |
 
 ## Hook methods reference
 

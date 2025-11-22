@@ -1,30 +1,29 @@
-# Requests <Badge type="tip" text="^2.0" />
+# Requests
 
-From version 2.0, `$request` object can be accessed in callback functions of:
+Request object can be accessed in callback functions of:
 
-- [Endpoint request handler](/endpoints.html#access-request-data-in-handler)
+- [Endpoint request handler](/endpoints.html#endpoint-handler-arguments)
 - [Request hook handler](/request-hooks.html#hook-arguments)
 - [Error hook handler](/error-hooks.html#error-hook-arguments)
 - [API instance exception handler](/api-instance.html#exception-handling)
 
 ## Request properties
 
-| Property      | Type                    | Description                                                        |
-| ------------- | ----------------------- | ------------------------------------------------------------------ |
-| `method`      | `string`                | Request method                                                     |
-| `path`        | `string\|null`          | Requested path                                                     |
-| `routeParams` | `array`                 | Route parameters of [dynamic paths](/endpoints.html#dynamic-paths) |
-| `queryParams` | `array`                 | Query parameters                                                   |
-| `headers`     | `array`                 | Request headers                                                    |
-| `contentType` | `string\|null`          | `Content-Type` header                                              |
-| `accept`      | `string\|null`          | `Accept` header                                                    |
-| `cookies`     | `array`                 | Shorthand for `$_COOKIES`                                          |
-| `ip`          | `string\|null`          | Shorthand for `$_SERVER['REMOTE_ADDR']`                            |
-| `userAgent`   | `string\|null`          | Shorthand for `$_SERVER['HTTP_USER_AGENT']`                        |
-| `protocol`    | `string\|null`          | Shorthand for `$_SERVER['SERVER_PROTOCOL']`                        |
-| `event`       | `ProcessWire\HookEvent` | ProcessWire URL hook event                                         |
-| `body`        | `mixed`                 | Request body                                                       |
-| `files`       | `array`                 | Normalized value of `$_FILES`                                      |
+| Property      | Type           | Description                                                        |
+| ------------- | -------------- | ------------------------------------------------------------------ |
+| `method`      | `string`       | Request method                                                     |
+| `path`        | `string\|null` | Requested path                                                     |
+| `routeParams` | `array`        | Route parameters of [dynamic paths](/endpoints.html#dynamic-paths) |
+| `queryParams` | `array`        | Query parameters                                                   |
+| `headers`     | `array`        | Request headers                                                    |
+| `contentType` | `string\|null` | `Content-Type` header                                              |
+| `accept`      | `string\|null` | `Accept` header                                                    |
+| `cookies`     | `array`        | Shorthand for `$_COOKIES`                                          |
+| `ip`          | `string\|null` | Shorthand for `$_SERVER['REMOTE_ADDR']`                            |
+| `userAgent`   | `string\|null` | Shorthand for `$_SERVER['HTTP_USER_AGENT']`                        |
+| `protocol`    | `string\|null` | Shorthand for `$_SERVER['SERVER_PROTOCOL']`                        |
+| `body`        | `mixed`        | Request body                                                       |
+| `files`       | `array`        | Normalized value of `$_FILES`                                      |
 
 ### Body
 
