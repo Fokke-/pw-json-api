@@ -145,11 +145,10 @@ test('properties()', function () {
   $result = (new PageParser())->input(getPage())->toArray();
   expect(array_keys($result))->toContain('id');
   expect(array_keys($result))->toContain('name');
-  expect(array_keys($result))->toContain('template');
 
   $result = (new PageParser())
     ->input(getPage())
-    ->properties('numChildren', 'bogus')
+    ->properties('template', 'numChildren', 'bogus')
     ->toArray();
   expect(array_keys($result))->toContain('id');
   expect(array_keys($result))->toContain('name');
@@ -188,19 +187,17 @@ test('properties() ignores fields', function () {
 
   expect(array_keys($result))->toContain('id');
   expect(array_keys($result))->toContain('name');
-  expect(array_keys($result))->toContain('template');
   expect(array_keys($result))->not()->toContain('checkbox');
 });
 
 test('excludeProperties()', function () {
   $result = (new PageParser())
     ->input(getPage())
-    ->excludeProperties('id', 'template')
+    ->excludeProperties('id')
     ->toArray();
 
   expect(array_keys($result))->toContain('name');
   expect(array_keys($result))->not()->toContain('id');
-  expect(array_keys($result))->not()->toContain('template');
 });
 
 test('properties() and excludeProperties() combined', function () {
@@ -212,14 +209,13 @@ test('properties() and excludeProperties() combined', function () {
 
   expect(array_keys($result))->toContain('id');
   expect(array_keys($result))->toContain('name');
-  expect(array_keys($result))->toContain('template');
   expect(array_keys($result))->toContain('numChildren');
   expect(array_keys($result))->not()->toContain('hasChildren');
 });
 
 test('fields()', function () {
   $result = (new PageParser())->input(getPage())->fields('title')->toArray();
-  expect(array_keys($result))->toBe(['id', 'name', 'template', 'title']);
+  expect(array_keys($result))->toBe(['id', 'name', 'title']);
 });
 
 test('excludeFields()', function () {
@@ -236,11 +232,11 @@ test('excludeFields()', function () {
 test('fields() and excludeFields() combined', function () {
   $result = (new PageParser())
     ->input(getPage())
-    ->fields('title')
-    ->excludeFields('title')
+    ->fields('title', 'checkbox')
+    ->excludeFields('checkbox')
     ->toArray();
 
-  expect(array_keys($result))->toBe(['id', 'name', 'template']);
+  expect(array_keys($result))->toBe(['id', 'name', 'title']);
 });
 
 test('PageParserConfig::parseChildren', function () {
@@ -441,6 +437,7 @@ test('hookBeforeFieldParse()', function () {
     ->input(getPage())
     ->hookBeforeFieldParse(function ($args) {
       if ($args->field->name === 'single_page') {
+        $args->parser->properties('template');
         $args->parser->fields('title');
       }
     })
