@@ -91,14 +91,14 @@ $api->findEndpoint('/api/hello-world')?->hookOnError(function ($args) {
 
 ## Error hook arguments
 
-You can access hook arguments via the `$args` parameter of the hook handler function.
+You can access the following properties via the `$args` parameter of the handler function.
 
-| Property   | Type                     | Description                                     |
-| ---------- | ------------------------ | ----------------------------------------------- |
-| `request`  | `Request`                | Request object <Badge type="tip" text="^2.0" /> |
-| `response` | `Response`               | Error Response object                           |
-| `event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event                      |
-| `endpoint` | `Endpoint`               | Requested endpoint                              |
-| `service`  | `Service`                | Requested service                               |
-| `services` | `ServiceList`            | List of all parent services                     |
-| `api`      | `Api`                    | API instance                                    |
+| Property   | Type                     | Description                 |
+| ---------- | ------------------------ | --------------------------- |
+| `request`  | `Request`                | [Request object](/requests) |
+| `response` | `Response`               | Error Response object       |
+| `event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
+| `endpoint` | `Endpoint`               | Requested endpoint          |
+| `service`  | `Service`                | Requested service           |
+| `services` | `ServiceList`            | List of all parent services |
+| `api`      | `Api`                    | API instance                |

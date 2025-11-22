@@ -60,7 +60,7 @@ $this->addEndpoint('/user')
 
 ## Endpoint handler arguments
 
-You can access endpoint handler arguments via the `$args` parameter of the handler function.
+You can access the following properties via the `$args` parameter of the handler function.
 
 | Property  | Type                     | Description                 |
 | --------- | ------------------------ | --------------------------- |
