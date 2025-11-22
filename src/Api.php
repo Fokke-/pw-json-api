@@ -113,7 +113,6 @@ class Api
         $hookReturnBefore->request = $request;
         $hookReturnBefore->event = $request->event;
         $hookReturnBefore->handler = $handler;
-        $hookReturnBefore->method = $request->method;
         $hookReturnBefore->endpoint = $result->endpoint;
         $hookReturnBefore->service = $result->service;
         $hookReturnBefore->services = $result->endpoint->services;
@@ -176,7 +175,6 @@ class Api
         $hookReturnAfter->request = $request;
         $hookReturnAfter->event = $request->event;
         $hookReturnAfter->response = $response;
-        $hookReturnAfter->method = $request->method;
         $hookReturnAfter->endpoint = $result->endpoint;
         $hookReturnAfter->service = $result->service;
         $hookReturnAfter->services = $result->endpoint->services;
@@ -190,7 +188,6 @@ class Api
       // Inject request data to the exception
       $e->request = $request;
       $e->event = $request->event;
-      $e->method = $request->method;
       $e->endpoint = $result->endpoint;
       $e->service = $result->service;
       $e->services = $result->endpoint->services;
