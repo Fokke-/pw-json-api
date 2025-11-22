@@ -93,13 +93,12 @@ $api->findEndpoint('/api/hello-world')?->hookOnError(function ($args) {
 
 You can access hook arguments via the `$args` parameter of the hook handler function.
 
-| Property          | Type                     | Description                                                          |
-| ----------------- | ------------------------ | -------------------------------------------------------------------- |
-| `$args->request`  | `Request`                | Request object <Badge type="tip" text="^1.2" />                      |
-| `$args->response` | `Response`               | Error Response object                                                |
-| `$args->event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event <Badge type="danger" text="deprecated" /> |
-| `$args->method`   | `string`                 | Request method <Badge type="danger" text="deprecated" />             |
-| `$args->endpoint` | `Endpoint`               | Requested endpoint                                                   |
-| `$args->service`  | `Service`                | Requested service                                                    |
-| `$args->services` | `ServiceList`            | List of all parent services                                          |
-| `$args->api`      | `Api`                    | API instance <Badge type="tip" text="1.1+" />                        |
+| Property          | Type                     | Description                                     |
+| ----------------- | ------------------------ | ----------------------------------------------- |
+| `$args->request`  | `Request`                | Request object <Badge type="tip" text="^2.0" /> |
+| `$args->response` | `Response`               | Error Response object                           |
+| `$args->event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event                      |
+| `$args->endpoint` | `Endpoint`               | Requested endpoint                              |
+| `$args->service`  | `Service`                | Requested service                               |
+| `$args->services` | `ServiceList`            | List of all parent services                     |
+| `$args->api`      | `Api`                    | API instance                                    |

@@ -178,17 +178,6 @@ class Request
   }
 
   /**
-   * Get route arguments
-   *
-   * @deprecated 1.2.0 Use routeParam() instead.
-   */
-  public function arguments(string|null $key = null): mixed
-  {
-    // @phpstan-ignore argument.type
-    return $this->event->arguments($key);
-  }
-
-  /**
    * Get headers
    *
    * @return array<string, string>

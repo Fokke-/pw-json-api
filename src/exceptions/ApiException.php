@@ -7,25 +7,14 @@ namespace PwJsonApi;
  */
 class ApiException extends \Exception
 {
-  /** Response object */
+  /** Response */
   public readonly Response $response;
 
-  /** Request object */
+  /** Request */
   public Request $request;
 
-  /**
-   * ProcessWire URL hook event
-   *
-   * @deprecated 1.2.0 Use $request->event instead
-   */
+  /** ProcessWire URL hook event */
   public \ProcessWire\HookEvent $event;
-
-  /**
-   * Request method
-   *
-   * @deprecated 1.2.0 Use $request->method instead
-   */
-  public string|null $method;
 
   /** Request endpoint */
   public Endpoint $endpoint;

@@ -118,15 +118,14 @@ $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
 
 You can access hook arguments via the `$args` parameter of the hook handler function. The following properties are always included:
 
-| Property          | Type                     | Description                                                          |
-| ----------------- | ------------------------ | -------------------------------------------------------------------- |
-| `$args->request`  | `Request`                | Request object <Badge type="tip" text="^1.2" />                      |
-| `$args->event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event <Badge type="danger" text="deprecated" /> |
-| `$args->method`   | `string`                 | Request method <Badge type="danger" text="deprecated" />             |
-| `$args->endpoint` | `Endpoint`               | Requested endpoint                                                   |
-| `$args->service`  | `Service`                | Requested service                                                    |
-| `$args->services` | `ServiceList`            | List of all parent services                                          |
-| `$args->api`      | `Api`                    | API instance <Badge type="tip" text="^1.1" />                        |
+| Property          | Type                     | Description                                     |
+| ----------------- | ------------------------ | ----------------------------------------------- |
+| `$args->request`  | `Request`                | Request object <Badge type="tip" text="^2.0" /> |
+| `$args->event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event                      |
+| `$args->endpoint` | `Endpoint`               | Requested endpoint                              |
+| `$args->service`  | `Service`                | Requested service                               |
+| `$args->services` | `ServiceList`            | List of all parent services                     |
+| `$args->api`      | `Api`                    | API instance                                    |
 
 ### hookBefore\* arguments
 

@@ -1,6 +1,11 @@
 # CHANGELOG
 
-## 1.2.0
+## 2.0.0
+
+### Breaking changes
+
+- RequestHookReturn::$method` property has been removed. Use `RequestHookReturn::$request->method` instead.
+- ApiException::$method` property has been removed. Use `ApiException::$request->method` instead.
 
 ### New features
 
@@ -8,6 +13,8 @@
 - New plugin interface
 - CSRF protection plugin
 - Better type hinting for `addService()` method
+- `Api::$wire` is now public property
+- `Service::$wire` is now public property
 - **Page Parser:** Added new methods:
   - `properties()`
   - `excludeProperties()`
@@ -15,22 +22,11 @@
   - `hookAfterPropertyParse()`
 - **Page Parser:** Include base file name in parsed file data
 - **Page Parser:** Include file extension in parsed file data
-- `Api::$wire` is now public property
-- `Service::$wire` is now public property
 
 ### Bug fixes
 
 - Error hooks will be applied to `ApiException` thrown from `handleException()` method
-- Fixed incorrect `Content-Type` header when an unhandled exception was thrown
-
-### Deprecations
-
-The following deprecations will be removed in the next major version.
-
-- `RequestHookReturn::$event` property - Use `RequestHookReturn::$request->event` instead.
-- `RequestHookReturn::$method` property - Use `RequestHookReturn::$request->method` instead.
-- `ApiException::$event` property - Use `ApiException::$request->event` instead
-- `ApiException::$method` property- Use `ApiException::$request->method` instead
+- Fixed incorrect `Content-Type: application/json` header when an unhandled exception was thrown
 
 ## 1.1.1
 

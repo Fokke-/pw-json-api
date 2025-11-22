@@ -1,4 +1,4 @@
-# CSRF protection <Badge type="tip" text="^1.2" />
+# CSRF protection <Badge type="tip" text="^2.0" />
 
 This plugin adds [cross-site request forgery (CSRF)](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF) protection for your endpoints, utilising ProcessWire’s built-in token validation.
 

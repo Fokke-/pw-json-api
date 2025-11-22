@@ -1,6 +1,6 @@
-# Requests <Badge type="tip" text="^1.2" />
+# Requests <Badge type="tip" text="^2.0" />
 
-From version 1.2, `$request` object can be accessed in callback functions of:
+From version 2.0, `$request` object can be accessed in callback functions of:
 
 - [Endpoint request handler](/endpoints.html#access-request-data-in-handler)
 - [Request hook handler](/request-hooks.html#hook-arguments)
