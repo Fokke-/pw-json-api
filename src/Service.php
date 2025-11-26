@@ -20,7 +20,7 @@ abstract class Service
   use HasWire;
 
   /** Service name */
-  public readonly string $name;
+  public string $name;
 
   /** Constructor */
   public function __construct()
