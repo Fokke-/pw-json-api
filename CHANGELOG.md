@@ -30,6 +30,12 @@
 - Error hooks will be applied to `ApiException` thrown from `handleException()` method
 - Fixed incorrect `Content-Type: application/json` header when an unhandled exception was thrown
 
+## 1.2.0
+
+### New features
+
+- `Service::$name` is now mutable property. This can be useful when you want to extend an existing service, but keep the original name.
+
 ## 1.1.1
 
 ### Bug fixes
