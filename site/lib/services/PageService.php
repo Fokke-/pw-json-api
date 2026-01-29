@@ -6,10 +6,8 @@ use PwJsonApi\PageParser;
 
 class PageService extends Service
 {
-  public function __construct()
+  public function init()
   {
-    parent::__construct();
-
     $this->setBasePath('/pages');
     $this->addEndpoint('/')->get(function () {
       return new Response($this->getPages());

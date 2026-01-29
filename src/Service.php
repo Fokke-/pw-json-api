@@ -23,6 +23,13 @@ abstract class Service
   /** Service name */
   public string $name;
 
+  /**
+   * Is this service initialized?
+   *
+   * @internal
+   */
+  public bool $_isInitialized = false;
+
   /** Constructor */
   public function __construct()
   {
@@ -32,4 +39,28 @@ abstract class Service
     $wire = wire();
     $this->wire = $wire;
   }
+
+  /**
+   * Prepare service
+   *
+   * @internal
+   * @todo check if this is actually being used
+   */
+  public function _prepare(): static
+  {
+    if ($this->_isInitialized === true) {
+      return $this;
+    }
+
+    $this->init();
+    $this->_isInitialized = true;
+    return $this;
+  }
+
+  /**
+   * Service initializer
+   *
+   * @todo docs
+   */
+  public function init(): void {}
 }

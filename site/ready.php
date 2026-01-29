@@ -11,7 +11,6 @@ if (!defined('PROCESSWIRE')) {
 if ($page->template->name !== 'admin') {
   (new Api())
     ->configure(function ($config) {
-      $config->trailingSlashes = null;
       $config->jsonFlags =
         JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT;
     })
@@ -58,7 +57,6 @@ if ($page->template->name !== 'admin') {
     })
     ->addService(new FoodService(), function ($service) {
       $service->addService(new FruitService());
-      $service->addService(new VegetableService());
     })
     ->addService(new PageService())
     ->addService(new HelloWorldService())

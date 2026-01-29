@@ -68,6 +68,7 @@ class EndpointList
 
   /**
    * Add endpoint
+   * @todo Prevent cross-service injection
    */
   public function add(Endpoint $endpoint): static
   {
@@ -77,6 +78,7 @@ class EndpointList
 
   /**
    * Remove endpoint
+   * @todo Prevent cross-service injection
    */
   public function remove(Endpoint|string $endpointOrPath): static
   {

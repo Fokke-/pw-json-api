@@ -6,6 +6,7 @@ use PwJsonApi\Plugins\ApiPlugin;
 
 /**
  * Provides methods for adding plugins
+ * @todo Prevent cross-service injection
  */
 trait HasPluginSupport
 {

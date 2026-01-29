@@ -5,10 +5,8 @@ use PwJsonApi\Service;
 
 class CSRFService extends Service
 {
-  public function __construct()
+  public function init()
   {
-    parent::__construct();
-
     $this->addEndpoint('/')
       ->get(function () {
         return new Response([

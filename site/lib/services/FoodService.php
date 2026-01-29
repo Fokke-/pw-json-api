@@ -5,11 +5,11 @@ use PwJsonApi\Service;
 
 class FoodService extends Service
 {
-  public function __construct()
+  public function init()
   {
-    parent::__construct();
-
     $this->setBasePath('/food');
+
+    $this->addService(new VegetableService());
 
     $this->addEndpoint('/')->get(function () {
       return new Response([

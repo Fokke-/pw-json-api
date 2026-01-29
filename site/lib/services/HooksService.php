@@ -4,10 +4,8 @@ use PwJsonApi\{Service, Response};
 
 class HooksService extends Service
 {
-  public function __construct()
+  public function init()
   {
-    parent::__construct();
-
     $this->setBasePath('/hooks');
 
     $this->hookBefore(function ($beforeArgs) {

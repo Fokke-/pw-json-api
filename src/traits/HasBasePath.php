@@ -28,7 +28,7 @@ trait HasBasePath
   public function setBasePath(string|null $path): static
   {
     if (is_null($path)) {
-      $this->basePath = $path;
+      $this->basePath = null;
       return $this;
     }
 

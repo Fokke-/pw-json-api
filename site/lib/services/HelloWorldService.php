@@ -4,10 +4,8 @@ use PwJsonApi\{Service, Response};
 
 class HelloWorldService extends Service
 {
-  public function __construct()
+  public function init()
   {
-    parent::__construct();
-
     // Listen to path /hello-world with GET handler
     $this->addEndpoint('/hello-world')->get(function ($args) {
       return new Response([

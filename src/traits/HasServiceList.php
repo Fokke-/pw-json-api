@@ -16,6 +16,7 @@ trait HasServiceList
 
   /**
    * Initialise Service list
+   * @todo refactor to return the list
    */
   private function initServiceList(): static
   {
@@ -64,7 +65,7 @@ trait HasServiceList
     callable|null $setup = null,
   ): static {
     $this->initServiceList();
-    $this->services->add($service, $setup);
+    $this->services->add($service, $setup, $this);
     return $this;
   }
 }

@@ -20,8 +20,9 @@ trait HasApiInstance
    *
    * @internal
    */
-  public function _setApi(Api $api): void
+  public function _setApi(Api $api): static
   {
     $this->api = $api;
+    return $this;
   }
 }

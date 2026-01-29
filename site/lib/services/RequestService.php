@@ -5,10 +5,8 @@ use PwJsonApi\Service;
 
 class RequestService extends Service
 {
-  public function __construct()
+  public function init()
   {
-    parent::__construct();
-
     $this->setBasePath('/request');
     $this->addEndpoint('/')
       ->get(function ($args) {

@@ -5,10 +5,8 @@ use PwJsonApi\Service;
 
 class VegetableService extends Service
 {
-  public function __construct()
+  public function init()
   {
-    parent::__construct();
-
     $this->addEndpoint('/carrot')->get(function () {
       return new Response([
         'vegetable' => 'carrot',

@@ -6,10 +6,8 @@ use PwJsonApi\Service;
 
 class ExceptionService extends Service
 {
-  public function __construct()
+  public function init()
   {
-    parent::__construct();
-
     $this->setBasePath('/exceptions');
 
     $this->hookOnError(function ($args) {

@@ -7,6 +7,9 @@ use function ProcessWire\wire;
 
 /**
  * ProcessWire JSON API
+ *
+ * @todo PluginList + trait
+ * @todo Delay plugin initialization
  */
 class Api
 {
@@ -230,6 +233,7 @@ class Api
    *
    * - Resolves all services and endpoints and creates listeners for them
    * - Catches ApiExceptions and renders errors as JSON
+   * @todo do we actually need two iterators, one for services and one for endpoints, to keep things more efficient
    */
   public function run(): void
   {
@@ -250,73 +254,195 @@ class Api
     /** @var string[] */
     $paths = [];
 
+    // Phase 1: Initialize all services
     $search = new ApiSearch();
+    // echo "INITIALIZING SERVICES\n";
+    // $passes = 0;
 
+    // do {
+    //   $newServicesFound = false;
+    //   $passes++;
+
+    //   foreach ($search->iterate($this->getServices()) as $result) {
+    //     /** @var ApiSearchServiceResult|ApiSearchEndpointResult $result */
+    //     if (!($result instanceof ApiSearchServiceResult)) {
+    //       continue;
+    //     }
+
+    //     if ($result->service->_isInitialized === true) {
+    //       continue;
+    //     }
+
+    //     // TODO: check dupes
+    //     $serviceNames[] = $result->service->name;
+
+    //     var_dump("pass {$passes}: init " . $result->service->name);
+    //     $result->service->_setApi($this)->init();
+    //     $result->service->_isInitialized = true;
+    //     $newServicesFound = true;
+    //   }
+    // } while ($newServicesFound);
+
+    // echo "All services initialized in {$passes} passes\n";
+    // var_dump($serviceNames);
+
+    // $search = new ApiSearch();
+
+    // Phase 1: Init all services
+    // foreach ($search->iterate($this->getServices()) as $result) {
+    //   /** @var ApiSearchServiceResult|ApiSearchEndpointResult $result */
+    //   if (!($result instanceof ApiSearchServiceResult)) {
+    //     continue;
+    //   }
+
+    //   // Check for duplicated service
+    //   if (in_array($result->service->name, $serviceNames)) {
+    //     throw new WireException(
+    //       "Duplicated service '{$result->service->name}'",
+    //     );
+    //   }
+    //   $serviceNames[] = $result->service->name;
+
+    //   $result->service->init();
+    //   $result->service->_isInitialized = true;
+    // }
+
+    // Phase 2: Gather all endpoints and create listeners for them
     foreach ($search->iterate($this->getServices()) as $result) {
       /** @var ApiSearchServiceResult|ApiSearchEndpointResult $result */
-
-      // Prepare service
-      if ($result instanceof ApiSearchServiceResult) {
-        // Check for duplicated service
-        if (in_array($result->service->name, $serviceNames)) {
-          throw new WireException(
-            "Duplicated service '{$result->service->name}'",
-          );
-        }
-
-        $serviceNames[] = $result->service->name;
-
-        // Inject API instance to the service
-        $result->service->_setApi($this);
+      if (!($result instanceof ApiSearchEndpointResult)) {
+        continue;
       }
 
-      // Prepare endpoint
-      if ($result instanceof ApiSearchEndpointResult) {
-        // Resolve endpoint path
-        $path = (function () use ($result) {
-          $out = $result->resolvePath($this->getBasePath());
+      $path = (function () use ($result) {
+        $out = $result->resolvePath($this->getBasePath());
 
-          if ($this->config->trailingSlashes === true) {
-            return $out . '/';
-          } elseif ($this->config->trailingSlashes === null) {
-            return $out . '/?';
-          }
-
-          return $out;
-        })();
-
-        // Check for duplicated path
-        if (in_array($path, $paths)) {
-          throw new WireException(
-            "Duplicated endpoint path '{$path}' (defined in service '{$result->service->name}').",
-          );
+        if ($this->config->trailingSlashes === null) {
+          return $out . '/?';
         }
 
-        $paths[] = $path;
-
-        // Inject service list to the endpoint
-        foreach ($result->serviceSequence as $service) {
-          $result->endpoint->services->add($service);
+        if ($this->config->trailingSlashes === true) {
+          return $out . '/';
         }
 
-        // Listen to path
-        $this->wire->addHook($path, function (HookEvent $event) use ($result) {
-          try {
-            $response = $this->handleRequest($result, $event);
+        return $out;
+      })();
 
-            header('Content-Type: application/json');
-            http_response_code($response->code);
-            echo $response->toJson($this->config->jsonFlags);
-            die();
-          } catch (ApiException $e) {
-            // Output error
-            header('Content-Type: application/json');
-            http_response_code($e->response->code);
-            echo $e->response->toJson($this->config->jsonFlags, false);
-            die();
-          }
-        });
+      // Check for duplicated path
+      if (in_array($path, $paths)) {
+        throw new WireException(
+          "Duplicated endpoint path '{$path}' (defined in service '{$result->service->name}').",
+        );
       }
+
+      $paths[] = $path;
+
+      // Inject service sequence to the endpoint
+      foreach ($result->serviceSequence as $service) {
+        $result->endpoint->services->add($service);
+      }
+
+      // Listen to path
+      // echo 'listener: ' . $path . "\n";
+      $this->wire->addHook($path, function (HookEvent $event) use ($result) {
+        try {
+          $response = $this->handleRequest($result, $event);
+
+          header('Content-Type: application/json');
+          http_response_code($response->code);
+          echo $response->toJson($this->config->jsonFlags);
+          die();
+        } catch (ApiException $e) {
+          // Output error
+          header('Content-Type: application/json');
+          http_response_code($e->response->code);
+          echo $e->response->toJson($this->config->jsonFlags, false);
+          die();
+        }
+      });
     }
+
+    // // Phase 2: Init all services in the service tree
+    // echo "PHASE 2 - GATHER ALL\n";
+    // foreach ($search->iterate($this->getServices()) as $result) {
+    //   /** @var ApiSearchServiceResult|ApiSearchEndpointResult $result */
+    //   if (!($result instanceof ApiSearchServiceResult)) {
+    //     continue;
+    //   }
+
+    //   echo 'found ' .
+    //     $result->service->name .
+    //     ' (' .
+    //     ($result->service->_isInitialized ? 'true' : 'false') .
+    //     ")\n";
+    // }
+
+    // OLD IMPLEMENTATION
+    // foreach ($search->iterate($this->getServices()) as $result) {
+    //   /** @var ApiSearchServiceResult|ApiSearchEndpointResult $result */
+
+    //   // Prepare service
+    //   if ($result instanceof ApiSearchServiceResult) {
+    //     // Check for duplicated service
+    //     if (in_array($result->service->name, $serviceNames)) {
+    //       throw new WireException(
+    //         "Duplicated service '{$result->service->name}'",
+    //       );
+    //     }
+
+    //     $serviceNames[] = $result->service->name;
+
+    //     // Inject API instance to the service
+    //     $result->service->_setApi($this);
+    //   }
+
+    //   // Prepare endpoint
+    //   if ($result instanceof ApiSearchEndpointResult) {
+    //     // Resolve endpoint path
+    //     $path = (function () use ($result) {
+    //       $out = $result->resolvePath($this->getBasePath());
+
+    //       if ($this->config->trailingSlashes === true) {
+    //         return $out . '/';
+    //       } elseif ($this->config->trailingSlashes === null) {
+    //         return $out . '/?';
+    //       }
+
+    //       return $out;
+    //     })();
+
+    //     // Check for duplicated path
+    //     if (in_array($path, $paths)) {
+    //       throw new WireException(
+    //         "Duplicated endpoint path '{$path}' (defined in service '{$result->service->name}').",
+    //       );
+    //     }
+
+    //     $paths[] = $path;
+
+    //     // Inject service list to the endpoint
+    //     foreach ($result->serviceSequence as $service) {
+    //       $result->endpoint->services->add($service);
+    //     }
+
+    //     // Listen to path
+    //     $this->wire->addHook($path, function (HookEvent $event) use ($result) {
+    //       try {
+    //         $response = $this->handleRequest($result, $event);
+
+    //         header('Content-Type: application/json');
+    //         http_response_code($response->code);
+    //         echo $response->toJson($this->config->jsonFlags);
+    //         die();
+    //       } catch (ApiException $e) {
+    //         // Output error
+    //         header('Content-Type: application/json');
+    //         http_response_code($e->response->code);
+    //         echo $e->response->toJson($this->config->jsonFlags, false);
+    //         die();
+    //       }
+    //     });
+    //   }
+    // }
   }
 }

@@ -12,6 +12,7 @@ trait HasApiSearch
    */
   public function findService(string $name): Service|null
   {
+    $this->initServiceList();
     $search = new ApiSearch();
 
     foreach ($search->iterate($this->services->getItems()) as $result) {
@@ -42,6 +43,7 @@ trait HasApiSearch
     }
 
     // Continue searching recursively
+    $this->initServiceList();
     $search = new ApiSearch();
     $path = $this->formatPath($path);
 

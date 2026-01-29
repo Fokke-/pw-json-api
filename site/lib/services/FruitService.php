@@ -5,10 +5,8 @@ use PwJsonApi\Service;
 
 class FruitService extends Service
 {
-  public function __construct()
+  public function init()
   {
-    parent::__construct();
-
     $this->hookAfter(function ($args) {
       $args->response->with([
         'food_type' => 'fruit',
