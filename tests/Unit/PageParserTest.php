@@ -493,6 +493,19 @@ test('hookAfterImageParse()', function () {
   expect($result['single_image']['_foo'])->toBe('foo');
 });
 
+test('hookBeforeFileParse()', function () {
+  $result = (new PageParser())
+    ->input(getPage())
+    ->hookBeforeFileParse(function ($args) {
+      if ($args->field?->name === 'single_file') {
+        $args->file->description = 'modified';
+      }
+    })
+    ->toArray();
+
+  expect($result['single_file']['description'])->toBe('modified');
+});
+
 test('hookAfterFileParse()', function () {
   $result = (new PageParser())
     ->input(getPage())
