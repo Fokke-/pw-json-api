@@ -4,6 +4,9 @@ use PwJsonApi\Endpoint;
 use PwJsonApi\RequestMethod;
 
 test('path', function () {
+  $endpoint = new Endpoint('/');
+  expect($endpoint->getPath())->toBeNull();
+
   $endpoint = new Endpoint('/foo');
   expect($endpoint->getPath())->toBe('foo');
 
@@ -39,4 +42,15 @@ test('delete handler', function () {
   $endpoint = new Endpoint('/foo');
   $endpoint->delete(function () {});
   expect($endpoint->getHandler(RequestMethod::Delete))->toBeCallable();
+});
+
+test('patch handler', function () {
+  $endpoint = new Endpoint('/foo');
+  $endpoint->patch(function () {});
+  expect($endpoint->getHandler(RequestMethod::Patch))->toBeCallable();
+});
+
+test('getHandler returns null when handler is not defined', function () {
+  $endpoint = new Endpoint('/foo');
+  expect($endpoint->getHandler(RequestMethod::Get))->toBeNull();
 });
