@@ -73,7 +73,7 @@ class ApiSearchEndpointResult
   }
 
   /**
-   * Resolve hooks from result endpoint and all of it's services
+   * Resolve hooks from result endpoint and all of its services
    *
    * For timing "Before" the order is Service -> Endpoint
    * For timing "After" the order is Endpoint -> Service
@@ -113,7 +113,7 @@ class ApiSearchEndpointResult
   }
 
   /**
-   * Resolve onError hooks from result endpoint and all of it's services
+   * Resolve onError hooks from result endpoint and all of its services
    *
    * @return callable[]
    */

@@ -148,3 +148,19 @@ test('error hook can manipulate response', function () {
 
   expect($json['error'])->toBe('updated');
 });
+
+test('hookBeforeGet fires on GET request', function () {
+  $client = getHttp();
+  $res = $client->get('hooks/method-specific');
+  $json = resToJson($res);
+
+  expect($json['hook_before_get_fired'])->toBeTrue();
+});
+
+test('hookBeforeGet does not fire on POST request', function () {
+  $client = getHttp();
+  $res = $client->post('hooks/method-specific');
+  $json = resToJson($res);
+
+  expect($json)->not->toHaveKey('hook_before_get_fired');
+});

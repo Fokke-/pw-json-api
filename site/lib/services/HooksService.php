@@ -109,6 +109,25 @@ class HooksService extends Service
 
     $this->addService(new HooksChildService());
 
+    $this->addEndpoint('method-specific')
+      ->get(function () {
+        return new Response([
+          'method' => 'GET',
+        ]);
+      })
+      ->post(function () {
+        return new Response([
+          'method' => 'POST',
+        ]);
+      })
+      ->hookBeforeGet(function ($args) {
+        $args->endpoint->hookAfter(function ($args) {
+          $args->response->with([
+            'hook_before_get_fired' => true,
+          ]);
+        });
+      });
+
     $this->addEndpoint('manipulate-response')
       ->get(function ($args) {
         return new Response([

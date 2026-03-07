@@ -12,7 +12,7 @@ Defined for the whole API instance. These hooks will apply to all endpoints.
 
 ```php
 // Simple auth check for all requests, with any request method
-$api->hookBefore(function () {
+$api->hookBefore(function ($args) {
   if ($this->wire->user->isLoggedin() === false) {
     throw (new ApiException())->code(401)->with([
       'login_url' => 'https://example.com/login',

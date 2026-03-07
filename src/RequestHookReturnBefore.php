@@ -10,7 +10,7 @@ class RequestHookReturnBefore extends RequestHookReturn
   /**
    * Endpoint request handler
    *
-   * @var callable(): void
+   * @var callable(EndpointHandlerArgs): Response
    */
   public $handler;
 }
