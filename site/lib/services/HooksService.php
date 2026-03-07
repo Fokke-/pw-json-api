@@ -4,50 +4,41 @@ use PwJsonApi\{ApiException, Service, Response};
 
 class HooksService extends Service
 {
+  /**
+   * Tracks before hook execution order within a single request.
+   * Reset per-process (each HTTP request is a new PHP process).
+   *
+   * @var string[]
+   */
+  public static array $beforeOrder = [];
+
+  /**
+   * Captures before hook arguments for assertion.
+   *
+   * @var array<string, string>|null
+   */
+  public static ?array $beforeArgs = null;
+
+  /**
+   * Whether hookBeforeGet fired in this request.
+   */
+  public static bool $hookBeforeGetFired = false;
+
   public function init()
   {
     $this->setBasePath('/hooks');
 
     $this->hookBefore(function ($beforeArgs) {
-      $beforeArgs->endpoint->hookAfter(function ($afterArgs) use ($beforeArgs) {
-        $afterArgs->response->with([
-          'before_hook_execution_order' => [
-            ...$afterArgs->response->additionalData[
-              'before_hook_execution_order'
-            ] ?? [],
-            'service',
-          ],
-          'before_hook_args' => [
-            'type' => get_class($beforeArgs),
-            'request' => get_class($beforeArgs->request),
-            'endpoint' => get_class($beforeArgs->endpoint),
-            'service' => get_class($beforeArgs->service),
-            'services' => get_class($beforeArgs->services),
-            'api' => get_class($beforeArgs->api),
-            'handler' => gettype($beforeArgs->handler),
-          ],
-        ]);
-      });
-
-      $beforeArgs->api->hookAfter(function ($args) {
-        $args->response->with([
-          'after_hook_execution_order' => [
-            ...$args->response->additionalData['after_hook_execution_order'] ??
-            [],
-            'api',
-          ],
-        ]);
-      });
-
-      $beforeArgs->api->hookOnError(function ($args) {
-        $args->response->with([
-          'error_hook_execution_order' => [
-            ...$args->response->additionalData['error_hook_execution_order'] ??
-            [],
-            'api',
-          ],
-        ]);
-      });
+      self::$beforeOrder[] = 'service';
+      self::$beforeArgs = [
+        'type' => get_class($beforeArgs),
+        'request' => get_class($beforeArgs->request),
+        'endpoint' => get_class($beforeArgs->endpoint),
+        'service' => get_class($beforeArgs->service),
+        'services' => get_class($beforeArgs->services),
+        'api' => get_class($beforeArgs->api),
+        'handler' => gettype($beforeArgs->handler),
+      ];
     });
 
     $this->hookOnError(function ($args) {
@@ -76,6 +67,8 @@ class HooksService extends Service
           'api' => get_class($args->api),
           'response' => get_class($args->response),
         ],
+        'before_hook_execution_order' => self::$beforeOrder,
+        'before_hook_args' => self::$beforeArgs,
       ]);
     });
 
@@ -86,16 +79,7 @@ class HooksService extends Service
         ]);
       })
       ->hookBefore(function ($args) {
-        $args->endpoint->hookAfter(function ($args) {
-          $args->response->with([
-            'before_hook_execution_order' => [
-              ...$args->response->additionalData[
-                'before_hook_execution_order'
-              ] ?? [],
-              'endpoint',
-            ],
-          ]);
-        });
+        self::$beforeOrder[] = 'endpoint';
       })
       ->hookAfter(function ($args) {
         $args->response->with([
@@ -121,11 +105,14 @@ class HooksService extends Service
         ]);
       })
       ->hookBeforeGet(function ($args) {
-        $args->endpoint->hookAfter(function ($args) {
+        self::$hookBeforeGetFired = true;
+      })
+      ->hookAfter(function ($args) {
+        if (self::$hookBeforeGetFired) {
           $args->response->with([
             'hook_before_get_fired' => true,
           ]);
-        });
+        }
       });
 
     $this->addEndpoint('manipulate-response')

@@ -2,6 +2,9 @@ parameters:
   level: 9
   paths:
     - src
+  ignoreErrors:
+    - message: '#Instanceof between \*NEVER\*#'
+      path: src/traits/HasLock.php
   fileExtensions:
     - php
     - module

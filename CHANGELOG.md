@@ -4,6 +4,7 @@
 
 ### Breaking changes
 
+- Services, endpoints, and the Api instance are now locked after `Api::run()` is called to prevent cross-service injection and runtime mutation. Adding services, endpoints, plugins, hooks, or setting handlers after locking will throw `WireException`. All configuration must happen in `init()` or the setup callback.
 - `OPTIONS` requests to non-existent endpoints are no longer intercepted with an empty `200` response. These requests are now handled by ProcessWire's default routing.
 - `$event` argument is no longer passed directly to the endpoint handler. Use [`$args->event` instead](https://fokke-.github.io/pw-json-api/endpoints.html#endpoint-handler-arguments).
 - `$e` and `$request` are no longer passed directly to the `handleException()` callback function. [Use `$args->exception` and `$args->request` instead](https://fokke-.github.io/pw-json-api/api-instance.html#exception-handling).

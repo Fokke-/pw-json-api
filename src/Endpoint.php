@@ -10,6 +10,7 @@ class Endpoint
   use Utils;
   use HasRequestHooks;
   use HasPluginList;
+  use HasLock;
 
   /**
    * Endpoint path
@@ -98,6 +99,7 @@ class Endpoint
    */
   public function get(callable $handler): static
   {
+    $this->_assertNotLocked('set GET handler');
     $this->handlers[RequestMethod::Get->name] = $handler;
     return $this;
   }
@@ -109,6 +111,7 @@ class Endpoint
    */
   public function post(callable $handler): static
   {
+    $this->_assertNotLocked('set POST handler');
     $this->handlers[RequestMethod::Post->name] = $handler;
     return $this;
   }
@@ -120,6 +123,7 @@ class Endpoint
    */
   public function head(callable $handler): static
   {
+    $this->_assertNotLocked('set HEAD handler');
     $this->handlers[RequestMethod::Head->name] = $handler;
     return $this;
   }
@@ -131,6 +135,7 @@ class Endpoint
    */
   public function put(callable $handler): static
   {
+    $this->_assertNotLocked('set PUT handler');
     $this->handlers[RequestMethod::Put->name] = $handler;
     return $this;
   }
@@ -142,6 +147,7 @@ class Endpoint
    */
   public function patch(callable $handler): static
   {
+    $this->_assertNotLocked('set PATCH handler');
     $this->handlers[RequestMethod::Patch->name] = $handler;
     return $this;
   }
@@ -153,6 +159,7 @@ class Endpoint
    */
   public function delete(callable $handler): static
   {
+    $this->_assertNotLocked('set DELETE handler');
     $this->handlers[RequestMethod::Delete->name] = $handler;
     return $this;
   }

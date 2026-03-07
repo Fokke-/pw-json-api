@@ -29,18 +29,6 @@ class ExceptionService extends Service
       ]);
     });
 
-    $this->hookBefore(function ($args) {
-      $args->api->hookOnError(function ($args) {
-        $args->response->with([
-          'error_hook_execution_order' => [
-            ...$args->response->additionalData['error_hook_execution_order'] ??
-            [],
-            'api',
-          ],
-        ]);
-      });
-    });
-
     $this->addEndpoint('/')
       ->get(function () {
         throw new ApiException('This was doomed to fail!');

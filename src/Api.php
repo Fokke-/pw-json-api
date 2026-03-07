@@ -17,6 +17,7 @@ class Api
   use HasApiSearch;
   use HasPluginList;
   use HasWire;
+  use HasLock;
 
   /** Configuration */
   private ApiConfig $config;
@@ -241,6 +242,7 @@ class Api
   public function run(): void
   {
     $this->_initPlugins();
+    $this->_lock();
 
     $isOptions = ($_SERVER['REQUEST_METHOD'] ?? null) == 'OPTIONS';
 
@@ -293,6 +295,7 @@ class Api
 
       // Initialize endpoint plugins
       $result->endpoint->_initPlugins();
+      $result->endpoint->_lock();
 
       // Add listener for the endpoint path
       $this->wire->addHook($path, function (HookEvent $event) use (

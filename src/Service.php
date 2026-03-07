@@ -19,6 +19,7 @@ abstract class Service
   use HasApiSearch;
   use HasPluginList;
   use HasWire;
+  use HasLock;
 
   /** Service name */
   public string $name;

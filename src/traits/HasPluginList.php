@@ -6,7 +6,6 @@ use PwJsonApi\Plugins\ApiPlugin;
 
 /**
  * Provides methods for adding and managing plugins
- * @todo Prevent cross-service injection
  */
 trait HasPluginList
 {
@@ -48,6 +47,7 @@ trait HasPluginList
     ApiPlugin $plugin,
     callable|null $setup = null,
   ): static {
+    $this->_assertNotLocked('add plugin');
     $this->initPluginList();
 
     $this->plugins->add($plugin);

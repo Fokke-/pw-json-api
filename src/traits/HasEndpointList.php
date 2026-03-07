@@ -77,6 +77,7 @@ trait HasEndpointList
    */
   public function addEndpoint(string $path): Endpoint
   {
+    $this->_assertNotLocked('add endpoint');
     $this->initEndpointList();
     $endpoint = new Endpoint($path);
     $this->endpoints->add($endpoint);
@@ -89,6 +90,7 @@ trait HasEndpointList
    */
   public function removeEndpoint(string $path): static
   {
+    $this->_assertNotLocked('remove endpoint');
     $this->initEndpointList();
     $this->endpoints->remove($path);
     return $this;

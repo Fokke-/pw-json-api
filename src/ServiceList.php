@@ -2,8 +2,6 @@
 
 namespace PwJsonApi;
 
-use ProcessWire\WireException;
-
 /**
  * Represents a list of services
  */
@@ -48,23 +46,16 @@ class ServiceList
    * @template TService of Service
    * @param TService $service
    * @param (callable(TService): void)|null $setup
-   * @todo Prevent cross-service injection when API is running
    */
   public function add(Service $service, callable|null $setup = null): static
   {
-    // Prevent cross-service injection
-    // if ($context instanceof Service && $context->_isInitialized === true) {
-    //   throw new WireException(
-    //     "Cannot add service '{$service->name}' as a child service for '{$context->name}'. Service '{$context->name}' is already initialized.",
-    //   );
-    // }
-
     $service->_prepare();
 
     if (is_callable($setup)) {
       call_user_func($setup, $service);
     }
 
+    $service->_lock();
     $this->items[] = $service;
     return $this;
   }

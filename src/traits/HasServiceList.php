@@ -64,6 +64,7 @@ trait HasServiceList
     Service $service,
     callable|null $setup = null,
   ): static {
+    $this->_assertNotLocked('add service');
     $this->initServiceList();
     $this->services->add($service, $setup);
     return $this;

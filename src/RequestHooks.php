@@ -4,7 +4,6 @@ namespace PwJsonApi;
 
 /**
  * Request hooks
- * @todo Prevent cross-service injection
  */
 class RequestHooks extends Hooks
 {

@@ -9,16 +9,7 @@ class HooksChildService extends Service
     $this->setBasePath('/nested');
 
     $this->hookBefore(function ($beforeArgs) {
-      $beforeArgs->endpoint->hookAfter(function ($afterArgs) {
-        $afterArgs->response->with([
-          'before_hook_execution_order' => [
-            ...$afterArgs->response->additionalData[
-              'before_hook_execution_order'
-            ] ?? [],
-            'child-service',
-          ],
-        ]);
-      });
+      HooksService::$beforeOrder[] = 'child-service';
     });
 
     $this->hookAfter(function ($args) {
@@ -48,16 +39,7 @@ class HooksChildService extends Service
         ]);
       })
       ->hookBefore(function ($args) {
-        $args->endpoint->hookAfter(function ($args) {
-          $args->response->with([
-            'before_hook_execution_order' => [
-              ...$args->response->additionalData[
-                'before_hook_execution_order'
-              ] ?? [],
-              'endpoint',
-            ],
-          ]);
-        });
+        HooksService::$beforeOrder[] = 'endpoint';
       })
       ->hookAfter(function ($args) {
         $args->response->with([

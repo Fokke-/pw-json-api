@@ -20,24 +20,42 @@ if ($page->template->name !== 'admin') {
         $args->service instanceof HooksService ||
         $args->service instanceof HooksChildService
       ) {
-        $args->endpoint->hookAfter(function ($args) {
-          $args->response->with([
-            'before_hook_execution_order' => [
-              ...$args->response->additionalData[
-                'before_hook_execution_order'
-              ] ?? [],
-              'api',
-            ],
-          ]);
-        });
+        HooksService::$beforeOrder[] = 'api';
       }
     })
     ->hookAfter(function ($args) {
+      if (
+        $args->service instanceof HooksService ||
+        $args->service instanceof HooksChildService
+      ) {
+        $args->response->with([
+          'after_hook_execution_order' => [
+            ...$args->response->additionalData['after_hook_execution_order'] ??
+            [],
+            'api',
+          ],
+        ]);
+      }
+
       $args->response->with([
         'request' => $args->request->toArray(),
       ]);
     })
     ->hookOnError(function ($args) {
+      if (
+        $args->service instanceof ExceptionService ||
+        $args->service instanceof HooksService ||
+        $args->service instanceof HooksChildService
+      ) {
+        $args->response->with([
+          'error_hook_execution_order' => [
+            ...$args->response->additionalData['error_hook_execution_order'] ??
+            [],
+            'api',
+          ],
+        ]);
+      }
+
       $args->response->with([
         'request' => $args->request->toArray(),
       ]);
