@@ -28,29 +28,29 @@ Configure the parser using the `configure()` method, which allows you to control
 
 ```php
 $parser->configure(function ($config) {
-  /** Recursively parse child pages? */
-  public bool $parseChildren = false;
+  // Recursively parse child pages? (default: false)
+  $config->parseChildren = false;
 
-  /** Selector for child pages */
-  public string $childrenSelector = '';
+  // Selector for child pages (default: '')
+  $config->childrenSelector = '';
 
-  /** Key name for child pages */
-  public string $childrenKey = '_children';
+  // Key name for child pages (default: '_children')
+  $config->childrenKey = '_children';
 
-  /** Recursively parse children of page field references? */
-  public bool $parsePageReferenceChildren = false;
+  // Recursively parse children of page field references? (default: false)
+  $config->parsePageReferenceChildren = false;
 
-  /** Maximum depth for recursive parsing */
-  public int $maxDepth = 3;
+  // Maximum depth for recursive parsing (default: 3)
+  $config->maxDepth = 3;
 
-  /** Output full file URLs */
-  public bool $fullFileUrls = true;
+  // Output full file URLs (default: true)
+  $config->fullFileUrls = true;
 
-  /** Parse custom fields of files? */
-  public bool $parseFileCustomFields = false;
+  // Parse custom fields of files? (default: false)
+  $config->parseFileCustomFields = false;
 
-  /** Key name for custom fields of files */
-  public string $fileCustomFieldsKey = '_custom_fields';
+  // Key name for custom fields of files (default: '_custom_fields')
+  $config->fileCustomFieldsKey = '_custom_fields';
 });
 ```
 
@@ -138,6 +138,12 @@ Hooks allow you to modify data before and after parsing pages, fields, images, a
 
 ::: tip
 Hooks must be defined before the `toArray()` or `toResponse()` call.
+:::
+
+::: tip
+All hook callbacks receive an `$args->depth` property (int) indicating the
+current recursion depth (starting at 1). Use this to customize behavior at
+different nesting levels.
 :::
 
 ### hookBeforePageParse()
@@ -257,7 +263,9 @@ $parser->hookBeforeImageParse(function ($args) {
 
 ### hookAfterImageParse()
 
-Use this to modify final parsed output of an image.
+Use this to modify final parsed output of an image. The original (unmodified)
+image is available via `$args->originalImage`, which is useful for generating
+thumbnails or alternative sizes from the source image.
 
 ```php
 $parser->hookAfterImageParse(function ($args) {
