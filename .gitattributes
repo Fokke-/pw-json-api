@@ -1,3 +1,4 @@
+CLAUDE.md export-ignore
 .ddev export-ignore
 .git export-ignore
 .gitattributes export-ignore
@@ -7,6 +8,7 @@
 .husky export-ignore
 .prettierrc.json export-ignore
 .zed export-ignore
+composer.lock export-ignore
 docs export-ignore
 index.php export-ignore
 node_modules export-ignore
