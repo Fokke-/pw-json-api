@@ -19,7 +19,7 @@ features:
     details: No cryptic configuration files. Get the first endpoint running in minutes.
   - icon: 📦
     title: Extensible
-    details: With multiple API instances, service stacks and hooks, your API is ready to scale.
+    details: With multiple API instances, service stacks, hooks and plugins, your API is ready to scale.
   - icon: 🔧
     title: Built-in Tools
     details: Convert ProcessWire pages into structured data, ready for API responses.
