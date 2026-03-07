@@ -65,7 +65,7 @@ You can access the following properties via the `$args` parameter of the handler
 | `services`  | `ServiceList`            | List of all parent services |
 | `api`       | `Api`                    | API instance                |
 
-You need to either return a `Response` or throw an `ApiException` from the handler.
+You need to return either a `Response` or an `ApiException` from the handler.
 
 ```php
 $api->handleException(function ($args) {

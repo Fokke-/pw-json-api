@@ -30,6 +30,7 @@
 
 - Error hooks will be applied to `ApiException` thrown from `handleException()` method
 - Fixed incorrect `Content-Type: application/json` header when an unhandled exception was thrown
+- Fixed exception handler not returning `Response` when handler result was valid
 
 ## 1.2.0
 

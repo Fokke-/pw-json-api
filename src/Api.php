@@ -166,10 +166,12 @@ class Api
             $response = $exceptionHandlerResult;
           } elseif ($exceptionHandlerResult instanceof ApiException) {
             throw $exceptionHandlerResult;
+          } else {
+            throw $e;
           }
+        } else {
+          throw $e;
         }
-
-        throw $e;
       }
 
       // After hooks
