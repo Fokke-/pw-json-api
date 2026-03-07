@@ -16,7 +16,10 @@ if ($page->template->name !== 'admin') {
     })
     ->setBasePath('/api')
     ->hookBefore(function ($args) {
-      if ($args->service instanceof HooksService) {
+      if (
+        $args->service instanceof HooksService ||
+        $args->service instanceof HooksChildService
+      ) {
         $args->endpoint->hookAfter(function ($args) {
           $args->response->with([
             'before_hook_execution_order' => [
@@ -33,16 +36,6 @@ if ($page->template->name !== 'admin') {
       $args->response->with([
         'request' => $args->request->toArray(),
       ]);
-
-      if ($args->service instanceof HooksService) {
-        $args->response->with([
-          'after_hook_execution_order' => [
-            ...$args->response->additionalData['after_hook_execution_order'] ??
-            [],
-            'api',
-          ],
-        ]);
-      }
     })
     ->hookOnError(function ($args) {
       $args->response->with([

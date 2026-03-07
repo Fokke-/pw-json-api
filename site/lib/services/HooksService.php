@@ -1,6 +1,6 @@
 <?php namespace ProcessWire;
 
-use PwJsonApi\{Service, Response};
+use PwJsonApi\{ApiException, Service, Response};
 
 class HooksService extends Service
 {
@@ -28,6 +28,36 @@ class HooksService extends Service
           ],
         ]);
       });
+
+      $beforeArgs->api->hookAfter(function ($args) {
+        $args->response->with([
+          'after_hook_execution_order' => [
+            ...$args->response->additionalData['after_hook_execution_order'] ??
+            [],
+            'api',
+          ],
+        ]);
+      });
+
+      $beforeArgs->api->hookOnError(function ($args) {
+        $args->response->with([
+          'error_hook_execution_order' => [
+            ...$args->response->additionalData['error_hook_execution_order'] ??
+            [],
+            'api',
+          ],
+        ]);
+      });
+    });
+
+    $this->hookOnError(function ($args) {
+      $args->response->with([
+        'error_hook_execution_order' => [
+          ...$args->response->additionalData['error_hook_execution_order'] ??
+          [],
+          'service',
+        ],
+      ]);
     });
 
     $this->hookAfter(function ($args) {
@@ -76,6 +106,8 @@ class HooksService extends Service
           ],
         ]);
       });
+
+    $this->addService(new HooksChildService());
 
     $this->addEndpoint('manipulate-response')
       ->get(function ($args) {

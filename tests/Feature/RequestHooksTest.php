@@ -65,6 +65,54 @@ test('after hook can manipulate response', function () {
   expect($json['data']['fruits'])->toContain('banana');
 });
 
+test('nested service before hooks execution order', function () {
+  $client = getHttp();
+  $res = $client->get('hooks/nested');
+  $json = resToJson($res);
+
+  expect($json['before_hook_execution_order'])->toBe([
+    'api',
+    'service',
+    'child-service',
+    'endpoint',
+  ]);
+});
+
+test('nested service after hooks execution order', function () {
+  $client = getHttp();
+  $res = $client->get('hooks/nested');
+  $json = resToJson($res);
+
+  expect($json['after_hook_execution_order'])->toBe([
+    'endpoint',
+    'child-service',
+    'service',
+    'api',
+  ]);
+});
+
+test('nested service error hooks execution order', function () {
+  $client = getHttp();
+  $res = $client->get('hooks/nested/error');
+  $json = resToJson($res);
+
+  expect($json['error_hook_execution_order'])->toBe([
+    'endpoint',
+    'child-service',
+    'service',
+    'api',
+  ]);
+});
+
+test('nested service base path', function () {
+  $client = getHttp();
+  $nested = $client->get('hooks/nested');
+  $root = $client->get('hooks');
+
+  expect($nested->getStatusCode())->toBe(200);
+  expect($root->getStatusCode())->toBe(200);
+});
+
 test('error hook arguments', function () {
   $client = getHttp();
   $res = $client->get('exceptions');
