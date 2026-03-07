@@ -89,6 +89,10 @@ class ExceptionService extends Service
         $this->addEndpointExecutionOrder($args);
       });
 
+    $this->addEndpoint('/response-from-handler')->get(function () {
+      throw new \Exception('handled-with-response');
+    });
+
     $this->addEndpoint('/manipulate-response')
       ->get(function () {
         throw new ApiException('wire-exception');

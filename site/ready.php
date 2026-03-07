@@ -1,7 +1,7 @@
 <?php namespace ProcessWire;
 
 // JSON API
-use PwJsonApi\{Api, ApiException};
+use PwJsonApi\{Api, ApiException, Response};
 use PwJsonApi\Plugins\{CSRFPlugin};
 
 if (!defined('PROCESSWIRE')) {
@@ -62,6 +62,17 @@ if ($page->template->name !== 'admin') {
     ->addService(new HelloWorldService())
     ->addService(new RequestService())
     ->addService(new HooksService())
+    ->addService(new ExceptionService())
+    ->run();
+
+  (new Api())
+    ->setBasePath('exception-response')
+    ->handleException(function ($args) {
+      return (new Response([
+        'handled' => true,
+        'message' => $args->exception->getMessage(),
+      ]))->code(500);
+    })
     ->addService(new ExceptionService())
     ->run();
 

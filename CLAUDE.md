@@ -19,11 +19,24 @@ Requires PHP 8.2+, developed in a DDEV environment.
 - **Naming:** `...Args` for DTOs, `...Exception`, `...Interface`, `...Config`
 - **PHPDoc:** required for complex callables/generics; omit when native types suffice
 
+## Architecture
+
+- **Service:** abstract class that groups endpoints; extends `Service` and overrides `init()` to add endpoints, hooks, and child services. `init()` is the preferred place for all service configuration.
+- **Api:** top-level container that holds services, runs them via `run()`, and registers ProcessWire URL hooks.
+
 ## Testing
 
 - Pest PHP framework
 - Unit tests: `tests/Unit/`, feature tests: `tests/Feature/`
 - Test helpers: `tests/Pest.php`
+
+## Workflow checklist
+
+When modifying code, always verify:
+
+- The feature has an existing test, and the test is up to date with the change
+- Documentation in `docs/` is up to date for the affected feature
+- If the feature is not documented at all, ask the developer whether to add it
 
 ## Git
 

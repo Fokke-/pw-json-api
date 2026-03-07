@@ -55,3 +55,13 @@ test('custom error handler function handles WireException', function () {
   expect($res->getStatusCode())->toBe(400);
   expect($data['message'])->toBe('wire-exception');
 });
+
+test('exception handler can return Response', function () {
+  $client = getHttp('exception-response');
+  $res = $client->get('exceptions/response-from-handler');
+  $json = resToJson($res);
+
+  expect($res->getStatusCode())->toBe(500);
+  expect($json['data']['handled'])->toBe(true);
+  expect($json['data']['message'])->toBe('handled-with-response');
+});

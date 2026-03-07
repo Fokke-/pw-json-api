@@ -77,6 +77,19 @@ test('api is set on service after run', function () {
   expect($ref->getValue($service))->toBe($api);
 });
 
+test('configure sets config values', function () {
+  $api = new Api();
+  $api->configure(function ($config) {
+    $config->trailingSlashes = true;
+    $config->jsonFlags = JSON_PRETTY_PRINT;
+  });
+
+  $ref = new ReflectionProperty($api, 'config');
+  $config = $ref->getValue($api);
+  expect($config->trailingSlashes)->toBe(true);
+  expect($config->jsonFlags)->toBe(JSON_PRETTY_PRINT);
+});
+
 test('duplicate endpoint paths are not allowed', function () {
   $api = new Api();
   $api->addService(new FruitService());
