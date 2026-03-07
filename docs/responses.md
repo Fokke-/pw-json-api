@@ -57,3 +57,31 @@ The resulting JSON:
   "message": "Your details were saved successfully!"
 }
 ```
+
+## Response without data
+
+If you pass `null` to the constructor, the `data` key will be omitted from the response. This is useful when the response only contains additional keys.
+
+```php
+return (new Response(null))->with([
+  'message' => 'Action completed successfully!',
+]);
+```
+
+The resulting JSON:
+
+```json
+{
+  "message": "Action completed successfully!"
+}
+```
+
+## Methods
+
+### toArray()
+
+Return the response as an associative array.
+
+```php
+$response->toArray();
+```
