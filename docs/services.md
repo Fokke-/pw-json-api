@@ -79,7 +79,7 @@ $page = $this->wire->pages->findOne('template=basic-page');
 A reference to the main instance will be injected into the `api` property of the service. You can use this to access methods and properties of other services.
 
 ::: warning
-The main instance will be injected into the service after `run()` has been called. Therefore, you cannot access `api` directly in the service `init()` method.
+The main instance will be injected into the service when `run()` is called. Therefore, you cannot access `api` directly in the service `init()` method.
 :::
 
 ```php
