@@ -23,7 +23,7 @@ Like an API instance or service, an endpoint can also contain request hooks. [Re
 
 ## Example endpoint
 
-Call `addEndpoint()` in the service constructor and pass the `path` you want to listen to.
+Call `addEndpoint()` in the service `init()` method and pass the `path` you want to listen to.
 
 ```php
 use PwJsonApi\ApiException;

@@ -44,7 +44,6 @@ abstract class Service
    * Prepare service
    *
    * @internal
-   * @todo check if this is actually being used
    */
   public function _prepare(): static
   {

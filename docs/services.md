@@ -8,7 +8,7 @@ You can also define service-wide request hooks, which will apply to every endpoi
 
 ## Example service
 
-Create a new service by extending the `Service` class. In the constructor, you can define one or more endpoints with handlers for different request methods. [Read more about endpoints](/endpoints).
+Create a new service by extending the `Service` class. Override the `init()` method to define one or more endpoints with handlers for different request methods. [Read more about endpoints](/endpoints).
 
 ```php
 <?php namespace ProcessWire;
@@ -19,11 +19,9 @@ class HelloWorldService extends Service
 {
   protected string $word = 'world';
 
-  public function __construct()
+  protected function init()
   {
-    parent::__construct();
-
-    $this->setBasePath('/greet')
+    $this->setBasePath('/greet');
 
     // Listen to the base path (/greet)
     $this->addEndpoint('/')->get(function () {
@@ -49,7 +47,7 @@ class HelloWorldService extends Service
 
 ## Base path
 
-Like the main instance, the service can also define its base path in the constructor.
+Like the main instance, the service can also define its base path in the service `init()` method.
 
 ```php
 $this->setBasePath('/greet');
@@ -59,10 +57,10 @@ $this->setBasePath('/greet');
 
 In many cases, a flat service tree is enough, but for larger APIs you can define child services to further categorize the endpoints. Child services will inherit all hooks from parent service(s), and the base paths of the parent services will apply.
 
-Child services can be defined in the service constructor by calling `addService()`.
+Child services can be defined in the service `init()` method by calling `addService()`.
 
 ```php
-// In service constructor
+// In init()
 $this->addService(new AnotherService());
 ```
 
@@ -81,16 +79,14 @@ $page = $this->wire->pages->findOne('template=basic-page');
 A reference to the main instance will be injected into the `api` property of the service. You can use this to access methods and properties of other services.
 
 ::: warning
-The main instance will be injected into the service after `run()` has been called. Therefore, you cannot access `api` directly in the service constructor.
+The main instance will be injected into the service after `run()` has been called. Therefore, you cannot access `api` directly in the service `init()` method.
 :::
 
 ```php
 class HelloWorldService extends Service
 {
-  public function __construct()
+  protected function init()
   {
-    parent::__construct();
-
     // ❌ Trying to access API too early
     $anotherService = $this->api->findService('AnotherService')
 

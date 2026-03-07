@@ -23,9 +23,9 @@ $api->hookOnError(function ($args) {
 
 ### Service error hooks
 
-Defined for a single service branch. These hooks will apply to all errors thrown in endpoints within the given service (including child services). Service hooks can be defined directly in the service constructor or injected into the service object.
+Defined for a single service branch. These hooks will apply to all errors thrown in endpoints within the given service (including child services). Service hooks can be defined directly in the service `init()` method or injected into the service object.
 
-#### Define in service constructor
+#### Define in init()
 
 ```php
 $this->hookOnError(function ($args) {
