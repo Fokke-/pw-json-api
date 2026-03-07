@@ -16,15 +16,14 @@ trait HasServiceList
 
   /**
    * Initialise Service list
-   * @todo refactor to return the list
    */
-  private function initServiceList(): static
+  private function initServiceList(): ServiceList
   {
     if (empty($this->services)) {
       $this->services = new ServiceList();
     }
 
-    return $this;
+    return $this->services;
   }
 
   /**
@@ -34,8 +33,7 @@ trait HasServiceList
    */
   public function getServices(): array
   {
-    $this->initServiceList();
-    return $this->services->getItems();
+    return $this->initServiceList()->getItems();
   }
 
   /**
@@ -46,8 +44,7 @@ trait HasServiceList
    */
   public function getService(string $name): Service|null
   {
-    $this->initServiceList();
-    return $this->services->get($name);
+    return $this->initServiceList()->get($name);
   }
 
   /**
@@ -65,8 +62,7 @@ trait HasServiceList
     callable|null $setup = null,
   ): static {
     $this->_assertNotLocked('add service');
-    $this->initServiceList();
-    $this->services->add($service, $setup);
+    $this->initServiceList()->add($service, $setup);
     return $this;
   }
 }

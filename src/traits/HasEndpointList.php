@@ -17,13 +17,13 @@ trait HasEndpointList
   /**
    * Initialise Endpoint list
    */
-  private function initEndpointList(): static
+  private function initEndpointList(): EndpointList
   {
     if (empty($this->endpoints)) {
       $this->endpoints = new EndpointList();
     }
 
-    return $this;
+    return $this->endpoints;
   }
 
   /**
@@ -31,8 +31,7 @@ trait HasEndpointList
    */
   public function getBasePath(): string|null
   {
-    $this->initEndpointList();
-    return $this->endpoints->getBasePath();
+    return $this->initEndpointList()->getBasePath();
   }
 
   /**
@@ -40,8 +39,7 @@ trait HasEndpointList
    */
   public function setBasePath(string|null $path): static
   {
-    $this->initEndpointList();
-    $this->endpoints->setBasePath($path);
+    $this->initEndpointList()->setBasePath($path);
     return $this;
   }
 
@@ -52,8 +50,7 @@ trait HasEndpointList
    */
   public function getEndpoints(): array
   {
-    $this->initEndpointList();
-    return $this->endpoints->getItems();
+    return $this->initEndpointList()->getItems();
   }
 
   /**
@@ -64,8 +61,7 @@ trait HasEndpointList
    */
   public function getEndpoint(string $path): Endpoint|null
   {
-    $this->initEndpointList();
-    return $this->endpoints->get($path);
+    return $this->initEndpointList()->get($path);
   }
 
   /**
@@ -78,9 +74,8 @@ trait HasEndpointList
   public function addEndpoint(string $path): Endpoint
   {
     $this->_assertNotLocked('add endpoint');
-    $this->initEndpointList();
     $endpoint = new Endpoint($path);
-    $this->endpoints->add($endpoint);
+    $this->initEndpointList()->add($endpoint);
 
     return $endpoint;
   }
@@ -91,8 +86,7 @@ trait HasEndpointList
   public function removeEndpoint(string $path): static
   {
     $this->_assertNotLocked('remove endpoint');
-    $this->initEndpointList();
-    $this->endpoints->remove($path);
+    $this->initEndpointList()->remove($path);
     return $this;
   }
 }

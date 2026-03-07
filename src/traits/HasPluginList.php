@@ -24,13 +24,13 @@ trait HasPluginList
   /**
    * Initialise Plugin list
    */
-  private function initPluginList(): static
+  private function initPluginList(): PluginList
   {
     if (empty($this->plugins)) {
       $this->plugins = new PluginList();
     }
 
-    return $this;
+    return $this->plugins;
   }
 
   /**
@@ -48,9 +48,7 @@ trait HasPluginList
     callable|null $setup = null,
   ): static {
     $this->_assertNotLocked('add plugin');
-    $this->initPluginList();
-
-    $this->plugins->add($plugin);
+    $this->initPluginList()->add($plugin);
 
     if (is_callable($setup)) {
       call_user_func($setup, $plugin);
@@ -70,8 +68,7 @@ trait HasPluginList
    */
   public function getPlugins(): array
   {
-    $this->initPluginList();
-    return $this->plugins->getAll();
+    return $this->initPluginList()->getAll();
   }
 
   /**
@@ -83,8 +80,7 @@ trait HasPluginList
    */
   public function getPlugin(string $className): ApiPlugin|null
   {
-    $this->initPluginList();
-    return $this->plugins->get($className);
+    return $this->initPluginList()->get($className);
   }
 
   /**
@@ -94,8 +90,7 @@ trait HasPluginList
    */
   public function hasPlugin(string $className): bool
   {
-    $this->initPluginList();
-    return $this->plugins->has($className);
+    return $this->initPluginList()->has($className);
   }
 
   /**
@@ -105,8 +100,7 @@ trait HasPluginList
    */
   public function _initPlugins(): void
   {
-    $this->initPluginList();
     $this->_pluginsInitialized = true;
-    $this->plugins->_initAll($this);
+    $this->initPluginList()->_initAll($this);
   }
 }
