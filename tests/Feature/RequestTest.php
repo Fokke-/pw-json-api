@@ -246,3 +246,69 @@ test('multiple file uploads', function () {
     'foo' => 'foo',
   ]);
 });
+
+test('head method', function () {
+  $client = getHttp();
+  $res = $client->request('HEAD', 'request');
+
+  expect($res->getStatusCode())->toBe(200);
+  expect((string) $res->getBody())->toBe('');
+});
+
+test('malformed json payload', function () {
+  $client = getHttp();
+  $res = $client->post('request', [
+    'headers' => [
+      'Content-Type' => 'application/json',
+    ],
+    'body' => '{invalid json',
+  ]);
+
+  expect($res->getStatusCode())->toBe(400);
+  $json = resToJson($res);
+  expect($json['error'])->toBe('Malformed request payload');
+});
+
+test('query parameters', function () {
+  $client = getHttp();
+  $res = $client->get('request', [
+    'query' => [
+      'foo' => 'bar',
+      'baz' => 'qux',
+    ],
+  ]);
+
+  $json = resToJson($res);
+  expect($json['request']['queryParams'])->toBe([
+    'foo' => 'bar',
+    'baz' => 'qux',
+  ]);
+  expect($json['request']['queryParams']['foo'])->toBe('bar');
+  expect($json['request']['queryParams']['baz'])->toBe('qux');
+});
+
+test('toArray returns all properties', function () {
+  $client = getHttp();
+  $res = $client->get('request');
+
+  $json = resToJson($res);
+  $request = $json['request'];
+
+  expect($request)->toBeArray();
+  expect($request)->toHaveKeys([
+    'method',
+    'methodEnum',
+    'path',
+    'routeParams',
+    'queryParams',
+    'headers',
+    'contentType',
+    'accept',
+    'cookies',
+    'ip',
+    'userAgent',
+    'protocol',
+    'body',
+    'files',
+  ]);
+});

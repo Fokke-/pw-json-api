@@ -48,7 +48,7 @@ class Request
   public string|null $accept;
 
   /**
-   * Shorthand for $_COOKIES
+   * Shorthand for $_COOKIE
    *
    * @var array<string, string>
    */
@@ -75,6 +75,8 @@ class Request
 
   public function __construct()
   {
+    $this->routeParams = [];
+    $this->body = null;
     $this->method = $this->getServerVar('REQUEST_METHOD') ?? '';
     $this->methodEnum = RequestMethod::tryFrom($this->method);
     $this->path = $this->getPath($this->getServerVar('REQUEST_URI'));

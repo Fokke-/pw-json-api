@@ -33,6 +33,11 @@ class RequestService extends Service
         return new Response([
           'method' => $args->request->method,
         ]);
+      })
+      ->head(function ($args) {
+        return new Response([
+          'method' => $args->request->method,
+        ]);
       });
 
     $this->addEndpoint('/dynamic-path/name/{name}')->get(function () {
