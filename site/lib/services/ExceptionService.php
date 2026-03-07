@@ -73,6 +73,14 @@ class ExceptionService extends Service
         $this->addEndpointExecutionOrder($args);
       });
 
+    $this->addEndpoint('/with')
+      ->get(function () {
+        throw (new ApiException())->with(['key' => 'value']);
+      })
+      ->hookOnError(function ($args) {
+        $this->addEndpointExecutionOrder($args);
+      });
+
     $this->addEndpoint('/base-exception')
       ->get(function () {
         throw new \Exception('base-exception');

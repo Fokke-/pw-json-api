@@ -34,8 +34,19 @@ test('if message is not passed, response does not include it', function () {
 test('Api404Exception is a shorthand', function () {
   $client = getHttp();
   $res = $client->get('exceptions/404');
+  $data = resToJson($res);
 
   expect($res->getStatusCode())->toBe(404);
+  expect($data)->not()->toHaveKey('error');
+});
+
+test('with() adds top-level keys to error response', function () {
+  $client = getHttp();
+  $res = $client->get('exceptions/with');
+  $data = resToJson($res);
+
+  expect($res->getStatusCode())->toBe(400);
+  expect($data['key'])->toBe('value');
 });
 
 test('custom error handler function handles Exception', function () {
