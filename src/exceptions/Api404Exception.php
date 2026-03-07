@@ -15,6 +15,6 @@ class Api404Exception extends ApiException
   public function __construct(?\Throwable $previous = null)
   {
     parent::__construct(null, $previous);
-    $this->response->code(404);
+    $this->code(404);
   }
 }
