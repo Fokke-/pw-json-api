@@ -97,7 +97,7 @@ class Response
       return null;
     }
 
-    $json = json_encode($this->toArray($withData), $jsonOptions);
+    $json = json_encode($data, $jsonOptions);
     return is_string($json) ? $json : null;
   }
 }
