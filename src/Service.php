@@ -28,7 +28,7 @@ abstract class Service
    *
    * @internal
    */
-  public bool $_isInitialized = false;
+  private bool $_isInitialized = false;
 
   /** Constructor */
   public function __construct()
@@ -52,15 +52,15 @@ abstract class Service
       return $this;
     }
 
-    $this->init();
     $this->_isInitialized = true;
+    $this->init();
     return $this;
   }
 
   /**
-   * Service initializer
+   * Configure service endpoints and hooks.
    *
-   * @todo docs
+   * @phpstan-ignore missingType.return
    */
-  public function init(): void {}
+  protected function init() {}
 }

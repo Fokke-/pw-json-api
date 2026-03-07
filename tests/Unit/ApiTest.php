@@ -43,6 +43,8 @@ test('endpoint can be found', function () {
     $service->addService(new FruitService());
   });
 
+  $api->run();
+
   expect($api->findEndpoint('/food') instanceof Endpoint)->toBe(true);
   expect($api->findEndpoint('/food/fruits/orange') instanceof Endpoint)->toBe(
     true,
@@ -52,3 +54,39 @@ test('endpoint can be found', function () {
     $api->findService('FoodService')->findEndpoint('/') instanceof Endpoint,
   )->toBe(true);
 });
+
+test('duplicate services are not allowed', function () {
+  $api = new Api();
+  $api->addService(new FoodService());
+  $api->addService(new FoodService());
+
+  $api->run();
+})->throws(
+  \ProcessWire\WireException::class,
+  "Duplicated service 'FoodService'",
+);
+
+test('api is set on service after run', function () {
+  $api = new Api();
+  $api->addService(new FoodService());
+
+  $api->run();
+
+  $service = $api->getService('FoodService');
+  $ref = new ReflectionProperty($service, 'api');
+  expect($ref->getValue($service))->toBe($api);
+});
+
+test('duplicate endpoint paths are not allowed', function () {
+  $api = new Api();
+  $api->addService(new FruitService());
+
+  $service = new FruitService();
+  $service->name = 'FruitService2';
+  $api->addService($service);
+
+  $api->run();
+})->throws(
+  \ProcessWire\WireException::class,
+  "Duplicated endpoint path '/fruits/?' (defined in service 'FruitService2').",
+);

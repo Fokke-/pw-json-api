@@ -21,7 +21,7 @@ class ApiSearch
    * yielding information about each service and endpoint.
    *
    * @param Service[] $services
-   * @return \Generator<ApiSearchServiceResult|ApiSearchEndpointResult>
+   * @return \Generator<int, ApiSearchServiceResult|ApiSearchEndpointResult>
    */
   public function iterate(array $services): \Generator
   {

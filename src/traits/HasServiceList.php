@@ -65,7 +65,7 @@ trait HasServiceList
     callable|null $setup = null,
   ): static {
     $this->initServiceList();
-    $this->services->add($service, $setup, $this);
+    $this->services->add($service, $setup);
     return $this;
   }
 }
