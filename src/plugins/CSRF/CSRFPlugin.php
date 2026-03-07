@@ -87,6 +87,7 @@ class CSRFPlugin extends ApiPlugin implements ApiPluginInterface
    * Check CSRF token
    *
    * @throws ApiException If validation fails
+   * @todo should we get the old value of config->ajax and set it back after the validation is complete?
    */
   protected function checkToken(): void
   {
