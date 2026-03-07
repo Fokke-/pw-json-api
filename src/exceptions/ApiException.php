@@ -31,7 +31,7 @@ class ApiException extends \Exception
   /**
    * Constructor
    *
-   * @param string $message
+   * @param string|null $message
    * @param \Throwable|null $previous
    */
   public function __construct(
