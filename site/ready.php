@@ -80,6 +80,12 @@ if ($page->template->name !== 'admin') {
     ->run();
 
   (new Api())
+    ->setBasePath('plugin-tree')
+    ->addPlugin(new PluginTreeTestPlugin())
+    ->addService(new FoodService())
+    ->run();
+
+  (new Api())
     ->setBasePath('csrf')
     ->addPlugin(new CSRFPlugin(), function ($plugin) {
       // Token name

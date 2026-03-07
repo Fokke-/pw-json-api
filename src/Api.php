@@ -7,9 +7,6 @@ use function ProcessWire\wire;
 
 /**
  * ProcessWire JSON API
- *
- * @todo PluginList + trait
- * @todo Delay plugin initialization
  */
 class Api
 {
@@ -18,7 +15,7 @@ class Api
   use HasServiceList;
   use HasRequestHooks;
   use HasApiSearch;
-  use HasPluginSupport;
+  use HasPluginList;
   use HasWire;
 
   /** Configuration */
@@ -243,6 +240,8 @@ class Api
    */
   public function run(): void
   {
+    $this->_initPlugins();
+
     $isOptions = ($_SERVER['REQUEST_METHOD'] ?? null) == 'OPTIONS';
 
     /** @var string[] */
@@ -291,6 +290,9 @@ class Api
       foreach ($result->serviceSequence as $service) {
         $result->endpoint->services->add($service);
       }
+
+      // Initialize endpoint plugins
+      $result->endpoint->_initPlugins();
 
       // Add listener for the endpoint path
       $this->wire->addHook($path, function (HookEvent $event) use (

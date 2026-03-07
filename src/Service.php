@@ -17,7 +17,7 @@ abstract class Service
   use HasEndpointList;
   use HasRequestHooks;
   use HasApiSearch;
-  use HasPluginSupport;
+  use HasPluginList;
   use HasWire;
 
   /** Service name */
@@ -53,6 +53,7 @@ abstract class Service
 
     $this->_isInitialized = true;
     $this->init();
+    $this->_initPlugins();
     return $this;
   }
 

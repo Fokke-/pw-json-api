@@ -2,10 +2,10 @@
 
 namespace ProcessWire;
 
-use PwJsonApi\Plugins\{ApiPlugin, ApiPluginInterface, CSRFPluginService};
-use PwJsonApi\{Api, Service, ApiException, Endpoint};
+use PwJsonApi\Plugins\ApiPlugin;
+use PwJsonApi\{Api, Service, Endpoint};
 
-class TestPlugin extends ApiPlugin implements ApiPluginInterface
+class TestPlugin extends ApiPlugin
 {
   public function init(Api|Service|Endpoint $context): static
   {

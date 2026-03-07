@@ -67,7 +67,10 @@ export default withMermaid({
       },
       {
         text: 'Plugins',
-        items: [{ text: 'CSRF protection', link: '/plugins/csrf' }],
+        items: [
+          { text: 'Overview', link: '/plugins/plugins-overview' },
+          { text: 'CSRF protection', link: '/plugins/csrf' },
+        ],
       },
       {
         text: 'Tools',

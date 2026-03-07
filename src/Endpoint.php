@@ -9,7 +9,7 @@ class Endpoint
 {
   use Utils;
   use HasRequestHooks;
-  use HasPluginSupport;
+  use HasPluginList;
 
   /**
    * Endpoint path

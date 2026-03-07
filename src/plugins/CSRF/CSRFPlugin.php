@@ -2,7 +2,7 @@
 
 namespace PwJsonApi\Plugins;
 
-use PwJsonApi\Plugins\{ApiPlugin, ApiPluginInterface, CSRFPluginService};
+use PwJsonApi\Plugins\{ApiPlugin, CSRFPluginService};
 use PwJsonApi\{Api, Service, ApiException, Endpoint};
 use ProcessWire\{WireException, WireCSRFException};
 
@@ -12,7 +12,7 @@ use ProcessWire\{WireException, WireCSRFException};
  *
  * @see https://fokke-.github.io/pw-json-api/plugins/csrf.html
  */
-class CSRFPlugin extends ApiPlugin implements ApiPluginInterface
+class CSRFPlugin extends ApiPlugin
 {
   /** Token name */
   public string $tokenName = 'pw_json_api_csrf_token';
@@ -87,7 +87,6 @@ class CSRFPlugin extends ApiPlugin implements ApiPluginInterface
    * Check CSRF token
    *
    * @throws ApiException If validation fails
-   * @todo should we get the old value of config->ajax and set it back after the validation is complete?
    */
   protected function checkToken(): void
   {
@@ -95,12 +94,15 @@ class CSRFPlugin extends ApiPlugin implements ApiPluginInterface
     // to allow passing token as a header.
     // Otherwise the plugin would force the end-user to define
     // form payload as FormData.
+    $previousAjax = $this->wire->config->ajax;
     $this->wire->config->ajax = true;
 
     try {
       $this->wire->session->CSRF->validate($this->tokenName);
     } catch (WireCSRFException $e) {
       throw (new ApiException($e->getMessage()))->with($this->getToken());
+    } finally {
+      $this->wire->config->ajax = $previousAjax;
     }
   }
 }
