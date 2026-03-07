@@ -77,7 +77,7 @@ $this->addEndpoint('/hello-world')
     ]);
   })
   ->hookOnError(function ($args) {
-    $args->response->data['_foo'] = 'foo';
+    $args->response->with(['_foo' => 'foo']);
   });
 ```
 
@@ -85,7 +85,7 @@ $this->addEndpoint('/hello-world')
 
 ```php
 $api->findEndpoint('/api/hello-world')?->hookOnError(function ($args) {
-  $args->response->data['_foo'] = 'foo';
+  $args->response->with(['_foo' => 'foo']);
 });
 ```
 
