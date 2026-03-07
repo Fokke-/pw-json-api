@@ -28,6 +28,12 @@ class PageParser
   /** Default properties to parse */
   protected const PROPERTIES_DEFAULT = ['id', 'name'];
 
+  /**
+   * @var array<class-string, string>
+   * @internal
+   */
+  private static array $fieldTypeNameCache = [];
+
   /** Field types to skip */
   protected const SKIP_FIELDTYPES = [
     'FieldtypeCache',
@@ -126,7 +132,7 @@ class PageParser
   }
 
   /**
-   * Specify properties to parse. By default, id, name, and template will be included.
+   * Specify properties to parse. By default, id and name will be included.
    * Any values specified here will be included with the defaults.
    *
    * Note that you can also pass method names, such as numChildren.
@@ -235,7 +241,7 @@ class PageParser
           $field = $page->getField($fieldName);
           if (
             $field === null ||
-            in_array($field->type, self::SKIP_FIELDTYPES)
+            in_array((string) $field->type, self::SKIP_FIELDTYPES, true)
           ) {
             return $acc;
           }
@@ -362,18 +368,19 @@ class PageParser
   {
     $value = $page->{$field->name};
 
-    // Clone current parser. This will be used for fields with
-    // any sort of page reference as a value.
-    $parser = clone $this;
-    $parser->config = clone $this->config;
-    $parser->config->parseChildren =
-      $parser->config->parsePageReferenceChildren;
+    // Clone is deferred until needed (hooks or Page/PageArray fields)
+    $parser = null;
 
     // Run BeforeFieldParse hooks
     $beforeFieldParseHooks = $this->getPageParserHooks(
       PageParserHookKey::BeforeFieldParse,
     );
     if (!empty($beforeFieldParseHooks)) {
+      $parser = clone $this;
+      $parser->config = clone $this->config;
+      $parser->config->parseChildren =
+        $parser->config->parsePageReferenceChildren;
+
       $hookRet = new HookReturnBeforeFieldParse();
       $hookRet->field = $field;
       $hookRet->page = $page;
@@ -388,11 +395,13 @@ class PageParser
       }
     }
 
-    $parsedValue = (function () use ($value, $field, $page, $parser) {
+    $parsedValue = (function () use ($value, $field, $page, &$parser) {
       /** @var Fieldtype */
       $fieldType = $field->type;
 
-      $fieldClassName = (new \ReflectionClass($fieldType))->getShortName();
+      $fieldClassName = self::$fieldTypeNameCache[
+        $fieldType::class
+      ] ??= (new \ReflectionClass($fieldType))->getShortName();
 
       if ($value === null) {
         return null;
@@ -409,32 +418,42 @@ class PageParser
       } elseif ($value instanceof Pageimage) {
         return $this->parseImage($value, $field, $page);
       } elseif ($value instanceof Pageimages) {
-        return array_reduce(
-          $value->getArray(),
-          function (array $acc, Pageimage $image) use ($field, $page) {
-            $acc[] = $this->parseImage($image, $field, $page);
-            return $acc;
-          },
-          [],
+        return array_values(
+          array_map(
+            fn(Pageimage $image) => $this->parseImage($image, $field, $page),
+            $value->getArray(),
+          ),
         );
       } elseif ($value instanceof Pagefile) {
         return $this->parseFile($value, $field, $page);
       } elseif ($value instanceof Pagefiles) {
-        return array_reduce(
-          $value->getArray(),
-          function (array $acc, Pagefile $file) use ($field, $page) {
-            $acc[] = $this->parseFile($file, $field, $page);
-            return $acc;
-          },
-          [],
+        return array_values(
+          array_map(
+            fn(Pagefile $file) => $this->parseFile($file, $field, $page),
+            $value->getArray(),
+          ),
         );
       } elseif ($value instanceof Page) {
         if (!$value->id) {
           return null;
         }
 
+        if ($parser === null) {
+          $parser = clone $this;
+          $parser->config = clone $this->config;
+          $parser->config->parseChildren =
+            $parser->config->parsePageReferenceChildren;
+        }
+
         return $parser->input($value)->toArray();
       } elseif ($value instanceof PageArray) {
+        if ($parser === null) {
+          $parser = clone $this;
+          $parser->config = clone $this->config;
+          $parser->config->parseChildren =
+            $parser->config->parsePageReferenceChildren;
+        }
+
         return $parser->input($value)->toArray();
       } elseif ($value instanceof SelectableOptionArray) {
         // Single option
@@ -459,17 +478,15 @@ class PageParser
         }
 
         // Multiple options
-        return array_reduce(
-          $value->getArray(),
-          function (array $acc, SelectableOption $option) {
-            $acc[] = [
+        return array_values(
+          array_map(
+            fn(SelectableOption $option) => [
               'id' => $option->id,
               'value' => $option->value,
               'title' => $option->title,
-            ];
-            return $acc;
-          },
-          [],
+            ],
+            $value->getArray(),
+          ),
         );
       } else {
         return $value;

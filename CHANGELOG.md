@@ -19,6 +19,8 @@
 - CSRF protection plugin
 - `Api::$wire` is now public property
 - `Service::$wire` is now public property
+- `Allow:` header is included for requests if the request method is disallowed or `OPTIONS`
+- **Page Parser:** Performance enhancements
 - **Page Parser:** Added new methods:
   - `properties()`
   - `excludeProperties()`
@@ -26,7 +28,6 @@
   - `hookAfterPropertyParse()`
 - **Page Parser:** Include base file name in parsed file data
 - **Page Parser:** Include file extension in parsed file data
-- `Allow:` header is included for requests if the request method is disallowed or `OPTIONS`
 
 ### Bug fixes
 
