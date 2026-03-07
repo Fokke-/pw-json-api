@@ -5,9 +5,9 @@ Under the hood, the endpoint path will be used to create a [ProcessWire URL hook
 Each endpoint listener must either return a [`Response`](/responses) object or throw an [`ApiException`](/error-handling) to halt the process and respond with an error.
 
 ::: info
-By default, all the request methods are denied, except for `OPTIONS`. You must add listeners for each request method you want to allow. Requests with disallowed methods will be denied with a 405 response.
+By default, all the request methods are denied, except for `OPTIONS`. You must add listeners for each request method you want to allow. Requests with disallowed methods will be denied with a 405 response that includes an `Allow` header listing the permitted methods.
 
-The `OPTIONS` method is always allowed and will result in an empty response with a status code of `200`, even if the actual endpoint does not exist. This is important to prevent false-positive CORS errors when performing cross-origin requests to non-existent endpoints.
+The `OPTIONS` method is always allowed for existing endpoints and will result in an empty response with a status code of `200`. The response includes an `Allow` header listing the permitted methods.
 :::
 
 The supported listeners are:

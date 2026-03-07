@@ -34,15 +34,14 @@ test('method not allowed', function () {
   $res = $client->post('food');
 
   expect($res->getStatusCode())->toBe(405);
+  expect($res->getHeaderLine('Allow'))->toBe('OPTIONS, GET');
 });
 
 test('options method is always accepted', function () {
   $client = getHttp();
   $res = $client->request('options', 'food');
   expect($res->getStatusCode())->toBe(200);
-
-  $res = $client->request('options', 'non-existant-endpoint');
-  expect($res->getStatusCode())->toBe(200);
+  expect($res->getHeaderLine('Allow'))->toBe('OPTIONS, GET');
 });
 
 test('request method handlers', function () {

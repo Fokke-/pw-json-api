@@ -54,3 +54,15 @@ test('getHandler returns null when handler is not defined', function () {
   $endpoint = new Endpoint('/foo');
   expect($endpoint->getHandler(RequestMethod::Get))->toBeNull();
 });
+
+test('getAllowedMethods returns empty array with no handlers', function () {
+  $endpoint = new Endpoint('/foo');
+  expect($endpoint->getAllowedMethods())->toBe([]);
+});
+
+test('getAllowedMethods returns registered methods', function () {
+  $endpoint = new Endpoint('/foo');
+  $endpoint->get(function () {});
+  $endpoint->post(function () {});
+  expect($endpoint->getAllowedMethods())->toBe(['GET', 'POST']);
+});

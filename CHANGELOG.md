@@ -4,6 +4,7 @@
 
 ### Breaking changes
 
+- `OPTIONS` requests to non-existent endpoints are no longer intercepted with an empty `200` response. These requests are now handled by ProcessWire's default routing.
 - `$event` argument is no longer passed directly to the endpoint handler. Use [`$args->event` instead](https://fokke-.github.io/pw-json-api/endpoints.html#endpoint-handler-arguments).
 - `$e` and `$request` are no longer passed directly to the `handleException()` callback function. [Use `$args->exception` and `$args->request` instead](https://fokke-.github.io/pw-json-api/api-instance.html#exception-handling).
 - `RequestHookReturn::$method` property has been removed. Use [`RequestHookReturn::$request->method` instead](https://fokke-.github.io/pw-json-api/request-hooks.html#hook-arguments).
@@ -25,6 +26,7 @@
   - `hookAfterPropertyParse()`
 - **Page Parser:** Include base file name in parsed file data
 - **Page Parser:** Include file extension in parsed file data
+- `Allow:` header is included for requests if the request method is disallowed or `OPTIONS`
 
 ### Bug fixes
 

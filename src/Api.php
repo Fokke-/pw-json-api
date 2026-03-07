@@ -88,14 +88,19 @@ class Api
     try {
       $request->_init($event);
 
-      if ($request->methodEnum === null) {
-        throw (new ApiException())->code(405);
-      }
+      // Try to find handler matching the request method
+      $handler = $request->methodEnum
+        ? $result->endpoint->getHandler($request->methodEnum)
+        : null;
 
-      // Try to find handler matching the request method.
-      // If found, get response from handler.
-      $handler = $result->endpoint->getHandler($request->methodEnum);
       if (empty($handler)) {
+        header(
+          'Allow: ' .
+            implode(', ', [
+              'OPTIONS',
+              ...$result->endpoint->getAllowedMethods(),
+            ]),
+        );
         throw (new ApiException())->code(405);
       }
 
@@ -238,16 +243,7 @@ class Api
    */
   public function run(): void
   {
-    // Special handling for OPTIONS requests.
-    // To avoid false positives with CORS errors, always return 200,
-    // regardless of the path.
-    if (($_SERVER['REQUEST_METHOD'] ?? null) == 'OPTIONS') {
-      $response = new Response();
-
-      header('Content-Type: application/json');
-      http_response_code($response->code);
-      die($response->toJson($this->config->jsonFlags, false));
-    }
+    $isOptions = ($_SERVER['REQUEST_METHOD'] ?? null) == 'OPTIONS';
 
     /** @var string[] */
     $serviceNames = [];
@@ -297,7 +293,22 @@ class Api
       }
 
       // Add listener for the endpoint path
-      $this->wire->addHook($path, function (HookEvent $event) use ($result) {
+      $this->wire->addHook($path, function (HookEvent $event) use (
+        $result,
+        $isOptions,
+      ) {
+        // Handle OPTIONS requests with Allow header
+        if ($isOptions) {
+          $methods = $result->endpoint->getAllowedMethods();
+          header('Allow: ' . implode(', ', ['OPTIONS', ...$methods]));
+
+          $response = new Response();
+
+          header('Content-Type: application/json');
+          http_response_code($response->code);
+          die($response->toJson($this->config->jsonFlags, false));
+        }
+
         try {
           $response = $this->handleRequest($result, $event);
 

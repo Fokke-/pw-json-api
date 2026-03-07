@@ -73,6 +73,25 @@ class Endpoint
   }
 
   /**
+   * Get HTTP methods for which handlers are registered
+   *
+   * @return string[]
+   */
+  public function getAllowedMethods(): array
+  {
+    $methods = [];
+    foreach (RequestMethod::cases() as $method) {
+      if ($method === RequestMethod::Options) {
+        continue;
+      }
+      if (!empty($this->handlers[$method->name])) {
+        $methods[] = $method->value;
+      }
+    }
+    return $methods;
+  }
+
+  /**
    * Handle GET requests
    *
    * @param callable(EndpointHandlerArgs): Response $handler
