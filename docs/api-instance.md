@@ -63,6 +63,14 @@ Under the hood, the method:
 2. Validates that there are no duplicate service names or endpoint paths
 3. Registers a [ProcessWire URL hook](https://processwire.com/docs/modules/hooks/#url-hooks-new-in-3-0-173) listener for each endpoint path
 
+### Locking
+
+After `run()` is called, the Api instance, all services, and all endpoints are **locked**. Locked objects reject structural mutations — this includes adding services, endpoints, plugins, hooks, and setting endpoint handlers.
+
+All configuration must happen either in a service's `init()` method or in the `addService()` setup callback.
+
+A `WireException` is thrown if a mutation is attempted after locking.
+
 ## Exception handling
 
 Due to the nature of ProcessWire URL hooks, exceptions thrown in hook code cannot be caught in the main program flow. Use `handleException()` to define your own exception handler for other exception types, such as `WireException`.
