@@ -40,22 +40,43 @@ Front-end implementation is outside the scope of this guide, but here is a basic
 3. Pass the token as a header
 4. If the response is successful, read the new token from the response data using the `csrf_token` key and update your store.
 
-```js{8-11}
-const token = {
-  name: 'TOKEN1727703112X1763204571',
-  value: 'mw4aFl6fFDoE58I90hn.oL7SQQWoAbA7',
-};
+```js
+let token = null;
 
-const response = await fetch('https://example.com/my-post-endpoint', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    [`X-${token.name}`]: token.value,
-  },
-  body: JSON.stringify({
-    foo: 'bar',
-  }),
-});
+// Fetch the initial token
+async function fetchToken() {
+  const res = await fetch('/api/csrf-token');
+  const json = await res.json();
 
-console.warn(await response.json());
+  if (json.data.csrf_token) {
+    token = json.data.csrf_token;
+  }
+}
+
+// Make a POST request with the token, then store the rotated token
+async function post(url, body) {
+  if (!token) {
+    await fetchToken();
+  }
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      [`X-${token.name}`]: token.value,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const json = await res.json();
+
+  // Store the rotated token
+  if (json.data.csrf_token) {
+    token = json.data.csrf_token;
+  }
+
+  return json;
+}
+
+const result = await post('/api/my-endpoint', { foo: 'bar' });
 ```
