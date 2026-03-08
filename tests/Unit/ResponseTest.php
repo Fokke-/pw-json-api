@@ -23,6 +23,12 @@ test('response with extra keys', function () {
   expect($response->additionalData)->toBe(['foo' => 'bar']);
 });
 
+test('response without data omits data key', function () {
+  $response = (new Response(null))->with(['message' => 'ok']);
+  expect($response->toArray())->toBe(['message' => 'ok']);
+  expect($response->toJson())->toBe('{"message":"ok"}');
+});
+
 test('toArray()', function () {
   $response = new Response();
   expect($response->toArray())->toBe(['data' => []]);
