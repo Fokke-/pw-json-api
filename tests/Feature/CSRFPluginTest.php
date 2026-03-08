@@ -7,6 +7,7 @@ test('token endpoint', function () {
   $json = resToJson($res);
 
   expect($res->getStatusCode())->toBe(200);
+  expect($json)->not()->toHaveKey('data');
   expect($json['csrf_token']['name'])->toBeString();
   expect($json['csrf_token']['value'])->toBeString();
   expect($json['csrf_token']['time'])->toBeInt();
