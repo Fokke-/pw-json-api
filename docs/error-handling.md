@@ -46,6 +46,16 @@ The resulting JSON:
 }
 ```
 
+## HTTP headers <Badge type="tip" text="^2.0" />
+
+Use `header()` to set custom HTTP headers on the error response.
+
+```php
+throw (new ApiException('Forbidden'))
+  ->code(403)
+  ->header('X-Reason', 'insufficient-permissions');
+```
+
 ## Api404Exception
 
 This can be used as a shorthand for an exception with a `404` response code.

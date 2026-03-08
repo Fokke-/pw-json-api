@@ -76,6 +76,23 @@ The resulting JSON:
 }
 ```
 
+## HTTP headers <Badge type="tip" text="^2.0" />
+
+Use `header()` to set custom HTTP headers on the response. Headers set this way are emitted alongside `Content-Type` when the response is sent.
+
+```php
+return (new Response([
+  'first_name' => 'Jerry',
+  'last_name' => 'Cotton',
+]))->header('X-Custom-Header', 'custom-value');
+```
+
+Multiple headers can be chained:
+
+```php
+return (new Response())->header('X-First', 'one')->header('X-Second', 'two');
+```
+
 ## Methods
 
 ### toArray()

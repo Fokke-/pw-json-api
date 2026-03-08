@@ -14,6 +14,7 @@
 
 ### New features
 
+- Response header support
 - New `init()` method for Services
 - New `Request` object is exposed in arguments of request handlers and hooks
 - New plugin interface

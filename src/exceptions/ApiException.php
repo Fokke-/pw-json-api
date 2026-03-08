@@ -65,4 +65,13 @@ class ApiException extends \Exception
     $this->response->with($data);
     return $this;
   }
+
+  /**
+   * Set an HTTP header on the response
+   */
+  public function header(string $name, string $value): static
+  {
+    $this->response->header($name, $value);
+    return $this;
+  }
 }

@@ -18,6 +18,13 @@ class Response
   public int $code = 200;
 
   /**
+   * HTTP headers
+   *
+   * @var array<string, string>
+   */
+  public array $headers = [];
+
+  /**
    * Additional top-level key-value pairs
    *
    * @var array<string, mixed>
@@ -41,6 +48,25 @@ class Response
   {
     $this->code = $code;
     return $this;
+  }
+
+  /**
+   * Set an HTTP header
+   */
+  public function header(string $name, string $value): static
+  {
+    $this->headers[$name] = $value;
+    return $this;
+  }
+
+  /**
+   * Get all HTTP headers
+   *
+   * @return array<string, string>
+   */
+  public function getHeaders(): array
+  {
+    return $this->headers;
   }
 
   /**

@@ -90,14 +90,15 @@ class Api
         : null;
 
       if (empty($handler)) {
-        header(
-          'Allow: ' .
+        throw (new ApiException())
+          ->code(405)
+          ->header(
+            'Allow',
             implode(', ', [
               'OPTIONS',
               ...$result->endpoint->getAllowedMethods(),
             ]),
-        );
-        throw (new ApiException())->code(405);
+          );
       }
 
       // Before hooks
@@ -306,11 +307,16 @@ class Api
         // Handle OPTIONS requests with Allow header
         if ($isOptions) {
           $methods = $result->endpoint->getAllowedMethods();
-          header('Allow: ' . implode(', ', ['OPTIONS', ...$methods]));
 
-          $response = new Response();
+          $response = (new Response())->header(
+            'Allow',
+            implode(', ', ['OPTIONS', ...$methods]),
+          );
 
           header('Content-Type: application/json');
+          foreach ($response->getHeaders() as $name => $value) {
+            header("{$name}: {$value}");
+          }
           http_response_code($response->code);
           die($response->toJson($this->config->jsonFlags, false));
         }
@@ -319,12 +325,18 @@ class Api
           $response = $this->handleRequest($result, $event);
 
           header('Content-Type: application/json');
+          foreach ($response->getHeaders() as $name => $value) {
+            header("{$name}: {$value}");
+          }
           http_response_code($response->code);
           echo $response->toJson($this->config->jsonFlags);
           die();
         } catch (ApiException $e) {
           // Output error
           header('Content-Type: application/json');
+          foreach ($e->response->getHeaders() as $name => $value) {
+            header("{$name}: {$value}");
+          }
           http_response_code($e->response->code);
           echo $e->response->toJson($this->config->jsonFlags, false);
           die();
