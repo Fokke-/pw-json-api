@@ -70,6 +70,7 @@ export default withMermaid({
         items: [
           { text: 'Overview', link: '/plugins/plugins-overview' },
           { text: 'CSRF protection', link: '/plugins/csrf' },
+          { text: 'Rate limiting', link: '/plugins/rate-limit' },
         ],
       },
       {

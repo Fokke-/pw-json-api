@@ -19,6 +19,7 @@
 - New `Request` object is exposed in arguments of request handlers and hooks
 - New plugin interface
 - CSRF protection plugin
+- Rate limit plugin
 - `Api::$wire` is now public property
 - `Service::$wire` is now public property
 - `Allow:` header is included for requests if the request method is disallowed or `OPTIONS`

@@ -2,7 +2,7 @@
 
 // JSON API
 use PwJsonApi\{Api, ApiException, Response};
-use PwJsonApi\Plugins\{CSRFPlugin};
+use PwJsonApi\Plugins\{CSRFPlugin, RateLimitPlugin};
 
 if (!defined('PROCESSWIRE')) {
   die();
@@ -137,5 +137,48 @@ if ($page->template->name !== 'admin') {
   (new DocumentedApi())
     ->setBasePath('documented-api')
     ->addService(new DocumentedService())
+    ->run();
+
+  // Response headers
+  (new Api())
+    ->setBasePath('response-headers')
+    ->hookAfter(function ($args) {
+      $args->response->header('X-After-Hook-Header', 'after-hook-value');
+    })
+    ->addService(new ResponseHeaderService())
+    ->run();
+
+  // Rate limit — API level
+  (new Api())
+    ->setBasePath('rate-limit-api')
+    ->addPlugin(new RateLimitPlugin(), function ($plugin) {
+      $plugin->limit = 3;
+      $plugin->window = 60;
+    })
+    ->addService(new RateLimitService())
+    ->run();
+
+  // Rate limit — service level
+  (new Api())
+    ->setBasePath('rate-limit-service')
+    ->addService(new RateLimitService(), function ($service) {
+      $service->addPlugin(new RateLimitPlugin(), function ($plugin) {
+        $plugin->limit = 3;
+        $plugin->window = 60;
+      });
+    })
+    ->run();
+
+  // Rate limit — endpoint level
+  (new Api())
+    ->setBasePath('rate-limit-endpoint')
+    ->addService(new RateLimitService(), function ($service) {
+      $service
+        ->findEndpoint('/')
+        ?->addPlugin(new RateLimitPlugin(), function ($plugin) {
+          $plugin->limit = 3;
+          $plugin->window = 60;
+        });
+    })
     ->run();
 }
