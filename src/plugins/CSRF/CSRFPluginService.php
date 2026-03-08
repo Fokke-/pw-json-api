@@ -12,7 +12,7 @@ class CSRFPluginService extends Service
     $this->addEndpoint($csrfPlugin->endpointPath)->get(function () use (
       $csrfPlugin,
     ) {
-      return (new Response())->with($csrfPlugin->getToken());
+      return (new Response(null))->with($csrfPlugin->getToken());
     });
   }
 }
