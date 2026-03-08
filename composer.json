@@ -29,7 +29,11 @@
   },
   "autoload": {
     "classmap": [
-      "src/",
+      "src/"
+    ]
+  },
+  "autoload-dev": {
+    "classmap": [
       "site/lib/"
     ]
   },
