@@ -11,13 +11,13 @@ use ProcessWire\{HookEvent};
 class Request
 {
   /** Request method */
-  public string $method;
+  public readonly string $method;
 
   /** Method as enum */
-  public RequestMethod|null $methodEnum;
+  public readonly RequestMethod|null $methodEnum;
 
   /** Requested path */
-  public string|null $path;
+  public readonly string|null $path;
 
   /**
    * Route parameters of dynamic paths
@@ -25,58 +25,56 @@ class Request
    * @var array<string|int, string>
    * @see https://fokke-.github.io/pw-json-api/endpoints.html#dynamic-paths
    */
-  public array $routeParams;
+  public readonly array $routeParams;
 
   /**
    * Query parameters
    *
    * @var array<string, mixed>
    */
-  public array $queryParams;
+  public readonly array $queryParams;
 
   /**
    * Headers
    *
    * @var array<string, string>
    */
-  public array $headers;
+  public readonly array $headers;
 
   /** Content-Type header */
-  public string|null $contentType;
+  public readonly string|null $contentType;
 
   /** Accept header */
-  public string|null $accept;
+  public readonly string|null $accept;
 
   /**
    * Shorthand for $_COOKIE
    *
    * @var array<string, string>
    */
-  public array $cookies;
+  public readonly array $cookies;
 
   /** Shorthand for $_SERVER['REMOTE_ADDR'] */
-  public string|null $ip;
+  public readonly string|null $ip;
 
   /** Shorthand for $_SERVER['HTTP_USER_AGENT'] */
-  public string|null $userAgent;
+  public readonly string|null $userAgent;
 
   /** Shorthand for $_SERVER['SERVER_PROTOCOL'] */
-  public string|null $protocol;
+  public readonly string|null $protocol;
 
   /** Request body */
-  public mixed $body;
+  public readonly mixed $body;
 
   /**
    * Normalized value of $_FILES
    *
    * @var array<string, list<array<string, mixed>>>
    */
-  public array $files;
+  public readonly array $files;
 
-  public function __construct()
+  public function __construct(HookEvent $event)
   {
-    $this->routeParams = [];
-    $this->body = null;
     $this->method = $this->getServerVar('REQUEST_METHOD') ?? '';
     $this->methodEnum = RequestMethod::tryFrom($this->method);
     $this->path = $this->getPath($this->getServerVar('REQUEST_URI'));
@@ -89,6 +87,8 @@ class Request
     $this->userAgent = $this->getServerVar('HTTP_USER_AGENT');
     $this->protocol = $this->getServerVar('SERVER_PROTOCOL');
     $this->files = $this->getFiles();
+    $this->routeParams = $this->getRouteParams($event);
+    $this->body = $this->getBody($this->contentType);
   }
 
   protected function getServerVar(string $key): string|null
@@ -96,18 +96,6 @@ class Request
     return isset($_SERVER[$key]) && is_string($_SERVER[$key])
       ? $_SERVER[$key]
       : null;
-  }
-
-  /**
-   * Initialize request
-   *
-   * @internal
-   */
-  public function _init(HookEvent $event): static
-  {
-    $this->routeParams = $this->getRouteParams($event);
-    $this->body = $this->getBody($this->contentType);
-    return $this;
   }
 
   /**

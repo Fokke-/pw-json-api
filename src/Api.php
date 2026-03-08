@@ -80,12 +80,10 @@ class Api
     ApiSearchEndpointResult $result,
     HookEvent $event,
   ): Response {
-    $request = new Request();
+    $request = new Request($event);
 
     // Get response from endpoint
     try {
-      $request->_init($event);
-
       // Try to find handler matching the request method
       $handler = $request->methodEnum
         ? $result->endpoint->getHandler($request->methodEnum)
