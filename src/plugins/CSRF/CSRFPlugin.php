@@ -4,7 +4,7 @@ namespace PwJsonApi\Plugins;
 
 use PwJsonApi\Plugins\{ApiPlugin, CSRFPluginService};
 use PwJsonApi\{Api, Service, ApiException, Endpoint};
-use ProcessWire\{WireException, WireCSRFException};
+use ProcessWire\WireException;
 
 /**
  * This plugin adds cross-site request forgery (CSRF) protection for your endpoints,
@@ -90,17 +90,18 @@ class CSRFPlugin extends ApiPlugin
    */
   protected function checkToken(): void
   {
-    // This is a dirty move, but it's required
-    // to allow passing token as a header.
-    // Otherwise the plugin would force the end-user to define
-    // form payload as FormData.
+    // Required to allow passing the token as a header.
+    // ProcessWire only checks the X-{tokenName} header
+    // when config->ajax is true.
     $previousAjax = $this->wire->config->ajax;
     $this->wire->config->ajax = true;
 
     try {
-      $this->wire->session->CSRF->validate($this->tokenName);
-    } catch (WireCSRFException $e) {
-      throw (new ApiException($e->getMessage()))->with($this->getToken());
+      if (!$this->wire->session->CSRF->hasValidToken($this->tokenName)) {
+        throw (new ApiException(
+          'This request was aborted because it appears to be forged.',
+        ))->with($this->getToken());
+      }
     } finally {
       $this->wire->config->ajax = $previousAjax;
     }
