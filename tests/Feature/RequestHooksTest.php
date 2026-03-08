@@ -149,6 +149,14 @@ test('error hook can manipulate response', function () {
   expect($json['error'])->toBe('updated');
 });
 
+test('before hook can replace handler', function () {
+  $client = getHttp();
+  $res = $client->get('hooks/replace-handler');
+  $json = resToJson($res);
+
+  expect($json['data']['handler'])->toBe('replaced');
+});
+
 test('hookBeforeGet fires on GET request', function () {
   $client = getHttp();
   $res = $client->get('hooks/method-specific');

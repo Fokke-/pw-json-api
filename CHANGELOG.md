@@ -32,6 +32,7 @@
 
 ### Bug fixes
 
+- Before-hooks can now replace the endpoint handler via `$args->handler`
 - Error hooks will be applied to `ApiException` thrown from `handleException()` method
 - Fixed incorrect `Content-Type: application/json` header when an unhandled exception was thrown
 - Fixed exception handler not returning `Response` when handler result was valid

@@ -127,6 +127,8 @@ class Api
         foreach ($beforeHooks as $hookFn) {
           call_user_func($hookFn, $hookReturnBefore);
         }
+
+        $handler = $hookReturnBefore->handler;
       }
 
       // Get response from handler

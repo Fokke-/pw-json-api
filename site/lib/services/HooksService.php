@@ -115,6 +115,20 @@ class HooksService extends Service
         }
       });
 
+    $this->addEndpoint('replace-handler')
+      ->get(function () {
+        return new Response([
+          'handler' => 'original',
+        ]);
+      })
+      ->hookBefore(function ($args) {
+        $args->handler = function () {
+          return new Response([
+            'handler' => 'replaced',
+          ]);
+        };
+      });
+
     $this->addEndpoint('manipulate-response')
       ->get(function ($args) {
         return new Response([
