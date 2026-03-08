@@ -99,7 +99,9 @@ class CSRFPlugin extends ApiPlugin
     try {
       if (!$this->wire->session->CSRF->hasValidToken($this->tokenName)) {
         throw (new ApiException(
-          'This request was aborted because it appears to be forged.',
+          $this->wire->session->CSRF->_(
+            'This request was aborted because it appears to be forged.',
+          ),
         ))->with($this->getToken());
       }
     } finally {
