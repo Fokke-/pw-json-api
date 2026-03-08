@@ -130,3 +130,10 @@ To generate JSON instead:
 ```console
 ./vendor/bin/openapi site/lib --format json -o openapi.json
 ```
+
+## View and explore the spec
+
+The generated spec file can be opened in an API client or documentation viewer:
+
+- [Bruno](https://www.usebruno.com/) — open-source API client that can import OpenAPI specs for testing and exploration
+- [Swagger UI](https://swagger.io/tools/swagger-ui/) — interactive documentation viewer that renders the spec as a browsable reference with a built-in request console
