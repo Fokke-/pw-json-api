@@ -55,7 +55,6 @@ class ServiceList
       call_user_func($setup, $service);
     }
 
-    $service->_lock();
     $this->items[] = $service;
     return $this;
   }

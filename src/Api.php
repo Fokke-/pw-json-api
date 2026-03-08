@@ -264,6 +264,7 @@ class Api
         }
         $serviceNames[] = $result->service->name;
         $result->service->_setApi($this);
+        $result->service->_lock();
         continue;
       }
 

@@ -6,9 +6,18 @@ use PwJsonApi\Plugins\ApiPlugin;
 
 // --- Service locking ---
 
-test('service is locked after ServiceList::add()', function () {
+test('service is not locked after addService()', function () {
   $api = new Api();
   $api->addService(new FoodService());
+
+  $service = $api->getService('FoodService');
+  expect($service->_isLocked())->toBeFalse();
+});
+
+test('service is locked after run()', function () {
+  $api = new Api();
+  $api->addService(new FoodService());
+  $api->run();
 
   $service = $api->getService('FoodService');
   expect($service->_isLocked())->toBeTrue();
@@ -53,6 +62,7 @@ test('service is not locked during setup callback', function () {
 test('locked service rejects addEndpoint()', function () {
   $api = new Api();
   $api->addService(new FoodService());
+  $api->run();
 
   $service = $api->getService('FoodService');
   $service->addEndpoint('/fail');
@@ -61,6 +71,7 @@ test('locked service rejects addEndpoint()', function () {
 test('locked service rejects removeEndpoint()', function () {
   $api = new Api();
   $api->addService(new FruitService());
+  $api->run();
 
   $service = $api->getService('FruitService');
   $service->removeEndpoint('/');
@@ -69,6 +80,7 @@ test('locked service rejects removeEndpoint()', function () {
 test('locked service rejects addService()', function () {
   $api = new Api();
   $api->addService(new FoodService());
+  $api->run();
 
   $service = $api->getService('FoodService');
   $service->addService(new FruitService());
@@ -77,6 +89,7 @@ test('locked service rejects addService()', function () {
 test('locked service rejects addPlugin()', function () {
   $api = new Api();
   $api->addService(new FoodService());
+  $api->run();
 
   $service = $api->getService('FoodService');
   $service->addPlugin(
@@ -209,6 +222,7 @@ test('locked endpoint rejects addPlugin()', function () {
 test('locked service rejects hookBefore()', function () {
   $api = new Api();
   $api->addService(new FoodService());
+  $api->run();
 
   $service = $api->getService('FoodService');
   $service->hookBefore(function () {});
@@ -217,6 +231,7 @@ test('locked service rejects hookBefore()', function () {
 test('locked service rejects hookAfter()', function () {
   $api = new Api();
   $api->addService(new FoodService());
+  $api->run();
 
   $service = $api->getService('FoodService');
   $service->hookAfter(function () {});
@@ -225,6 +240,7 @@ test('locked service rejects hookAfter()', function () {
 test('locked service rejects hookOnError()', function () {
   $api = new Api();
   $api->addService(new FoodService());
+  $api->run();
 
   $service = $api->getService('FoodService');
   $service->hookOnError(function () {});

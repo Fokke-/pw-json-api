@@ -104,6 +104,12 @@ if ($page->template->name !== 'admin') {
     ->run();
 
   (new Api())
+    ->setBasePath('plugin-hook-attach')
+    ->addPlugin(new PluginHookAttachTestPlugin())
+    ->addService(new FoodService())
+    ->run();
+
+  (new Api())
     ->setBasePath('csrf')
     ->addPlugin(new CSRFPlugin(), function ($plugin) {
       // Token name
