@@ -78,6 +78,12 @@ export default withMermaid({
           { text: 'ProcessWire Page Parser', link: '/processwire-page-parser' },
         ],
       },
+      {
+        text: 'Recipes',
+        items: [
+          { text: 'OpenAPI documentation', link: '/recipes/openapi' },
+        ],
+      },
     ],
     socialLinks: [
       { icon: 'github', link: 'https://github.com/Fokke-/pw-json-api' },

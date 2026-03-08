@@ -2,6 +2,7 @@
 
 ProcessWire JSON API library for building structured API endpoints.
 Requires PHP 8.2+, developed in a DDEV environment.
+**MUST** maintain PHP 8.2 compatibility — do not use language features that require 8.3+.
 
 ## Commands
 

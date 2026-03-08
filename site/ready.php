@@ -133,4 +133,9 @@ if ($page->template->name !== 'admin') {
     })
     ->addService(new CSRFService())
     ->run();
+
+  (new DocumentedApi())
+    ->setBasePath('documented-api')
+    ->addService(new DocumentedService())
+    ->run();
 }
