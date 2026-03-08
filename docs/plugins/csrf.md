@@ -16,7 +16,9 @@ use PwJsonApi\Plugins\CSRFPlugin;
 $api->addPlugin(new CSRFPlugin());
 ```
 
-You can access the newly added plugin in an optional setup callback to configure it:
+## Configuration
+
+You can configure the plugin via the setup callback:
 
 ```php
 $api->addPlugin(new CSRFPlugin(), function ($plugin) {
