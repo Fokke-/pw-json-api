@@ -86,13 +86,8 @@ class EndpointList
         : $this->get($endpointOrPath);
 
     if (empty($endpoint)) {
-      $path =
-        $endpointOrPath instanceof Endpoint
-          ? $endpointOrPath->getPath()
-          : $endpointOrPath;
-
       throw new WireException(
-        "Unable to remove endpoint. Endpoint with path '{$path}' was not found.",
+        "Unable to remove endpoint. Endpoint with path '{$endpointOrPath}' was not found.",
       );
     }
 
