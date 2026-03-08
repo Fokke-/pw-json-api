@@ -42,7 +42,7 @@
     "processwire/processwire": ">=3.0.173"
   },
   "require-dev": {
-    "pestphp/pest": "^3.8",
+    "pestphp/pest": "^4",
     "guzzlehttp/guzzle": "^7.9",
     "phpstan/phpstan": "^2.1"
   },
