@@ -46,7 +46,7 @@ abstract class Service
    *
    * @internal
    */
-  public function _prepare(): static
+  final public function _prepare(): static
   {
     if ($this->_isInitialized === true) {
       return $this;
