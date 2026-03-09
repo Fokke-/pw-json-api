@@ -177,8 +177,6 @@ class PageParser
    */
   protected function parsePage(Page $page): array
   {
-    $page = clone $page;
-
     // Use current parser as a base for child page parser
     $childPageParser = clone $this;
     $childPageParser->config = clone $this->config;
@@ -190,6 +188,7 @@ class PageParser
     );
 
     if (!empty($beforePageParseHooks)) {
+      $page = clone $page;
       $hookRet = new HookReturnBeforePageParse();
 
       foreach ($beforePageParseHooks as $handler) {
