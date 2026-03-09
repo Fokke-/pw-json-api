@@ -17,18 +17,18 @@
     "src/**/*.php": "vendor/bin/phpstan analyse --memory-limit 1G"
   },
   "devDependencies": {
-    "@braintree/sanitize-url": "7.1.1",
-    "@prettier/plugin-php": "0.22.4",
-    "cytoscape": "3.32.0",
+    "@braintree/sanitize-url": "7.1.2",
+    "@prettier/plugin-php": "0.24.0",
+    "cytoscape": "3.33.1",
     "cytoscape-cose-bilkent": "4.1.0",
-    "dayjs": "1.11.13",
-    "debug": "4.4.1",
+    "dayjs": "1.11.19",
+    "debug": "4.4.3",
     "husky": "9.1.7",
-    "lint-staged": "16.2.6",
-    "mermaid": "11.6.0",
-    "prettier": "3.5.3",
-    "sass-embedded": "1.89.1",
-    "vitepress": "1.6.3",
+    "lint-staged": "16.3.2",
+    "mermaid": "11.12.3",
+    "prettier": "3.8.1",
+    "sass-embedded": "1.97.3",
+    "vitepress": "1.6.4",
     "vitepress-plugin-mermaid": "2.0.17"
   }
 }
