@@ -1,7 +1,7 @@
 <?php
 
 use PwJsonApi\{PageParser, Response};
-use ProcessWire\{NullPage};
+use ProcessWire\{NullPage, PageArray, Pageimage};
 
 test('toArray()', function () {
   $result = (new PageParser())->input(getPage())->toArray();
@@ -9,6 +9,13 @@ test('toArray()', function () {
 
   $result = (new PageParser())->input(new NullPage())->toArray();
   expect($result)->toBeArray();
+});
+
+test('toArray() with PageArray input', function () {
+  $result = (new PageParser())->input(getMultiplePages())->toArray();
+  expect($result)->toBeArray()->toHaveCount(2);
+  expect($result[0])->toHaveKey('id');
+  expect($result[1])->toHaveKey('id');
 });
 
 test('toArray() with empty input', function () {
@@ -19,6 +26,18 @@ test('toArray() with empty input', function () {
 test('toResponse()', function () {
   $result = (new PageParser())->input(getPage())->toResponse();
   expect($result)->toBeInstanceOf(Response::class);
+});
+
+test('input(), getInput(), clearInput()', function () {
+  $parser = new PageParser();
+  expect($parser->getInput())->toBeNull();
+
+  $page = getPage();
+  $parser->input($page);
+  expect($parser->getInput())->toBe($page);
+
+  $parser->clearInput();
+  expect($parser->getInput())->toBeInstanceOf(PageArray::class);
 });
 
 test('string', function () {
@@ -64,7 +83,25 @@ test('integer', function () {
 test('Pagefile', function () {
   $result = (new PageParser())->input(getPage())->toArray();
   expect($result['single_file'])->toBeArray();
-  expect($result['single_file']['url'])->not()->toBeEmpty();
+  expect($result['single_file'])->toHaveKeys([
+    'basename',
+    'ext',
+    'url',
+    'filesize',
+    'filesize_str',
+    'description',
+    'tags',
+    'created',
+    'modified',
+  ]);
+  expect($result['single_file']['basename'])->toBeString()->not()->toBeEmpty();
+  expect($result['single_file']['ext'])->toBeString()->not()->toBeEmpty();
+  expect($result['single_file']['url'])->toBeString()->not()->toBeEmpty();
+  expect($result['single_file']['filesize'])->toBeInt();
+  expect($result['single_file']['filesize_str'])->toBeString();
+  expect($result['single_file']['tags'])->toBeArray();
+  expect($result['single_file']['created'])->toBeInt();
+  expect($result['single_file']['modified'])->toBeInt();
 
   $result = (new PageParser())->input(getEmptyPage())->toArray();
   expect($result['single_file'])->toBeNull();
@@ -84,7 +121,25 @@ test('Pagefiles', function () {
 test('Pageimage', function () {
   $result = (new PageParser())->input(getPage())->toArray();
   expect($result['single_image'])->toBeArray();
-  expect($result['single_image']['url'])->not()->toBeEmpty();
+  expect($result['single_image'])->toHaveKeys([
+    'basename',
+    'ext',
+    'url',
+    'filesize',
+    'filesize_str',
+    'description',
+    'tags',
+    'created',
+    'modified',
+    'width',
+    'height',
+    '_focus',
+    '_ratio',
+  ]);
+  expect($result['single_image']['width'])->toBeInt();
+  expect($result['single_image']['height'])->toBeInt();
+  expect($result['single_image']['_focus'])->toBeArray();
+  expect($result['single_image']['_ratio'])->toBeFloat();
 
   $result = (new PageParser())->input(getEmptyPage())->toArray();
   expect($result['single_image'])->toBeNull();
@@ -393,6 +448,88 @@ test('hookBeforePageParse()', function () {
     ->toArray();
 
   expect($result['title'])->toBe('bogus');
+});
+
+test('hooks receive correct depth', function () {
+  $depths = [];
+
+  (new PageParser())
+    ->configure(function ($config) {
+      $config->parseChildren = true;
+      $config->maxDepth = 3;
+    })
+    ->input(getPageWithChildren())
+    ->fields('title')
+    ->hookBeforePageParse(function ($args) use (&$depths) {
+      $depths[] = $args->depth;
+    })
+    ->toArray();
+
+  expect($depths)->toBe([1, 2, 3]);
+});
+
+test('hookBeforePageParse() does not mutate original input', function () {
+  $page = getPage();
+  $originalTitle = $page->title;
+
+  (new PageParser())
+    ->input($page)
+    ->hookBeforePageParse(function ($args) {
+      $args->page->title = 'mutated';
+    })
+    ->toArray();
+
+  expect($page->title)->toBe($originalTitle);
+});
+
+test('hookBeforeFieldParse() can overwrite image field', function () {
+  $sourcePage = getPage();
+
+  $result = (new PageParser())
+    ->input(getEmptyPage())
+    ->hookBeforeFieldParse(function ($args) use ($sourcePage) {
+      if ($args->field->name === 'single_image' && empty($args->value)) {
+        $args->value = $sourcePage->single_image;
+      }
+    })
+    ->toArray();
+
+  expect($result['single_image'])->toBeArray();
+  expect($result['single_image']['url'])->not()->toBeEmpty();
+});
+
+test('hookBeforeImageParse() can overwrite image', function () {
+  $sourcePage = getPage();
+  $sourceImage = $sourcePage->multiple_images->first();
+
+  $result = (new PageParser())
+    ->input(getPage())
+    ->hookBeforeImageParse(function ($args) use ($sourceImage) {
+      if ($args->field->name === 'single_image') {
+        $args->image = $sourceImage;
+      }
+    })
+    ->toArray();
+
+  expect($result['single_image'])->toBeArray();
+  expect($result['single_image']['basename'])->toBe($sourceImage->basename);
+});
+
+test('hookBeforeFileParse() can overwrite file', function () {
+  $sourcePage = getPage();
+  $sourceFile = $sourcePage->multiple_files->first();
+
+  $result = (new PageParser())
+    ->input(getPage())
+    ->hookBeforeFileParse(function ($args) use ($sourceFile) {
+      if ($args->field?->name === 'single_file') {
+        $args->file = $sourceFile;
+      }
+    })
+    ->toArray();
+
+  expect($result['single_file'])->toBeArray();
+  expect($result['single_file']['basename'])->toBe($sourceFile->basename);
 });
 
 test('hookAfterPageParse()', function () {
