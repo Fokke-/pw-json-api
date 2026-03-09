@@ -3,12 +3,7 @@
 use function ProcessWire\wire;
 
 beforeEach(function () {
-  // Clear rate limit cache entries before each test
-  wire()->cache->deleteFor('PwJsonApi_RateLimit_*');
-
-  // Also delete by finding matching keys
-  $db = wire()->database;
-  $db->exec("DELETE FROM caches WHERE name LIKE 'PwJsonApi\_RateLimit\_%'");
+  wire()->cache->deleteFor('PwJsonApi_RateLimit');
 });
 
 test('requests within the limit succeed with rate limit headers', function () {

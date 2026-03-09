@@ -12,6 +12,8 @@ use PwJsonApi\{Api, Service, Endpoint, ApiException, Request};
  */
 class RateLimitPlugin extends ApiPlugin
 {
+  protected const CACHE_NS = 'PwJsonApi_RateLimit';
+
   /** Maximum requests per window */
   public int $limit = 60;
 
@@ -57,7 +59,7 @@ class RateLimitPlugin extends ApiPlugin
       $identifier = $this->resolveClientId($request);
       $cacheKey = $this->getCacheKey($identifier);
 
-      $cached = $this->wire->cache->get($cacheKey);
+      $cached = $this->wire->cache->getFor(static::CACHE_NS, $cacheKey);
       $count = is_numeric($cached) ? (int) $cached : 0;
       $remaining = max(0, $this->limit - $count);
       $reset = $this->getWindowStart() + $this->window;
@@ -89,7 +91,7 @@ class RateLimitPlugin extends ApiPlugin
   protected function getCacheKey(string $identifier): string
   {
     $windowStart = $this->getWindowStart();
-    return "PwJsonApi_RateLimit_{$identifier}_{$windowStart}";
+    return "{$identifier}_{$windowStart}";
   }
 
   /**
@@ -107,11 +109,16 @@ class RateLimitPlugin extends ApiPlugin
   {
     $cacheKey = $this->getCacheKey($identifier);
 
-    $cached = $this->wire->cache->get($cacheKey);
+    $cached = $this->wire->cache->getFor(static::CACHE_NS, $cacheKey);
     $count = is_numeric($cached) ? (int) $cached : 0;
     $count++;
 
-    $this->wire->cache->save($cacheKey, (string) $count, $this->window);
+    $this->wire->cache->saveFor(
+      static::CACHE_NS,
+      $cacheKey,
+      (string) $count,
+      $this->window,
+    );
 
     return $count;
   }
