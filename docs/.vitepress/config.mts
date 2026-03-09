@@ -41,7 +41,7 @@ export default withMermaid({
     ],
     sidebar: [
       {
-        text: 'The first steps',
+        text: 'Introduction',
         items: [
           { text: 'Overview', link: '/overview' },
           { text: 'Getting started', link: '/getting-started' },
