@@ -38,38 +38,14 @@ test('requests over the limit return 429 with retry_after', function () {
   expect($res->getHeaderLine('X-RateLimit-Reset'))->not()->toBe('');
 });
 
-test('plugin works at API level', function () {
-  $client = getHttp('rate-limit-api');
+test('plugin can only be installed on Api instance', function () {
+  $service = new class extends \PwJsonApi\Service {
+    public function init(): void
+    {
+      $this->addEndpoint('/');
+    }
+  };
 
-  for ($i = 0; $i < 3; $i++) {
-    $res = $client->get('');
-    expect($res->getStatusCode())->toBe(200);
-  }
-
-  $res = $client->get('');
-  expect($res->getStatusCode())->toBe(429);
-});
-
-test('plugin works at service level', function () {
-  $client = getHttp('rate-limit-service');
-
-  for ($i = 0; $i < 3; $i++) {
-    $res = $client->get('');
-    expect($res->getStatusCode())->toBe(200);
-  }
-
-  $res = $client->get('');
-  expect($res->getStatusCode())->toBe(429);
-});
-
-test('plugin works at endpoint level', function () {
-  $client = getHttp('rate-limit-endpoint');
-
-  for ($i = 0; $i < 3; $i++) {
-    $res = $client->get('');
-    expect($res->getStatusCode())->toBe(200);
-  }
-
-  $res = $client->get('');
-  expect($res->getStatusCode())->toBe(429);
-});
+  $plugin = new \PwJsonApi\Plugins\RateLimitPlugin();
+  $plugin->init($service);
+})->throws(\ProcessWire\WireException::class);

@@ -148,7 +148,7 @@ if ($page->template->name !== 'admin') {
     ->addService(new ResponseHeaderService())
     ->run();
 
-  // Rate limit — API level
+  // Rate limit
   (new Api())
     ->setBasePath('rate-limit-api')
     ->addPlugin(new RateLimitPlugin(), function ($plugin) {
@@ -156,29 +156,5 @@ if ($page->template->name !== 'admin') {
       $plugin->window = 60;
     })
     ->addService(new RateLimitService())
-    ->run();
-
-  // Rate limit — service level
-  (new Api())
-    ->setBasePath('rate-limit-service')
-    ->addService(new RateLimitService(), function ($service) {
-      $service->addPlugin(new RateLimitPlugin(), function ($plugin) {
-        $plugin->limit = 3;
-        $plugin->window = 60;
-      });
-    })
-    ->run();
-
-  // Rate limit — endpoint level
-  (new Api())
-    ->setBasePath('rate-limit-endpoint')
-    ->addService(new RateLimitService(), function ($service) {
-      $service
-        ->findEndpoint('/')
-        ?->addPlugin(new RateLimitPlugin(), function ($plugin) {
-          $plugin->limit = 3;
-          $plugin->window = 60;
-        });
-    })
     ->run();
 }

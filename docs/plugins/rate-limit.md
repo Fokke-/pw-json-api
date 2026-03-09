@@ -2,27 +2,16 @@
 
 This plugin adds rate limiting for your API endpoints using a fixed-window algorithm. It uses ProcessWire's WireCache for storage, which means request counts are persisted in the database and survive across requests.
 
-The plugin can be installed at any level: `Api`, `Service`, or `Endpoint`.
+This plugin can only be installed on an `Api` instance.
 
 ## Installation
 
-Install the plugin by calling the `addPlugin()` method.
+Install the plugin by calling the `addPlugin()` method on your `Api` instance.
 
 ```php
 use PwJsonApi\Plugins\RateLimitPlugin;
 
-// API level — limits all endpoints
 $api->addPlugin(new RateLimitPlugin());
-
-// Service level — limits only this service's endpoints
-$api->addService(new MyService(), function ($service) {
-  $service->addPlugin(new RateLimitPlugin());
-});
-
-// Endpoint level — limits only this endpoint
-$api->addService(new MyService(), function ($service) {
-  $service->findEndpoint('/')?->addPlugin(new RateLimitPlugin());
-});
 ```
 
 ## Configuration

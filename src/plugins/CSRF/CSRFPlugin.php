@@ -27,7 +27,9 @@ class CSRFPlugin extends ApiPlugin
   public function init(Api|Service|Endpoint $context): static
   {
     if (!($context instanceof Api)) {
-      throw new WireException('You must install CSRFPlugin for API instance');
+      throw new WireException(
+        'CSRFPlugin can only be installed on an Api instance',
+      );
     }
 
     parent::init($context);

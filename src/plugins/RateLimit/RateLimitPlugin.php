@@ -3,6 +3,7 @@
 namespace PwJsonApi\Plugins;
 
 use PwJsonApi\{Api, Service, Endpoint, ApiException, Request};
+use ProcessWire\WireException;
 
 /**
  * Rate limiting plugin using a fixed-window algorithm with
@@ -33,6 +34,12 @@ class RateLimitPlugin extends ApiPlugin
   /** Initialize plugin */
   public function init(Api|Service|Endpoint $context): static
   {
+    if (!($context instanceof Api)) {
+      throw new WireException(
+        'RateLimitPlugin can only be installed on an Api instance',
+      );
+    }
+
     parent::init($context);
 
     $context->hookBefore(function ($args) {
