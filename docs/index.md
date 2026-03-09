@@ -5,7 +5,7 @@ layout: home
 hero:
   name: 'ProcessWire JSON API'
   text: ''
-  tagline: 'JSON API made simple for ProcessWire'
+  tagline: 'Structured APIs for ProcessWire, without the boilerplate'
   actions:
     - theme: brand
       text: Getting started
@@ -15,7 +15,7 @@ hero:
       link: /overview
 features:
   - icon: 🏖️
-    title: Fast and Easy to Use
+    title: Convention over Configuration
     details: No cryptic configuration files. Get the first endpoint running in minutes.
   - icon: 📦
     title: Extensible
