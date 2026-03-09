@@ -5,7 +5,7 @@ use PwJsonApi\Service;
 
 class FoodService extends Service
 {
-  public function init()
+  protected function init()
   {
     $this->setBasePath('/food');
 

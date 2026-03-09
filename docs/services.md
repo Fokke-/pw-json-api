@@ -19,13 +19,17 @@ class HelloWorldService extends Service
 {
   protected string $word = 'world';
 
+  public function __construct()
+  {
+    parent::__construct();
+    $this->setBasePath('/greet');
+  }
+
   protected function init()
   {
-    $this->setBasePath('/greet');
-
     // Listen to the base path (/greet)
     $this->addEndpoint('/')->get(function () {
-      return new Response()->with([
+      return (new Response())->with([
         'message' => 'Nothing to see here!',
       ]);
     });
@@ -47,10 +51,14 @@ class HelloWorldService extends Service
 
 ## Base path
 
-Like the main instance, the service can also define its base path in the service `init()` method.
+Like the main instance, the service can also define its base path. Set the base path in the constructor so that [extending classes](#extending-a-service) can override it independently of the endpoint configuration.
 
 ```php
-$this->setBasePath('/greet');
+public function __construct()
+{
+  parent::__construct();
+  $this->setBasePath('/greet');
+}
 ```
 
 ## Child services
@@ -65,6 +73,69 @@ $this->addService(new AnotherService());
 ```
 
 This relationship can also be defined on the fly while adding the service to the main instance, allowing you to nest services that normally would not be related to each other. [See example of adding a child service on the fly](api-instance.html#adding-a-service).
+
+## Extending a service
+
+Since services are classes, you can extend them to reuse or replace functionality. The `init()` method is intentionally separate from the constructor, giving the extending class full control over which endpoints are registered.
+
+Set the base path in the constructor so it can be overridden independently of the endpoint configuration.
+
+```php
+class GreetingService extends Service
+{
+  public function __construct()
+  {
+    parent::__construct();
+    $this->setBasePath('/greet');
+  }
+
+  protected function init()
+  {
+    $this->addEndpoint('/hello')->get(function () {
+      return new Response(['message' => 'Hello!']);
+    });
+
+    $this->addEndpoint('/goodbye')->get(function () {
+      return new Response(['message' => 'Goodbye!']);
+    });
+  }
+}
+```
+
+### Keeping parent endpoints
+
+An extending class can call `parent::init()` to keep the parent endpoints and add its own:
+
+```php
+class ExtendedGreetingService extends GreetingService
+{
+  protected function init()
+  {
+    parent::init();
+
+    $this->addEndpoint('/hey')->get(function () {
+      return new Response(['message' => 'Hey!']);
+    });
+  }
+}
+```
+
+### Replacing parent endpoints
+
+Or it can skip `parent::init()` entirely to replace the endpoints:
+
+```php
+class ReplacedGreetingService extends GreetingService
+{
+  protected function init()
+  {
+    // Only /howdy is registered — parent endpoints are not included
+    $this->addEndpoint('/howdy')->get(function () {
+      return new Response(['message' => 'Howdy!']);
+    });
+  }
+}
+```
 
 ## Accessing the ProcessWire API in the service
 

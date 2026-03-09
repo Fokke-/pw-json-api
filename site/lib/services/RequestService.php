@@ -5,7 +5,7 @@ use PwJsonApi\Service;
 
 class RequestService extends Service
 {
-  public function init()
+  protected function init()
   {
     $this->setBasePath('/request');
     $this->addEndpoint('/')

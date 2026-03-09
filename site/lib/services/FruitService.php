@@ -5,7 +5,7 @@ use PwJsonApi\Service;
 
 class FruitService extends Service
 {
-  public function init()
+  protected function init()
   {
     $this->hookAfter(function ($args) {
       $args->response->with([

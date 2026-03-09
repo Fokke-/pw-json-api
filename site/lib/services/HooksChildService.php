@@ -4,7 +4,7 @@ use PwJsonApi\{ApiException, Service, Response};
 
 class HooksChildService extends Service
 {
-  public function init()
+  protected function init()
   {
     $this->setBasePath('/nested');
 

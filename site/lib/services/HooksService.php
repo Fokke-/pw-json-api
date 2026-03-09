@@ -24,7 +24,7 @@ class HooksService extends Service
    */
   public static bool $hookBeforeGetFired = false;
 
-  public function init()
+  protected function init()
   {
     $this->setBasePath('/hooks');
 

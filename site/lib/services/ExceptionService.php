@@ -6,7 +6,7 @@ use PwJsonApi\Service;
 
 class ExceptionService extends Service
 {
-  public function init()
+  protected function init()
   {
     $this->setBasePath('/exceptions');
 

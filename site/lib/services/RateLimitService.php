@@ -5,7 +5,7 @@ use PwJsonApi\Service;
 
 class RateLimitService extends Service
 {
-  public function init()
+  protected function init()
   {
     $this->addEndpoint('/')->get(function () {
       return new Response([

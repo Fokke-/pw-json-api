@@ -6,7 +6,7 @@ use PwJsonApi\PageParser;
 
 class PageService extends Service
 {
-  public function init()
+  protected function init()
   {
     $this->setBasePath('/pages');
     $this->addEndpoint('/')->get(function () {

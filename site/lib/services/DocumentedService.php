@@ -5,7 +5,7 @@ use OpenApi\Attributes as OA;
 
 class DocumentedService extends Service
 {
-  public function init()
+  protected function init()
   {
     $this->addEndpoint('/greet')
       ->get($this->greet(...))

@@ -40,7 +40,7 @@ test('requests over the limit return 429 with retry_after', function () {
 
 test('plugin can only be installed on Api instance', function () {
   $service = new class extends \PwJsonApi\Service {
-    public function init(): void
+    protected function init(): void
     {
       $this->addEndpoint('/');
     }

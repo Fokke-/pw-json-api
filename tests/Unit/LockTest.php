@@ -36,7 +36,7 @@ test('service is not locked during init()', function () {
       $this->ref = &$wasLocked;
     }
 
-    public function init()
+    protected function init()
     {
       $this->ref = $this->_isLocked();
     }

@@ -23,7 +23,7 @@ Requires PHP 8.2+, developed in a DDEV environment.
 
 ## Architecture
 
-- **Service:** abstract class that groups endpoints; extends `Service` and overrides `init()` to add endpoints, hooks, and child services. `init()` is the preferred place for all service configuration.
+- **Service:** abstract class that groups endpoints; extends `Service`. Constructor sets base path and class properties. `init()` registers endpoints, hooks, and child services. This separation allows extending classes to override `init()` without inheriting parent endpoints.
 - **Api:** top-level container that holds services, runs them via `run()`, and registers ProcessWire URL hooks.
 
 ## Testing
