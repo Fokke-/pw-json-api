@@ -62,7 +62,7 @@ The response body also includes `retry_after` with the same value.
 
 ## Custom client identifier
 
-By default, the plugin identifies clients by their IP address (`$request->ip`). You can provide a custom identifier using the `$clientId` callback:
+By default, the plugin identifies clients by their IP address (`$request->ip`). If no IP address is available (e.g. in CLI contexts), rate limiting is skipped. You can provide a custom identifier using the `$clientId` callback — returning `null` will skip rate limiting for that request:
 
 ```php
 use function ProcessWire\wire;

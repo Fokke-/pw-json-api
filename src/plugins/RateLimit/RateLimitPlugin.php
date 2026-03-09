@@ -26,7 +26,7 @@ class RateLimitPlugin extends ApiPlugin
   /**
    * Custom client identifier resolver
    *
-   * @var (callable(Request): string)|null
+   * @var (callable(Request): ?string)|null
    */
   public $clientId = null;
 
@@ -38,6 +38,11 @@ class RateLimitPlugin extends ApiPlugin
     $context->hookBefore(function ($args) {
       $request = $args->request;
       $identifier = $this->resolveClientId($request);
+
+      if ($identifier === null) {
+        return;
+      }
+
       $count = $this->increment($identifier);
       $reset = $this->getWindowStart() + $this->window;
 
@@ -57,6 +62,11 @@ class RateLimitPlugin extends ApiPlugin
     $context->hookAfter(function ($args) {
       $request = $args->request;
       $identifier = $this->resolveClientId($request);
+
+      if ($identifier === null) {
+        return;
+      }
+
       $cacheKey = $this->getCacheKey($identifier);
 
       $cached = $this->wire->cache->getFor(static::CACHE_NS, $cacheKey);
@@ -76,13 +86,13 @@ class RateLimitPlugin extends ApiPlugin
   /**
    * Resolve the client identifier from the request
    */
-  protected function resolveClientId(Request $request): string
+  protected function resolveClientId(Request $request): ?string
   {
     if (is_callable($this->clientId)) {
       return call_user_func($this->clientId, $request);
     }
 
-    return $request->ip ?? 'unknown';
+    return $request->ip;
   }
 
   /**
