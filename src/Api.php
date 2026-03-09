@@ -240,7 +240,7 @@ class Api
    * - Resolves all services and endpoints and creates listeners for them
    * - Catches ApiExceptions and renders errors as JSON
    */
-  public function run(): void
+  final public function run(): void
   {
     $this->_initPlugins();
     $this->_lock();
