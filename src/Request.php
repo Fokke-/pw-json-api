@@ -23,7 +23,7 @@ class Request
    * Route parameters of dynamic paths
    *
    * @var array<string|int, string>
-   * @see https://fokke-.github.io/pw-json-api/endpoints.html#dynamic-paths
+   * @see https://pwjsonapi.fokke.fi/endpoints.html#dynamic-paths
    */
   public readonly array $routeParams;
 

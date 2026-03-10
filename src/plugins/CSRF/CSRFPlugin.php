@@ -10,7 +10,7 @@ use ProcessWire\WireException;
  * This plugin adds cross-site request forgery (CSRF) protection for your endpoints,
  * utilising ProcessWire’s built-in token validation.
  *
- * @see https://fokke-.github.io/pw-json-api/plugins/csrf.html
+ * @see https://pwjsonapi.fokke.fi/plugins/csrf.html
  */
 class CSRFPlugin extends ApiPlugin
 {

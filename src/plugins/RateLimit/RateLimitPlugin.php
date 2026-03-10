@@ -9,7 +9,7 @@ use ProcessWire\WireException;
  * Rate limiting plugin using a fixed-window algorithm with
  * ProcessWire's WireCache for storage.
  *
- * @see https://fokke-.github.io/pw-json-api/plugins/rate-limit.html
+ * @see https://pwjsonapi.fokke.fi/plugins/rate-limit.html
  */
 class RateLimitPlugin extends ApiPlugin
 {

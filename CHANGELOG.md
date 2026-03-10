@@ -6,11 +6,11 @@
 
 - Services, endpoints, and the Api instance are now locked after `Api::run()` is called to prevent cross-service injection and runtime mutation. Adding services, endpoints, plugins, hooks, or setting handlers after locking will throw `WireException`. All configuration must happen in `init()` or the setup callback.
 - `OPTIONS` requests to non-existent endpoints are no longer intercepted with an empty `200` response. These requests are now handled by ProcessWire's default routing.
-- `$event` argument is no longer passed directly to the endpoint handler. Use [`$args->event` instead](https://fokke-.github.io/pw-json-api/endpoints.html#endpoint-handler-arguments).
-- `$e` and `$request` are no longer passed directly to the `handleException()` callback function. [Use `$args->exception` and `$args->request` instead](https://fokke-.github.io/pw-json-api/api-instance.html#exception-handling).
-- `RequestHookReturn::$method` property has been removed. Use [`RequestHookReturn::$request->method` instead](https://fokke-.github.io/pw-json-api/request-hooks.html#hook-arguments).
-- `ApiException::$method` property has been removed. [Use `ApiException::$request->method` instead](https://fokke-.github.io/pw-json-api/error-hooks.html#error-hook-arguments).
-- **Page parser:** Page properties, such as `template` are no longer defined by using `fields()` method. [Use `properties()` instead](https://fokke-.github.io/pw-json-api/processwire-page-parser.html#property-selection).
+- `$event` argument is no longer passed directly to the endpoint handler. Use [`$args->event` instead](https://pwjsonapi.fokke.fi/endpoints.html#endpoint-handler-arguments).
+- `$e` and `$request` are no longer passed directly to the `handleException()` callback function. [Use `$args->exception` and `$args->request` instead](https://pwjsonapi.fokke.fi/api-instance.html#exception-handling).
+- `RequestHookReturn::$method` property has been removed. Use [`RequestHookReturn::$request->method` instead](https://pwjsonapi.fokke.fi/request-hooks.html#hook-arguments).
+- `ApiException::$method` property has been removed. [Use `ApiException::$request->method` instead](https://pwjsonapi.fokke.fi/error-hooks.html#error-hook-arguments).
+- **Page parser:** Page properties, such as `template` are no longer defined by using `fields()` method. [Use `properties()` instead](https://pwjsonapi.fokke.fi/processwire-page-parser.html#property-selection).
 
 ### New features
 

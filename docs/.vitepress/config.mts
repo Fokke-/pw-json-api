@@ -1,35 +1,34 @@
-import { defineConfig } from 'vitepress';
 import { withMermaid } from 'vitepress-plugin-mermaid';
 
 // https://vitepress.dev/reference/site-config
 export default withMermaid({
   title: 'ProcessWire JSON API',
   description: '',
-  base: '/pw-json-api/',
-  head: [
-    [
-      'meta',
-      {
-        'http-equiv': 'Cache-Control',
-        content: 'no-cache, no-store, must-revalidate',
-      },
-    ],
-    [
-      'meta',
-      {
-        'http-equiv': 'Pragma',
-        content: 'no-cache',
-      },
-    ],
-    [
-      'meta',
-      {
-        'http-equiv': 'Expires',
-        content: '0',
-      },
-    ],
-  ],
+  base: '/',
   lastUpdated: true,
+  sitemap: {
+    hostname: 'https://pwjsonapi.fokke.fi',
+    lastmodDateOnly: false,
+  },
+  cleanUrls: true,
+  transformPageData(pageData) {
+    const path = pageData.relativePath
+      .replace(/index\.md$/, '')
+      .replace(/\.(md|html)$/, '');
+
+    const canonicalUrl = [
+      `https://pwjsonapi.fokke.fi`,
+      path ? `/${path}` : undefined,
+    ]
+      .filter((item) => !!item)
+      .join('');
+
+    pageData.frontmatter.head ??= [];
+    pageData.frontmatter.head.push([
+      'link',
+      { rel: 'canonical', href: canonicalUrl },
+    ]);
+  },
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     search: {
@@ -81,9 +80,7 @@ export default withMermaid({
       },
       {
         text: 'Recipes',
-        items: [
-          { text: 'OpenAPI documentation', link: '/recipes/openapi' },
-        ],
+        items: [{ text: 'OpenAPI documentation', link: '/recipes/openapi' }],
       },
     ],
     socialLinks: [

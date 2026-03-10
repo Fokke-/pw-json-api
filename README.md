@@ -1,6 +1,6 @@
 # ProcessWire JSON API
 
-[Click here for documentation](https://fokke-.github.io/pw-json-api/)
+[Click here for documentation](https://pwjsonapi.fokke.fi)
 
 ## Tests
 
