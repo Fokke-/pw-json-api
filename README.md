@@ -4,7 +4,7 @@
 
 ## Tests
 
-DDEV must be installed in order to run tests. See https://ddev.readthedocs.io/en/stable/users/install/ddev-installation/
+DDEV (>= 1.25.1) must be installed in order to run tests. See https://ddev.readthedocs.io/en/stable/users/install/ddev-installation/
 
 Running this command starts the container, imports the database and runs the tests. The container will keep running after the tests are complete.
 
