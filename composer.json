@@ -18,6 +18,7 @@
   ],
   "scripts": {
     "test": "./scripts/test.sh",
+    "test-all-php": "./scripts/test-all-php.sh",
     "export-test-db": "ddev export-db --file=./tests/fixtures/test-db.sql.gz",
     "analyse": "vendor/bin/phpstan analyse --memory-limit 1G",
     "post-install-cmd": [
