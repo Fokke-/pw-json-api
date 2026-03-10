@@ -23,7 +23,7 @@ abstract class Hooks
   {
     $this->items = array_reduce(
       $keys,
-      function (array $acc, \UnitEnum $item) {
+      static function (array $acc, \UnitEnum $item) {
         $acc[$item->name] = [];
         return $acc;
       },

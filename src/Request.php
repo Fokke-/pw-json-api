@@ -117,7 +117,7 @@ class Request
    */
   protected function getCookies(): array
   {
-    return array_filter($_COOKIE, fn($val) => is_string($val));
+    return array_filter($_COOKIE, static fn($val) => is_string($val));
   }
 
   /**
@@ -173,7 +173,7 @@ class Request
   protected function getHeaders(): array
   {
     $headers = function_exists('getallheaders') ? getallheaders() : [];
-    return array_filter($headers, fn($val) => is_string($val));
+    return array_filter($headers, static fn($val) => is_string($val));
   }
 
   /**

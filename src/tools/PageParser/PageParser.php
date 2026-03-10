@@ -481,7 +481,7 @@ class PageParser
         // Multiple options
         return array_values(
           array_map(
-            fn(SelectableOption $option) => [
+            static fn(SelectableOption $option) => [
               'id' => $option->id,
               'value' => $option->value,
               'title' => $option->title,

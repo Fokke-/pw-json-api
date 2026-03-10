@@ -39,7 +39,7 @@ class Endpoint
     $this->setPath($path);
     $this->handlers = array_reduce(
       RequestMethod::cases(),
-      function (array $acc, \UnitEnum $method) {
+      static function (array $acc, \UnitEnum $method) {
         $acc[$method->name] = [];
         return $acc;
       },

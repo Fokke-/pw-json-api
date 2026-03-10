@@ -61,7 +61,7 @@ class EndpointList
    */
   public function getPaths(): array
   {
-    return array_map(function (Endpoint $item) {
+    return array_map(static function (Endpoint $item) {
       return $item->getPath();
     }, $this->items);
   }

@@ -9,7 +9,7 @@ class CSRFPluginService extends Service
   {
     parent::__construct();
 
-    $this->addEndpoint($csrfPlugin->endpointPath)->get(function () use (
+    $this->addEndpoint($csrfPlugin->endpointPath)->get(static function () use (
       $csrfPlugin,
     ) {
       return (new Response(null))->with($csrfPlugin->getToken());

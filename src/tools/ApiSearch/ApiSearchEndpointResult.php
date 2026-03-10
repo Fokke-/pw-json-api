@@ -57,7 +57,7 @@ class ApiSearchEndpointResult
           // Service tree base paths
           ...array_reduce(
             $this->serviceSequence,
-            function (array $acc, Service $service) {
+            static function (array $acc, Service $service) {
               $acc[] = $service->getBasePath();
               return $acc;
             },
@@ -67,7 +67,7 @@ class ApiSearchEndpointResult
           // Endpoint path
           $this->endpoint->getPath(),
         ],
-        fn($segment) => !is_null($segment),
+        static fn($segment) => !is_null($segment),
       ),
     );
   }
@@ -88,7 +88,7 @@ class ApiSearchEndpointResult
       $timing === HookTiming::Before
         ? $this->serviceSequence
         : array_reverse($this->serviceSequence),
-      function ($acc, $service) use ($timing, $requestMethod) {
+      static function ($acc, $service) use ($timing, $requestMethod) {
         $acc = [
           ...$acc,
           ...$service->findRequestHooks($timing),
@@ -121,7 +121,7 @@ class ApiSearchEndpointResult
   {
     $serviceHooks = array_reduce(
       array_reverse($this->serviceSequence),
-      function ($acc, $service) {
+      static function ($acc, $service) {
         $acc = [...$acc, ...$service->getRequestHooks(RequestHookKey::OnError)];
 
         return $acc;
