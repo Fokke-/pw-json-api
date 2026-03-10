@@ -43,4 +43,10 @@ When modifying code, always verify:
 
 ## Git
 
+- **Never commit** — only the developer commits. `git add` is allowed when requested.
 - Imperative mood, ~50 chars, no trailing period
+
+## Multi-step plans
+
+- Pause between phases so the developer can review, test, and commit each phase separately.
+- Design phases to be independently committable — earlier phases must not depend on later ones.
