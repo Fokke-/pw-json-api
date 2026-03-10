@@ -21,12 +21,8 @@ abstract class Hooks
    */
   public function __construct(array $keys)
   {
-    $this->items = array_reduce(
-      $keys,
-      static function (array $acc, \UnitEnum $item) {
-        $acc[$item->name] = [];
-        return $acc;
-      },
+    $this->items = array_fill_keys(
+      array_map(static fn(\UnitEnum $item) => $item->name, $keys),
       [],
     );
   }

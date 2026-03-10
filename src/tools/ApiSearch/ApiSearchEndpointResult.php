@@ -55,13 +55,9 @@ class ApiSearchEndpointResult
           $basePath,
 
           // Service tree base paths
-          ...array_reduce(
+          ...array_map(
+            static fn(Service $service) => $service->getBasePath(),
             $this->serviceSequence,
-            static function (array $acc, Service $service) {
-              $acc[] = $service->getBasePath();
-              return $acc;
-            },
-            [],
           ),
 
           // Endpoint path
@@ -84,20 +80,16 @@ class ApiSearchEndpointResult
     HookTiming $timing,
     RequestMethod|null $requestMethod = null,
   ): array {
-    $serviceHooks = array_reduce(
-      $timing === HookTiming::Before
-        ? $this->serviceSequence
-        : array_reverse($this->serviceSequence),
-      static function ($acc, $service) use ($timing, $requestMethod) {
-        $acc = [
-          ...$acc,
+    $serviceHooks = array_merge(
+      ...array_map(
+        static fn($service) => [
           ...$service->findRequestHooks($timing),
           ...$service->findRequestHooks($timing, $requestMethod),
-        ];
-
-        return $acc;
-      },
-      [],
+        ],
+        $timing === HookTiming::Before
+          ? $this->serviceSequence
+          : array_reverse($this->serviceSequence),
+      ),
     );
 
     $endpointHooks = [
@@ -119,14 +111,13 @@ class ApiSearchEndpointResult
    */
   public function resolveErrorHooks(): array
   {
-    $serviceHooks = array_reduce(
-      array_reverse($this->serviceSequence),
-      static function ($acc, $service) {
-        $acc = [...$acc, ...$service->getRequestHooks(RequestHookKey::OnError)];
-
-        return $acc;
-      },
-      [],
+    $serviceHooks = array_merge(
+      ...array_map(
+        static fn($service) => $service->getRequestHooks(
+          RequestHookKey::OnError,
+        ),
+        array_reverse($this->serviceSequence),
+      ),
     );
 
     $endpointHooks = [

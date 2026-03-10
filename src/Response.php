@@ -99,16 +99,9 @@ class Response
           'data' => $this->data,
         ];
       })(),
-      ...array_reduce(
-        array_keys($this->additionalData),
-        function (array $acc, string $key) {
-          if (!is_null($this->additionalData[$key])) {
-            $acc[$key] = $this->additionalData[$key];
-          }
-
-          return $acc;
-        },
-        [],
+      ...array_filter(
+        $this->additionalData,
+        static fn($value) => !is_null($value),
       ),
     ];
 
