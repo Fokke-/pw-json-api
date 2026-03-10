@@ -2,7 +2,7 @@
 
 Like request hooks, error hooks can be used to modify the response when an `ApiException` is thrown. The behavior of error hooks is similar, except that there are no 'before' or 'after' timings.
 
-The entire `ApiException` object will be passed to the hook handler function, with [hook arguments](#error-hook-arguments) injected. [The hook execution order](request-hooks.html#hook-execution-order) remains the same.
+An `ErrorHookReturn` object will be passed to the hook handler function. [The hook execution order](request-hooks.html#hook-execution-order) remains the same.
 
 ## Error hook scopes
 
@@ -93,12 +93,13 @@ $api->findEndpoint('/api/hello-world')?->hookOnError(function ($args) {
 
 You can access the following properties via the `$args` parameter of the handler function.
 
-| Property   | Type                     | Description                 |
-| ---------- | ------------------------ | --------------------------- |
-| `request`  | `Request`                | [Request object](/requests) |
-| `response` | `Response`               | Error Response object       |
-| `event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
-| `endpoint` | `Endpoint`               | Requested endpoint          |
-| `service`  | `Service`                | Requested service           |
-| `services` | `ServiceList`            | List of all parent services |
-| `api`      | `Api`                    | API instance                |
+| Property    | Type                     | Description                 |
+| ----------- | ------------------------ | --------------------------- |
+| `exception` | `ApiException`           | The thrown exception        |
+| `response`  | `Response`               | Error Response object       |
+| `request`   | `Request`                | [Request object](/requests) |
+| `event`     | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
+| `endpoint`  | `Endpoint`               | Requested endpoint          |
+| `service`   | `Service`                | Requested service           |
+| `services`  | `ServiceList`            | List of all parent services |
+| `api`       | `Api`                    | API instance                |

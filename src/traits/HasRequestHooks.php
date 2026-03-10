@@ -217,7 +217,7 @@ trait HasRequestHooks
   /**
    * Hook on error
    *
-   * @param callable(ApiException): void $handler
+   * @param callable(ErrorHookReturn): void $handler
    */
   public function hookOnError(callable $handler): static
   {

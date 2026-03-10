@@ -119,13 +119,14 @@ test('error hook arguments', function () {
   $json = resToJson($res);
 
   expect($json['error_hook_args'])->toBe([
-    'type' => 'PwJsonApi\\ApiException',
+    'type' => 'PwJsonApi\\ErrorHookReturn',
     'request' => 'PwJsonApi\\Request',
     'response' => 'PwJsonApi\\Response',
     'endpoint' => 'PwJsonApi\\Endpoint',
     'service' => 'ProcessWire\\ExceptionService',
     'services' => 'PwJsonApi\\ServiceList',
     'api' => 'PwJsonApi\\Api',
+    'exception' => 'PwJsonApi\\ApiException',
   ]);
 });
 
@@ -147,6 +148,13 @@ test('error hook can manipulate response', function () {
   $json = resToJson($res);
 
   expect($json['error'])->toBe('updated');
+});
+
+test('error hook can manipulate response code', function () {
+  $client = getHttp();
+  $res = $client->get('exceptions/manipulate-response-code');
+
+  expect($res->getStatusCode())->toBe(503);
 });
 
 test('before hook can replace handler', function () {

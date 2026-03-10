@@ -205,14 +205,6 @@ class Api
         }
       }
     } catch (ApiException $e) {
-      // Inject request data to the exception
-      $e->request = $request;
-      $e->event = $event;
-      $e->endpoint = $result->endpoint;
-      $e->service = $result->service;
-      $e->services = $result->endpoint->services;
-      $e->api = $this;
-
       // Error hooks
       $errorHooks = [
         // Endpoint with services
@@ -223,8 +215,18 @@ class Api
       ];
 
       if (!empty($errorHooks)) {
+        $hookReturnError = new ErrorHookReturn();
+        $hookReturnError->request = $request;
+        $hookReturnError->event = $event;
+        $hookReturnError->endpoint = $result->endpoint;
+        $hookReturnError->service = $result->service;
+        $hookReturnError->services = $result->endpoint->services;
+        $hookReturnError->api = $this;
+        $hookReturnError->exception = $e;
+        $hookReturnError->response = $e->response;
+
         foreach ($errorHooks as $hookFn) {
-          call_user_func($hookFn, $e);
+          call_user_func($hookFn, $hookReturnError);
         }
       }
 

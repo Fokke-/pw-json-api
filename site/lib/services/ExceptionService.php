@@ -2,6 +2,7 @@
 
 use PwJsonApi\Api404Exception;
 use PwJsonApi\ApiException;
+use PwJsonApi\ErrorHookReturn;
 use PwJsonApi\Service;
 
 class ExceptionService extends Service
@@ -25,6 +26,7 @@ class ExceptionService extends Service
           'service' => get_class($args->service),
           'services' => get_class($args->services),
           'api' => get_class($args->api),
+          'exception' => get_class($args->exception),
         ],
       ]);
     });
@@ -99,9 +101,17 @@ class ExceptionService extends Service
           'error' => 'updated',
         ]);
       });
+
+    $this->addEndpoint('/manipulate-response-code')
+      ->get(function () {
+        throw new ApiException('original');
+      })
+      ->hookOnError(function ($args) {
+        $args->response->code(503);
+      });
   }
 
-  protected function addEndpointExecutionOrder(ApiException $args)
+  protected function addEndpointExecutionOrder(ErrorHookReturn $args)
   {
     $args->response->with([
       'error_hook_execution_order' => [
