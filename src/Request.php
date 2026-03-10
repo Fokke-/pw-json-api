@@ -7,6 +7,8 @@ use ProcessWire\{HookEvent};
 
 /**
  * API request
+ *
+ * @see https://pwjsonapi.fokke.fi/requests.html
  */
 class Request
 {

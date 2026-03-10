@@ -4,6 +4,11 @@ namespace PwJsonApi;
 
 use ProcessWire\{Page};
 
+/**
+ * Hook arguments for after property parse.
+ *
+ * @see https://pwjsonapi.fokke.fi/processwire-page-parser.html#hookafterpropertyparse
+ */
 class HookReturnAfterPropertyParse
 {
   /** Parsed property value */

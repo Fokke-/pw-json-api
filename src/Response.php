@@ -4,6 +4,8 @@ namespace PwJsonApi;
 
 /**
  * API response
+ *
+ * @see https://pwjsonapi.fokke.fi/responses.html
  */
 class Response
 {

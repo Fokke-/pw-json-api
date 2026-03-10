@@ -4,6 +4,8 @@ namespace PwJsonApi;
 
 /**
  * Endpoint handler arguments
+ *
+ * @see https://pwjsonapi.fokke.fi/endpoints.html#endpoint-handler-arguments
  */
 class EndpointHandlerArgs
 {

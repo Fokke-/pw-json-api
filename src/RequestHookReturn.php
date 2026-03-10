@@ -4,6 +4,8 @@ namespace PwJsonApi;
 
 /**
  * Base class for request hooks
+ *
+ * @see https://pwjsonapi.fokke.fi/request-hooks.html#hook-arguments
  */
 abstract class RequestHookReturn
 {

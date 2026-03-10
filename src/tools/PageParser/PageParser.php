@@ -20,6 +20,8 @@ use \ProcessWire\{
 
 /**
  * ProcessWire Page parser
+ *
+ * @see https://pwjsonapi.fokke.fi/processwire-page-parser.html
  */
 class PageParser
 {

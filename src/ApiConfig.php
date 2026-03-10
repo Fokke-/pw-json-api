@@ -4,6 +4,8 @@ namespace PwJsonApi;
 
 /**
  * API configuration
+ *
+ * @see https://pwjsonapi.fokke.fi/api-instance.html#configuration
  */
 class ApiConfig
 {

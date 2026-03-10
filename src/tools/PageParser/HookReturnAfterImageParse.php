@@ -4,6 +4,11 @@ namespace PwJsonApi;
 
 use ProcessWire\{Page, Field, Pageimage};
 
+/**
+ * Hook arguments for after image parse.
+ *
+ * @see https://pwjsonapi.fokke.fi/processwire-page-parser.html#hookafterimageparse
+ */
 class HookReturnAfterImageParse
 {
   /**

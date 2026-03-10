@@ -4,6 +4,8 @@ namespace PwJsonApi;
 
 /**
  * Event to return when an error occurs
+ *
+ * @see https://pwjsonapi.fokke.fi/error-hooks.html#error-hook-arguments
  */
 class ErrorHookReturn extends RequestHookReturn
 {

@@ -4,6 +4,8 @@ namespace PwJsonApi;
 
 /**
  * Single endpoint
+ *
+ * @see https://pwjsonapi.fokke.fi/endpoints.html
  */
 class Endpoint
 {

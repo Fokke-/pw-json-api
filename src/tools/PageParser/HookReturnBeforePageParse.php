@@ -4,6 +4,11 @@ namespace PwJsonApi;
 
 use ProcessWire\Page;
 
+/**
+ * Hook arguments for before page parse.
+ *
+ * @see https://pwjsonapi.fokke.fi/processwire-page-parser.html#hookbeforepageparse
+ */
 class HookReturnBeforePageParse
 {
   /** Source page */

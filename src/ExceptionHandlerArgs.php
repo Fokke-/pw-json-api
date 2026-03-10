@@ -4,6 +4,8 @@ namespace PwJsonApi;
 
 /**
  * Exception handler arguments
+ *
+ * @see https://pwjsonapi.fokke.fi/api-instance.html#exception-handling
  */
 class ExceptionHandlerArgs
 {

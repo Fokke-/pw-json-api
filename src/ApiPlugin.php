@@ -5,6 +5,11 @@ namespace PwJsonApi\Plugins;
 use PwJsonApi\{HasWire, Api, Service, Endpoint};
 use function ProcessWire\wire;
 
+/**
+ * Base class for API plugins.
+ *
+ * @see https://pwjsonapi.fokke.fi/plugins/plugins-overview.html
+ */
 abstract class ApiPlugin
 {
   use HasWire;

@@ -19,6 +19,7 @@ Requires PHP 8.2+, developed in a DDEV environment.
 - **Architecture:** trait-based composition with `Has...` naming (e.g. `HasServiceList`)
 - **Naming:** `...Args` for DTOs, `...Exception`, `...Interface`, `...Config`
 - **PHPDoc:** required for complex callables/generics; omit when native types suffice
+- **@see links:** add `@see https://pwjsonapi.fokke.fi/...` to class-level PHPDoc when a matching documentation page or section exists. Verify link validity with curl or by inspecting the markdown source in `docs/`.
 - **Control structures:** always use braces, no one-liner `if` statements
 
 ## Architecture

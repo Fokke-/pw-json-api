@@ -4,6 +4,8 @@ namespace PwJsonApi;
 
 /**
  * Request hooks
+ *
+ * @see https://pwjsonapi.fokke.fi/request-hooks.html
  */
 class RequestHooks extends Hooks
 {

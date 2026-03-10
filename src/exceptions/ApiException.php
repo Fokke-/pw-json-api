@@ -4,6 +4,8 @@ namespace PwJsonApi;
 
 /**
  * Api exception
+ *
+ * @see https://pwjsonapi.fokke.fi/error-handling.html
  */
 class ApiException extends \Exception
 {

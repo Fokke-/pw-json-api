@@ -7,6 +7,8 @@ use function ProcessWire\wire;
 
 /**
  * ProcessWire JSON API
+ *
+ * @see https://pwjsonapi.fokke.fi/api-instance.html
  */
 class Api
 {

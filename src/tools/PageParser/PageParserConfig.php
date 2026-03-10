@@ -4,6 +4,8 @@ namespace PwJsonApi;
 
 /**
  * Page parser configuration
+ *
+ * @see https://pwjsonapi.fokke.fi/processwire-page-parser.html#configuration
  */
 class PageParserConfig
 {
