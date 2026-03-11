@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting&hellip;</title>
+    <script>
+      var path = location.pathname.replace(/^\/pw-json-api\/?/, '/');
+      location.replace('https://pwjsonapi.fokke.fi' + path + location.search + location.hash);
+    </script>
+    <meta
+      http-equiv="refresh"
+      content="0; url=https://pwjsonapi.fokke.fi/"
+    />
+  </head>
+  <body>
+    <p>
+      This site has moved to
+      <a href="https://pwjsonapi.fokke.fi/">pwjsonapi.fokke.fi</a>.
+    </p>
+  </body>
+</html>
