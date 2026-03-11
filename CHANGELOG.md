@@ -4,7 +4,8 @@
 
 ### Breaking changes
 
-- Services, endpoints, and the Api instance are now locked after `Api::run()` is called to prevent cross-service injection and runtime mutation. Adding services, endpoints, plugins, hooks, or setting handlers after locking will throw `WireException`. All configuration must happen in `init()` or the setup callback.
+- `Api::run()` is now defined as final
+- Services, endpoints, and the Api instance are now locked after `Api::run()` is called to prevent cross-service injection and runtime mutation. Adding services, endpoints, plugins, hooks, or setting handlers after locking will throw `WireException`. All configuration must happen in Service `init()`, `__construct()`, or the setup callback.
 - `OPTIONS` requests to non-existent endpoints are no longer intercepted with an empty `200` response. These requests are now handled by ProcessWire's default routing.
 - `$event` argument is no longer passed directly to the endpoint handler. Use [`$args->event` instead](https://pwjsonapi.fokke.fi/endpoints.html#endpoint-handler-arguments).
 - `$e` and `$request` are no longer passed directly to the `handleException()` callback function. [Use `$args->exception` and `$args->request` instead](https://pwjsonapi.fokke.fi/api-instance.html#exception-handling).
@@ -15,8 +16,8 @@
 
 ### New features
 
-- Response header support
-- New `init()` method for Services
+- New `init()` method for services
+- New `header()` method for response
 - New `Request` object is exposed in arguments of request handlers and hooks
 - New plugin interface
 - CSRF protection plugin
