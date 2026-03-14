@@ -1,3 +1,7 @@
+---
+description: 'Throw ApiException to return structured error responses with custom status codes and messages.'
+---
+
 # Error handling
 
 The library catches any exception derived from the `ApiException` class and converts it to a response. You can throw an `ApiException` at any time to halt the process.

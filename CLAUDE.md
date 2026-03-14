@@ -39,6 +39,7 @@ When modifying code, always verify:
 
 - The feature has an existing test, and the test is up to date with the change
 - Documentation in `docs/` is up to date for the affected feature
+- Each documentation page has a frontmatter `description` — a short, concise meta description for SEO
 - If the feature is not documented at all, ask the developer whether to add it
 
 ## Git

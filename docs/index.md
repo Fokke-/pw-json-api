@@ -1,6 +1,7 @@
 ---
 # https://vitepress.dev/reference/default-theme-home-page
 layout: home
+description: 'Build structured JSON APIs for ProcessWire without boilerplate. Convention-based, extensible, and MIT licensed.'
 
 hero:
   name: 'ProcessWire JSON API'

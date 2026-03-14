@@ -1,3 +1,7 @@
+---
+description: 'Generate OpenAPI specifications from your services using swagger-php attributes and named endpoint methods.'
+---
+
 # OpenAPI documentation
 
 You can use [swagger-php](https://zircote.github.io/swagger-php/) attributes to generate an [OpenAPI](https://www.openapis.org/) spec directly from your services. The key pattern is to define endpoint handlers as named class methods instead of inline closures, giving the attributes a target to attach to.

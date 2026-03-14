@@ -1,3 +1,7 @@
+---
+description: 'Return structured JSON responses with custom status codes, headers, and data payloads.'
+---
+
 # Responses
 
 The data you return with the response will be rendered under the `data` key in the resulting JSON.

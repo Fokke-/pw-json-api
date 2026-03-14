@@ -1,3 +1,7 @@
+---
+description: 'Customize error responses with API-level and service-level error hooks when exceptions are thrown.'
+---
+
 # Error hooks
 
 Like request hooks, error hooks can be used to modify the response when an `ApiException` is thrown. The behavior of error hooks is similar, except that there are no 'before' or 'after' timings.

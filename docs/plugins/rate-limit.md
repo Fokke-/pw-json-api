@@ -1,3 +1,7 @@
+---
+description: "Limit API request rates per client using a fixed-window algorithm backed by ProcessWire's WireCache."
+---
+
 # Rate limiting <Badge type="tip" text="^2.0" />
 
 This plugin adds rate limiting for your API endpoints using a fixed-window algorithm. It uses ProcessWire's WireCache for storage, which means request counts are persisted in the database and survive across requests.

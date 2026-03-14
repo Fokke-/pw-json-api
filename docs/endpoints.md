@@ -1,3 +1,7 @@
+---
+description: 'Define endpoint handlers for GET, POST, PUT, PATCH, DELETE and other HTTP methods using ProcessWire URL hooks.'
+---
+
 # Endpoints
 
 Under the hood, the endpoint path will be used to create a [ProcessWire URL hook](https://processwire.com/blog/posts/pw-3.0.173/#introducing-url-path-hooks). All URL hook features are supported.

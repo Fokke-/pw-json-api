@@ -1,3 +1,7 @@
+---
+description: 'Learn how ProcessWire JSON API provides a unified structure for defining JSON endpoints using URL hooks.'
+---
+
 # Overview
 
 [ProcessWire](https://processwire.com) is a very flexible content management framework and CMS. In addition to building websites, it can be used as a headless CMS. My usual workflow is to use ProcessWire as a data backend, exposing JSON endpoints that are ready to be consumed by a Vue.js front-end application.

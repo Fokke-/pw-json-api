@@ -1,3 +1,7 @@
+---
+description: 'Convert ProcessWire pages into structured data with field selection, child page traversal, and hook-based customization.'
+---
+
 # ProcessWire Page Parser
 
 The **Page Parser** is a flexible tool for converting ProcessWire pages into structured data, ready for API responses. It supports all ProcessWire core field types and offers extensive configuration and hook options.

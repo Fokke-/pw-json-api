@@ -1,3 +1,7 @@
+---
+description: 'Install ProcessWire JSON API via Composer and create your first service and endpoint in minutes.'
+---
+
 # Getting started
 
 Please check that your environment meets the minimum system requirements:

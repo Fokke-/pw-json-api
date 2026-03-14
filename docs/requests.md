@@ -1,3 +1,7 @@
+---
+description: 'Access request properties like method, path, query parameters, headers, cookies, and body data in endpoint handlers.'
+---
+
 # Requests
 
 Request object can be accessed in callback functions of:

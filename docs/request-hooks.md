@@ -1,3 +1,7 @@
+---
+description: 'Add before and after hooks at the API, service, or endpoint level for authorization, validation, and response modification.'
+---
+
 # Request hooks
 
 Request hooks can be used to modify the behavior of endpoints. The most common use cases are to check for authorization before the request is handled, or to modify response data after the request has been handled. For these purposes, [hook arguments](#hook-arguments) will be passed to the hook handler functions.

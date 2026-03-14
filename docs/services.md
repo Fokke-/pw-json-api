@@ -1,3 +1,7 @@
+---
+description: 'Group endpoints into services with shared configuration, child service nesting, and hook inheritance.'
+---
+
 # Services
 
 Services are used to group endpoints. Since services are classes, they can have properties and methods.

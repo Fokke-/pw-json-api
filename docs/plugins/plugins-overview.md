@@ -1,3 +1,7 @@
+---
+description: 'Extend API, service, or endpoint behavior with reusable plugins built on the ApiPlugin base class.'
+---
+
 # Plugins <Badge type="tip" text="^2.0" />
 
 Plugins are reusable packages of hooks, services, and configuration that can be installed on an API instance, a service, or an endpoint. They provide a way to encapsulate cross-cutting concerns and share them across projects.

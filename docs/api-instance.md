@@ -1,3 +1,7 @@
+---
+description: 'Configure the top-level Api class with base paths, JSON encoding options, and system-wide request hooks.'
+---
+
 # API Instance
 
 An API instance holds all the services. You can also define system-wide request hooks, which will apply to every endpoint. [Read more about hooks](/request-hooks).
