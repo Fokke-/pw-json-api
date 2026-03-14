@@ -1,5 +1,8 @@
 <template>
   <Layout>
+    <template #layout-bottom>
+      <ReloadPrompt />
+    </template>
     <template #sidebar-nav-after>
       <iframe
         src="https://github.com/sponsors/Fokke-/button"
@@ -15,6 +18,7 @@
 
 <script setup lang="ts">
 import DefaultTheme from 'vitepress/theme';
+import ReloadPrompt from './components/ReloadPrompt.vue';
 
 const { Layout } = DefaultTheme;
 </script>

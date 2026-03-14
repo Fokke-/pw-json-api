@@ -10,6 +10,10 @@ Requires PHP 8.2+, developed in a DDEV environment.
 - `composer run analyse` — static analysis (PHPStan level 9)
 - `npm run format` — format code (Prettier)
 
+## Dependencies
+
+- **Pinned versions:** always install pnpm and Composer packages with exact versions (no `^` or `~` prefixes)
+
 ## Code conventions
 
 - **Formatting:** Prettier with PHP plugin — 2 spaces, single quotes, trailing commas, 80-char line width
@@ -37,6 +41,7 @@ Requires PHP 8.2+, developed in a DDEV environment.
 
 When modifying code, always verify:
 
+- When adding files or directories to the project root, ensure `.gitattributes` marks them `export-ignore` if they should not be included in the Composer package (only `src/`, `CHANGELOG.md`, `LICENSE`, `README.md`, and `composer.json` ship)
 - The feature has an existing test, and the test is up to date with the change
 - Documentation in `docs/` is up to date for the affected feature
 - Each documentation page has a frontmatter `description` — a short, concise meta description for SEO

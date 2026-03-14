@@ -4,6 +4,7 @@ CLAUDE.md export-ignore
 .gitattributes export-ignore
 .github export-ignore
 .gitignore export-ignore
+.npmrc export-ignore
 .htaccess export-ignore
 .husky export-ignore
 .prettierrc.json export-ignore
