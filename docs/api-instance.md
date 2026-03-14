@@ -67,6 +67,10 @@ Under the hood, the method:
 2. Validates that there are no duplicate service names or endpoint paths
 3. Registers a [ProcessWire URL hook](https://processwire.com/docs/modules/hooks/#url-hooks-new-in-3-0-173) listener for each endpoint path
 
+::: tip
+For a complete overview of the initialization and request handling sequence, see [Application lifecycle](/lifecycle).
+:::
+
 ### Locking
 
 After `run()` is called, the Api instance, all services, and all endpoints are **locked**. Locked objects reject structural mutations — this includes adding services, endpoints, plugins, hooks, and setting endpoint handlers.

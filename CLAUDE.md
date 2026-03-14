@@ -45,6 +45,7 @@ When modifying code, always verify:
 - The feature has an existing test, and the test is up to date with the change
 - Documentation in `docs/` is up to date for the affected feature
 - Each documentation page has a frontmatter `description` — a short, concise meta description for SEO
+- When renaming a documentation file (which changes its URL), check all `docs/` files and `src/` `@see` links for references to the old path
 - If the feature is not documented at all, ask the developer whether to add it
 
 ## Git

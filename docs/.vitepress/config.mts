@@ -51,6 +51,7 @@ export default withPwa(
           items: [
             { text: 'Overview', link: '/overview' },
             { text: 'Getting started', link: '/getting-started' },
+            { text: 'Application lifecycle', link: '/lifecycle' },
           ],
         },
         {
