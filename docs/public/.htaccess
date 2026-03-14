@@ -2,7 +2,7 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^([^\.]+)$ $1.html [NC,L]
 
-<FilesMatch "^(sw|workbox-.*)\.(js|js\.map)$">
+<FilesMatch "^(sw|workbox-.*)\.(js|js\.map)$|^sitemap\.xml$">
   <IfModule mod_headers.c>
     Header set Cache-Control "no-cache, no-store, must-revalidate"
     Header set Pragma "no-cache"
