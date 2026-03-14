@@ -29,6 +29,11 @@ export default defineConfig({
       { rel: 'canonical', href: canonicalUrl },
     ]);
   },
+  transformHtml(code) {
+    if (!code.includes('<main') && code.includes('id="VPContent"')) {
+      return code.replace('id="VPContent"', 'id="VPContent" role="main"');
+    }
+  },
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     search: {
