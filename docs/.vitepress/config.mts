@@ -130,6 +130,7 @@ export default withPwa(
       workbox: {
         globPatterns: ['**/*.{js,css,html,woff2}'],
         cleanupOutdatedCaches: true,
+        navigateFallbackDenylist: [/\.xml$/, /\.txt$/],
       },
     },
   }),
