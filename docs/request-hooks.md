@@ -171,12 +171,10 @@ You can access the following properties via the `$args` parameter of the handler
 
 ## Hook execution order
 
-```mermaid
-flowchart TD
-  A[API before]-->
-  B[Service before]-->
-  C[Endpoint before]-->
-  |Request handler|D[Endpoint after]-->
-  E[Service after]-->
-  F[API after]
-```
+1. API before hooks
+2. Service before hooks
+3. Endpoint before hooks
+4. **Request handler**
+5. Endpoint after hooks
+6. Service after hooks
+7. API after hooks

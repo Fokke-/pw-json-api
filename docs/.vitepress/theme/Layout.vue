@@ -6,6 +6,7 @@
         title="Sponsor Fokke-"
         height="32"
         width="114"
+        loading="lazy"
         style="border: 0; border-radius: 6px"
       ></iframe>
     </template>

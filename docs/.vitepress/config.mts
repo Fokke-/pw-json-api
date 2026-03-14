@@ -1,7 +1,7 @@
-import { withMermaid } from 'vitepress-plugin-mermaid';
+import { defineConfig } from 'vitepress';
 
 // https://vitepress.dev/reference/site-config
-export default withMermaid({
+export default defineConfig({
   title: 'ProcessWire JSON API',
   description: '',
   base: '/',
