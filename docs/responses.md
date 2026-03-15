@@ -97,6 +97,45 @@ Multiple headers can be chained:
 return (new Response())->header('X-First', 'one')->header('X-Second', 'two');
 ```
 
+## Paginated responses <Badge type="tip" text="^2.1" />
+
+`PaginatedResponse` extends `Response` and adds a `pagination` key to the output. It provides `start()`, `limit()`, and `total()` setters, plus computed `page` and `pages` values.
+
+::: warning
+This class does **not** perform pagination. It only attaches pagination metadata to the response. Actual pagination must be handled elsewhere, for example with ProcessWire selectors using `start` and `limit`.
+:::
+
+```php
+use PwJsonApi\PaginatedResponse;
+
+return (new PaginatedResponse(['foo', 'bar', 'baz']))
+  ->start(10)
+  ->limit(10)
+  ->total(85);
+```
+
+The resulting JSON:
+
+```json
+{
+  "data": ["foo", "bar", "baz"],
+  "pagination": {
+    "start": 10,
+    "limit": 10,
+    "total": 85,
+    "page": 2,
+    "pages": 9
+  }
+}
+```
+
+All three setters — `start()`, `limit()`, and `total()` — must be called before `toArray()` or `toJson()`. A `LogicException` is thrown if any value is missing.
+
+The computed values are derived as follows:
+
+- **`page`** — current page number (1-based): `floor(start / limit) + 1`
+- **`pages`** — total number of pages: `ceil(total / limit)`
+
 ## Methods
 
 ### toArray()

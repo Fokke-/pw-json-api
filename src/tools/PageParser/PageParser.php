@@ -705,4 +705,25 @@ class PageParser
   {
     return new Response($this->toArray());
   }
+
+  /**
+   * Parse data and return as a new PaginatedResponse
+   *
+   * Reads pagination metadata from the PageArray input.
+   *
+   * @throws \InvalidArgumentException If input is not a PageArray
+   */
+  public function toPaginatedResponse(): PaginatedResponse
+  {
+    if (!$this->input instanceof PageArray) {
+      throw new \InvalidArgumentException(
+        'toPaginatedResponse() requires a PageArray input',
+      );
+    }
+
+    return (new PaginatedResponse($this->toArray()))
+      ->start($this->input->getStart())
+      ->limit($this->input->getLimit())
+      ->total($this->input->getTotal());
+  }
 }

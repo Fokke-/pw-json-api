@@ -1,6 +1,6 @@
 <?php
 
-use PwJsonApi\{PageParser, Response};
+use PwJsonApi\{PageParser, PaginatedResponse, Response};
 use ProcessWire\{NullPage, PageArray, Pageimage};
 
 test('toArray()', function () {
@@ -656,3 +656,27 @@ test('hookAfterFileParse()', function () {
   expect($result['single_file'])->toHaveKey('_foo');
   expect($result['single_file']['_foo'])->toBe('foo');
 });
+
+test('toPaginatedResponse() with PageArray', function () {
+  $result = (new PageParser())
+    ->input(getMultiplePages())
+    ->toPaginatedResponse();
+
+  expect($result)->toBeInstanceOf(PaginatedResponse::class);
+
+  $array = $result->toArray();
+  expect($array)->toHaveKey('data');
+  expect($array)->toHaveKey('pagination');
+  expect($array['pagination']['start'])->toBeInt();
+  expect($array['pagination']['limit'])->toBeInt();
+  expect($array['pagination']['total'])->toBeInt();
+  expect($array['pagination']['page'])->toBeInt();
+  expect($array['pagination']['pages'])->toBeInt();
+});
+
+test('toPaginatedResponse() throws with single Page', function () {
+  (new PageParser())->input(getPage())->toPaginatedResponse();
+})->throws(
+  InvalidArgumentException::class,
+  'toPaginatedResponse() requires a PageArray input',
+);

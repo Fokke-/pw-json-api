@@ -136,6 +136,17 @@ $response = (new PageParser())
   ->toResponse();
 ```
 
+### As a paginated response <Badge type="tip" text="^2.1" />
+
+`toPaginatedResponse()` returns a [PaginatedResponse](/responses.html#paginated-responses) with pagination metadata read from the `PageArray` input. The input must be a `PageArray` — an `InvalidArgumentException` is thrown otherwise.
+
+```php{4}
+$response = (new PageParser())
+  ->input($this->wire->pages->find('template=basic-page, start=0, limit=10'))
+  ->fields('title', 'body')
+  ->toPaginatedResponse();
+```
+
 ## Hooks
 
 Hooks allow you to modify data before and after parsing pages, fields, images, and files. This enables advanced customization, such as resizing images, altering field values, or adding extra data.

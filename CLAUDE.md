@@ -47,6 +47,7 @@ When modifying code, always verify:
 - Each documentation page has a frontmatter `description` — a short, concise meta description for SEO
 - When renaming a documentation file (which changes its URL), check all `docs/` files and `src/` `@see` links for references to the old path
 - If the feature is not documented at all, ask the developer whether to add it
+- Document new features, bug fixes, and breaking changes in `CHANGELOG.md` under the next version number (determine from git tags). Use subsections matching existing entries: `### Breaking changes`, `### New features`, `### Bug fixes`. Do not document beta versions in the changelog.
 
 ## Git
 

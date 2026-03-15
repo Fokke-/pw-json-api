@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2.1.0
+
+### New features
+
+- New `PaginatedResponse` class for attaching pagination metadata to responses
+- **Page Parser:** New `toPaginatedResponse()` method for returning paginated results directly from the parser
+
 ## 2.0.0
 
 ### Breaking changes
