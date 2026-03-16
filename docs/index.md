@@ -18,6 +18,12 @@ features:
   - icon: 🏖️
     title: Convention over Configuration
     details: No cryptic configuration files. Get the first endpoint running in minutes.
+  - icon: 🧩
+    title: Strictly Typed
+    details: Your IDE already knows the API. Autocomplete everywhere, surprises nowhere.
+  - icon: ✨
+    title: Fluent API
+    details: Expressive, chainable methods that make building endpoints a breeze.
   - icon: 📦
     title: Extensible
     details: With multiple API instances, service stacks, hooks and plugins, your API is ready to scale.
