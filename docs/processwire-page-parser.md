@@ -161,6 +161,33 @@ current recursion depth (starting at 1). Use this to customize behavior at
 different nesting levels.
 :::
 
+### Skip <Badge type="tip" text="^2.1" />
+
+The `skip()` method is available in `hookBeforePageParse()`, `hookBeforePropertyParse()`, and `hookBeforeFieldParse()` callbacks. When called, the item is omitted from the output entirely — the key will not appear (not even as `null`). This also provides a performance benefit, as recursive fields are not parsed when skipped.
+
+```php
+// Skip unpublished pages
+$parser->hookBeforePageParse(function ($args) {
+  if ($args->page->isUnpublished()) {
+    $args->skip();
+  }
+});
+
+// Skip the body field at depth > 1
+$parser->hookBeforeFieldParse(function ($args) {
+  if ($args->field->name === 'body' && $args->depth > 1) {
+    $args->skip();
+  }
+});
+
+// Skip the id property
+$parser->hookBeforePropertyParse(function ($args) {
+  if ($args->propertyName === 'id') {
+    $args->skip();
+  }
+});
+```
+
 ### hookBeforePageParse()
 
 Use this to modify the source page.

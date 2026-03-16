@@ -6,6 +6,7 @@
 
 - New `PaginatedResponse` class for attaching pagination metadata to responses
 - **Page Parser:** New `toPaginatedResponse()` method for returning paginated results directly from the parser
+- **Page Parser:** `skip()` method for `BeforePageParse`, `BeforePropertyParse`, and `BeforeFieldParse` hooks to exclude items from output
 
 ## 2.0.0
 

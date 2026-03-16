@@ -25,6 +25,8 @@ Requires PHP 8.2+, developed in a DDEV environment.
 - **PHPDoc:** required for complex callables/generics; omit when native types suffice
 - **@see links:** add `@see https://pwjsonapi.fokke.fi/...` to class-level PHPDoc when a matching documentation page or section exists. Verify link validity with curl or by inspecting the markdown source in `docs/`.
 - **Control structures:** always use braces, no one-liner `if` statements
+- **Array operations:** avoid `array_filter` + `array_map` combos — use `array_reduce` when both filtering and mapping are needed
+- **Callbacks:** use `static fn`/`static function` for callbacks (e.g. `array_reduce`, `array_map`) that don't reference `$this`
 
 ## Architecture
 
@@ -47,7 +49,7 @@ When modifying code, always verify:
 - Each documentation page has a frontmatter `description` — a short, concise meta description for SEO
 - When renaming a documentation file (which changes its URL), check all `docs/` files and `src/` `@see` links for references to the old path
 - If the feature is not documented at all, ask the developer whether to add it
-- Document new features, bug fixes, and breaking changes in `CHANGELOG.md` under the next version number (determine from git tags). Use subsections matching existing entries: `### Breaking changes`, `### New features`, `### Bug fixes`. Do not document beta versions in the changelog.
+- Document new features, bug fixes, and breaking changes in `CHANGELOG.md` under the next version number (determine from git tags — use `git ls-remote --tags origin` and treat existing CHANGELOG entries as unreleased). Use subsections matching existing entries: `### Breaking changes`, `### New features`, `### Bug fixes`. Do not document beta versions in the changelog.
 
 ## Git
 

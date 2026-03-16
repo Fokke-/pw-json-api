@@ -657,6 +657,82 @@ test('hookAfterFileParse()', function () {
   expect($result['single_file']['_foo'])->toBe('foo');
 });
 
+test('skip() in hookBeforeFieldParse()', function () {
+  $result = (new PageParser())
+    ->input(getPage())
+    ->hookBeforeFieldParse(function ($args) {
+      if ($args->field->name === 'title') {
+        $args->skip();
+      }
+    })
+    ->toArray();
+
+  expect($result)->not()->toHaveKey('title');
+});
+
+test('skip() in hookBeforePropertyParse()', function () {
+  $result = (new PageParser())
+    ->input(getPage())
+    ->hookBeforePropertyParse(function ($args) {
+      if ($args->propertyName === 'id') {
+        $args->skip();
+      }
+    })
+    ->toArray();
+
+  expect($result)->not()->toHaveKey('id');
+  expect($result)->toHaveKey('name');
+});
+
+test('skip() in hookBeforePageParse() with PageArray', function () {
+  $pages = getMultiplePages();
+  $firstId = $pages->first()->id;
+
+  $result = (new PageParser())
+    ->input($pages)
+    ->hookBeforePageParse(function ($args) use ($firstId) {
+      if ($args->page->id === $firstId) {
+        $args->skip();
+      }
+    })
+    ->toArray();
+
+  expect($result)->toHaveCount(1);
+  expect($result[0]['id'])->not()->toBe($firstId);
+});
+
+test('skip() in hookBeforePageParse() with single Page', function () {
+  $result = (new PageParser())
+    ->input(getPage())
+    ->hookBeforePageParse(function ($args) {
+      $args->skip();
+    })
+    ->toArray();
+
+  expect($result)->toBe([]);
+});
+
+test('skip() short-circuits remaining hooks', function () {
+  $secondHookCalled = false;
+
+  $result = (new PageParser())
+    ->input(getPage())
+    ->hookBeforeFieldParse(function ($args) {
+      if ($args->field->name === 'title') {
+        $args->skip();
+      }
+    })
+    ->hookBeforeFieldParse(function ($args) use (&$secondHookCalled) {
+      if ($args->field->name === 'title') {
+        $secondHookCalled = true;
+      }
+    })
+    ->toArray();
+
+  expect($secondHookCalled)->toBeFalse();
+  expect($result)->not()->toHaveKey('title');
+});
+
 test('toPaginatedResponse() with PageArray', function () {
   $result = (new PageParser())
     ->input(getMultiplePages())

@@ -11,6 +11,8 @@ use ProcessWire\{Page, Field};
  */
 class HookReturnBeforeFieldParse
 {
+  use HasSkip;
+
   /** Field value */
   public mixed $value;
 

@@ -175,9 +175,9 @@ class PageParser
   /**
    * Parse a single page
    *
-   * @return array<string, mixed>
+   * @return array<string, mixed>|SkipSignal
    */
-  protected function parsePage(Page $page): array
+  protected function parsePage(Page $page): array|SkipSignal
   {
     // Use current parser as a base for child page parser
     $childPageParser = clone $this;
@@ -198,6 +198,9 @@ class PageParser
         $hookRet->parser = $childPageParser;
         $hookRet->depth = $this->_currentDepth;
         call_user_func($handler, $hookRet);
+        if ($hookRet->_isSkipped()) {
+          return SkipSignal::Skip;
+        }
         $page = $hookRet->page;
       }
     }
@@ -227,7 +230,11 @@ class PageParser
           }
 
           if ($page->has($propertyName)) {
-            $acc[$propertyName] = $this->parseProperty($propertyName, $page);
+            $result = $this->parseProperty($propertyName, $page);
+            if ($result === SkipSignal::Skip) {
+              return $acc;
+            }
+            $acc[$propertyName] = $result;
           }
 
           return $acc;
@@ -247,7 +254,11 @@ class PageParser
             return $acc;
           }
 
-          $acc[$fieldName] = $this->parseField($field, $page);
+          $result = $this->parseField($field, $page);
+          if ($result === SkipSignal::Skip) {
+            return $acc;
+          }
+          $acc[$fieldName] = $result;
           return $acc;
         },
         [],
@@ -299,9 +310,18 @@ class PageParser
    */
   protected function parsePageArray(PageArray $input): array
   {
-    return array_map(function (Page $page) {
-      return $this->parsePage($page);
-    }, $input->getArray());
+    return array_reduce(
+      $input->getArray(),
+      function (array $acc, Page $page) {
+        $result = $this->parsePage($page);
+        if ($result === SkipSignal::Skip) {
+          return $acc;
+        }
+        $acc[] = $result;
+        return $acc;
+      },
+      [],
+    );
   }
 
   /**
@@ -325,6 +345,9 @@ class PageParser
       foreach ($beforePropertyParseHooks as $handler) {
         $hookRet->value = $value;
         call_user_func($handler, $hookRet);
+        if ($hookRet->_isSkipped()) {
+          return SkipSignal::Skip;
+        }
         $value = $hookRet->value;
       }
     }
@@ -391,6 +414,9 @@ class PageParser
         $hookRet->value = $value;
         $hookRet->parser = $parser;
         call_user_func($handler, $hookRet);
+        if ($hookRet->_isSkipped()) {
+          return SkipSignal::Skip;
+        }
         $value = $hookRet->value;
         $parser = $hookRet->parser;
       }
@@ -692,7 +718,8 @@ class PageParser
     }
 
     if ($this->input instanceof Page) {
-      return $this->parsePage($this->input);
+      $result = $this->parsePage($this->input);
+      return $result === SkipSignal::Skip ? [] : $result;
     }
 
     return $this->parsePageArray($this->input);

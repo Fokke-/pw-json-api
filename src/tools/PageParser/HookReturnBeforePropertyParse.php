@@ -11,6 +11,8 @@ use ProcessWire\{Page};
  */
 class HookReturnBeforePropertyParse
 {
+  use HasSkip;
+
   /** Property value */
   public mixed $value;
 

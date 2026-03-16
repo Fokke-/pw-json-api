@@ -11,6 +11,8 @@ use ProcessWire\Page;
  */
 class HookReturnBeforePageParse
 {
+  use HasSkip;
+
   /** Source page */
   public Page $page;
 
