@@ -4,6 +4,8 @@ Structured APIs for ProcessWire, without the boilerplate.
 
 [Click here for documentation](https://pwjsonapi.fokke.fi)
 
+For AI-assisted development, see [llms.txt](https://pwjsonapi.fokke.fi/llms.txt).
+
 ## Tests
 
 DDEV (>= 1.25.1) must be installed in order to run tests. See https://ddev.readthedocs.io/en/stable/users/install/ddev-installation/
