@@ -1,5 +1,7 @@
 # ProcessWire JSON API
 
+Structured APIs for ProcessWire, without the boilerplate.
+
 [Click here for documentation](https://pwjsonapi.fokke.fi)
 
 ## Tests
