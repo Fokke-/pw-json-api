@@ -18,14 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
         with:
           version: 10
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: pnpm
@@ -33,10 +33,22 @@ jobs:
         run: pnpm install
       - name: Build with VitePress
         run: npm run docs:build
+      - name: Verify build output
+        run: |
+          if [ ! -f docs/.vitepress/dist/index.html ]; then
+            echo "Build output missing or empty"
+            exit 1
+          fi
       - name: Deploy via rsync
+        env:
+          SSH_KEY: ${{ secrets.DOCS_SSH_KEY }}
+          SSH_HOST: ${{ secrets.DOCS_SSH_HOST }}
+          SSH_USER: ${{ secrets.DOCS_SSH_USER }}
+          SSH_PATH: ${{ secrets.DOCS_SSH_PATH }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DOCS_SSH_KNOWN_HOSTS }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.DOCS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          echo "$SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.DOCS_SSH_HOST }} >> ~/.ssh/known_hosts
-          rsync -avz --delete docs/.vitepress/dist/ ${{ secrets.DOCS_SSH_USER }}@${{ secrets.DOCS_SSH_HOST }}:${{ secrets.DOCS_SSH_PATH }}/
+          echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+          rsync -avz --delete docs/.vitepress/dist/ "$SSH_USER@$SSH_HOST:$SSH_PATH/"
