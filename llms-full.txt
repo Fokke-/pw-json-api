@@ -13,7 +13,9 @@ The problem is that there's no unified way to define these endpoints. One approa
 
 Luckily, ProcessWire introduced [URL hooks](https://processwire.com/blog/posts/pw-3.0.173/) in version `3.0.173`. This enables a different approach for defining the API, completely decoupling the page tree from the endpoint hierarchy and keeping the page tree free of actual endpoints. With proper base path configuration, your JSON endpoints can coexist with the website itself.
 
-Since we're using ProcessWire pages as the main data source, the library includes a versatile [Page parser](https://pwjsonapi.fokke.fi/processwire-page-parser) tool to convert entire page trees into structured data, ready to be served as an API response.
+Since we're using ProcessWire pages as the main data source, the library includes a versatile [Page parser](#processwire-page-parser) tool to convert entire page trees into structured data, ready to be served as an API response.
+
+[broken](#nonexistent-heading)
 
 ---
 
@@ -100,31 +102,31 @@ This page provides a high-level overview of the full application lifecycle, from
 
 The bootstrap phase runs once when the module file is loaded. It sets up the API structure before any HTTP request is handled.
 
-1. **Create an API instance** — `new Api()` creates the top-level container. [Read more about the API instance](https://pwjsonapi.fokke.fi/api-instance).
-2. **Configure** — `configure()` sets options like `trailingSlashes` and `jsonFlags`. [Read more about configuration](https://pwjsonapi.fokke.fi/api-instance#configuration).
-3. **Set base path** — `setBasePath()` defines the root path prefix for all endpoints. [Read more about the base path](https://pwjsonapi.fokke.fi/api-instance#base-path).
-4. **Add services** — `addService()` registers services. Each service's `init()` method is called, which registers endpoints, hooks, and child services. [Read more about services](https://pwjsonapi.fokke.fi/services).
-5. **Add hooks and plugins** — Request hooks and plugins can be added at the API, service, or endpoint level. [Read more about request hooks](https://pwjsonapi.fokke.fi/request-hooks). [Read more about plugins](https://pwjsonapi.fokke.fi/plugins/plugins-overview).
-6. **Run** — `run()` validates the configuration (no duplicate service names or endpoint paths), registers a [ProcessWire URL hook](https://processwire.com/docs/modules/hooks/#url-hooks-new-in-3-0-173) listener for each endpoint path, and locks the instance to prevent further mutations. [Read more about running the API](https://pwjsonapi.fokke.fi/api-instance#running-the-api).
+1. **Create an API instance** — `new Api()` creates the top-level container. [Read more about the API instance](#api-instance).
+2. **Configure** — `configure()` sets options like `trailingSlashes` and `jsonFlags`. [Read more about configuration](#configuration).
+3. **Set base path** — `setBasePath()` defines the root path prefix for all endpoints. [Read more about the base path](#base-path).
+4. **Add services** — `addService()` registers services. Each service's `init()` method is called, which registers endpoints, hooks, and child services. [Read more about services](#services).
+5. **Add hooks and plugins** — Request hooks and plugins can be added at the API, service, or endpoint level. [Read more about request hooks](#request-hooks). [Read more about plugins](#plugins).
+6. **Run** — `run()` validates the configuration (no duplicate service names or endpoint paths), registers a [ProcessWire URL hook](https://processwire.com/docs/modules/hooks/#url-hooks-new-in-3-0-173) listener for each endpoint path, and locks the instance to prevent further mutations. [Read more about running the API](#running-the-api).
 
 ## Request handling
 
 The request handling phase runs for each incoming HTTP request that matches a registered endpoint path.
 
-1. **OPTIONS shortcut** — If the request method is `OPTIONS`, a `200` response with an `Allow` header is returned immediately. No hooks or handlers are executed. [Read more about endpoints](https://pwjsonapi.fokke.fi/endpoints).
-2. **Request object** — A `Request` object is created containing the HTTP method, path, query parameters, headers, body, and files. [Read more about requests](https://pwjsonapi.fokke.fi/requests).
-3. **Handler lookup** — The library looks up a handler for the request method. If no handler is registered, a `405` response with an `Allow` header is returned. [Read more about endpoints](https://pwjsonapi.fokke.fi/endpoints).
-4. **Before hooks** — Before hooks are executed in order: API → service → endpoint. [Read more about hook execution order](https://pwjsonapi.fokke.fi/request-hooks#hook-execution-order).
-5. **Handler execution** — The endpoint handler runs and returns a `Response`. [Read more about responses](https://pwjsonapi.fokke.fi/responses).
-6. **After hooks** — After hooks are executed in order: endpoint → service → API. [Read more about hook execution order](https://pwjsonapi.fokke.fi/request-hooks#hook-execution-order).
-7. **Error handling** — If an exception is thrown at any point, error hooks are executed and the exception is converted to a JSON response. [Read more about error handling](https://pwjsonapi.fokke.fi/error-handling). [Read more about error hooks](https://pwjsonapi.fokke.fi/error-hooks).
+1. **OPTIONS shortcut** — If the request method is `OPTIONS`, a `200` response with an `Allow` header is returned immediately. No hooks or handlers are executed. [Read more about endpoints](#endpoints).
+2. **Request object** — A `Request` object is created containing the HTTP method, path, query parameters, headers, body, and files. [Read more about requests](#requests).
+3. **Handler lookup** — The library looks up a handler for the request method. If no handler is registered, a `405` response with an `Allow` header is returned. [Read more about endpoints](#endpoints).
+4. **Before hooks** — Before hooks are executed in order: API → service → endpoint. [Read more about hook execution order](#hook-execution-order).
+5. **Handler execution** — The endpoint handler runs and returns a `Response`. [Read more about responses](#responses).
+6. **After hooks** — After hooks are executed in order: endpoint → service → API. [Read more about hook execution order](#hook-execution-order).
+7. **Error handling** — If an exception is thrown at any point, error hooks are executed and the exception is converted to a JSON response. [Read more about error handling](#error-handling). [Read more about error hooks](#error-hooks).
 8. **JSON response** — The final response is encoded as JSON and sent to the client.
 
 ---
 
 # API Instance
 
-An API instance holds all the services. You can also define system-wide request hooks, which will apply to every endpoint. [Read more about hooks](https://pwjsonapi.fokke.fi/request-hooks).
+An API instance holds all the services. You can also define system-wide request hooks, which will apply to every endpoint. [Read more about hooks](#request-hooks).
 
 ```php
 $api = new Api();
@@ -188,7 +190,7 @@ Under the hood, the method:
 3. Registers a [ProcessWire URL hook](https://processwire.com/docs/modules/hooks/#url-hooks-new-in-3-0-173) listener for each endpoint path
 
 ::: tip
-For a complete overview of the initialization and request handling sequence, see [Application lifecycle](https://pwjsonapi.fokke.fi/lifecycle).
+For a complete overview of the initialization and request handling sequence, see [Application lifecycle](#application-lifecycle).
 :::
 
 ### Locking
@@ -208,7 +210,7 @@ You can access the following properties via the `$args` parameter of the handler
 | Property    | Type                     | Description                 |
 | ----------- | ------------------------ | --------------------------- |
 | `exception` | `\Throwable`             | Exception                   |
-| `request`   | `Request`                | [Request object](https://pwjsonapi.fokke.fi/requests) |
+| `request`   | `Request`                | [Request object](#requests) |
 | `event`     | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
 | `endpoint`  | `Endpoint`               | Requested endpoint          |
 | `service`   | `Service`                | Requested service           |
@@ -256,13 +258,13 @@ $v2->run();
 
 Services are used to group endpoints. Since services are classes, they can have properties and methods.
 
-A service can define any number of [endpoints](https://pwjsonapi.fokke.fi/endpoints), and services may also contain child services, which will inherit hooks from the parent service.
+A service can define any number of [endpoints](#endpoints), and services may also contain child services, which will inherit hooks from the parent service.
 
-You can also define service-wide request hooks, which will apply to every endpoint of the service and its child services. [Read more about request hooks](https://pwjsonapi.fokke.fi/request-hooks).
+You can also define service-wide request hooks, which will apply to every endpoint of the service and its child services. [Read more about request hooks](#request-hooks).
 
 ## Example service
 
-Create a new service by extending the `Service` class. Override the `init()` method to define one or more endpoints with handlers for different request methods. [Read more about endpoints](https://pwjsonapi.fokke.fi/endpoints).
+Create a new service by extending the `Service` class. Override the `init()` method to define one or more endpoints with handlers for different request methods. [Read more about endpoints](#endpoints).
 
 ```php
 <?php namespace ProcessWire;
@@ -326,7 +328,7 @@ Child services can be defined in the service `init()` method by calling `addServ
 $this->addService(new AnotherService());
 ```
 
-This relationship can also be defined on the fly while adding the service to the main instance, allowing you to nest services that normally would not be related to each other. [See example of adding a child service on the fly](https://pwjsonapi.fokke.fi/api-instance#adding-a-service).
+This relationship can also be defined on the fly while adding the service to the main instance, allowing you to nest services that normally would not be related to each other. [See example of adding a child service on the fly](#adding-a-service).
 
 ## Extending a service
 
@@ -434,7 +436,7 @@ class HelloWorldService extends Service
 
 Under the hood, the endpoint path will be used to create a [ProcessWire URL hook](https://processwire.com/blog/posts/pw-3.0.173/#introducing-url-path-hooks). All URL hook features are supported.
 
-Each endpoint listener must either return a [`Response`](https://pwjsonapi.fokke.fi/responses) object or throw an [`ApiException`](https://pwjsonapi.fokke.fi/error-handling) to halt the process and respond with an error.
+Each endpoint listener must either return a [`Response`](#responses) object or throw an [`ApiException`](#error-handling) to halt the process and respond with an error.
 
 ::: info
 By default, all the request methods are denied, except for `OPTIONS`. You must add listeners for each request method you want to allow. Requests with disallowed methods will be denied with a 405 response that includes an `Allow` header listing the permitted methods.
@@ -451,7 +453,7 @@ The supported listeners are:
 - `patch()`
 - `delete()`
 
-Like an API instance or service, an endpoint can also contain request hooks. [Read more about request hooks](https://pwjsonapi.fokke.fi/request-hooks).
+Like an API instance or service, an endpoint can also contain request hooks. [Read more about request hooks](#request-hooks).
 
 ## Example endpoint
 
@@ -496,7 +498,7 @@ You can access the following properties via the `$args` parameter of the handler
 
 | Property  | Type                     | Description                 |
 | --------- | ------------------------ | --------------------------- |
-| `request` | `Request`                | [Request object](https://pwjsonapi.fokke.fi/requests) |
+| `request` | `Request`                | [Request object](#requests) |
 | `event`   | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
 
 ```php{1}
@@ -536,10 +538,10 @@ Querying `/products/bunny-rabbit` results in a following JSON:
 
 Request object can be accessed in callback functions of:
 
-- [Endpoint request handler](https://pwjsonapi.fokke.fi/endpoints#endpoint-handler-arguments)
-- [Request hook handler](https://pwjsonapi.fokke.fi/request-hooks#hook-arguments)
-- [Error hook handler](https://pwjsonapi.fokke.fi/error-hooks#error-hook-arguments)
-- [API instance exception handler](https://pwjsonapi.fokke.fi/api-instance#exception-handling)
+- [Endpoint request handler](#endpoint-handler-arguments)
+- [Request hook handler](#hook-arguments)
+- [Error hook handler](#error-hook-arguments)
+- [API instance exception handler](#exception-handling)
 
 ## Request properties
 
@@ -548,7 +550,7 @@ Request object can be accessed in callback functions of:
 | `method`      | `string`              | Request method                                                     |
 | `methodEnum`  | `RequestMethod\|null` | Method as enum                                                     |
 | `path`        | `string\|null`        | Requested path                                                     |
-| `routeParams` | `array`               | Route parameters of [dynamic paths](https://pwjsonapi.fokke.fi/endpoints#dynamic-paths) |
+| `routeParams` | `array`               | Route parameters of [dynamic paths](#dynamic-paths) |
 | `queryParams` | `array`               | Query parameters                                                   |
 | `headers`     | `array`               | Request headers                                                    |
 | `contentType` | `string\|null`        | `Content-Type` header                                              |
@@ -791,7 +793,7 @@ $response->toArray();
 The library catches any exception derived from the `ApiException` class and converts it to a response. You can throw an `ApiException` at any time to halt the process.
 
 ::: tip
-To handle other exceptions, such as `WireException`, you need to specify custom handling function by calling `handleException()` method of the API instance. [Read more about exception handling](https://pwjsonapi.fokke.fi/api-instance#exception-handling).
+To handle other exceptions, such as `WireException`, you need to specify custom handling function by calling `handleException()` method of the API instance. [Read more about exception handling](#exception-handling).
 :::
 
 ## Example exception
@@ -976,7 +978,7 @@ You can access the following properties via the `$args` parameter of the handler
 
 | Property   | Type                     | Description                 |
 | ---------- | ------------------------ | --------------------------- |
-| `request`  | `Request`                | [Request object](https://pwjsonapi.fokke.fi/requests) |
+| `request`  | `Request`                | [Request object](#requests) |
 | `event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
 | `endpoint` | `Endpoint`               | Requested endpoint          |
 | `service`  | `Service`                | Requested service           |
@@ -1037,7 +1039,7 @@ You can access the following properties via the `$args` parameter of the handler
 
 Like request hooks, error hooks can be used to modify the response when an `ApiException` is thrown. The behavior of error hooks is similar, except that there are no 'before' or 'after' timings.
 
-An `ErrorHookReturn` object will be passed to the hook handler function. [The hook execution order](https://pwjsonapi.fokke.fi/request-hooks#hook-execution-order) remains the same.
+An `ErrorHookReturn` object will be passed to the hook handler function. [The hook execution order](#hook-execution-order) remains the same.
 
 ## Error hook scopes
 
@@ -1132,7 +1134,7 @@ You can access the following properties via the `$args` parameter of the handler
 | ----------- | ------------------------ | --------------------------- |
 | `exception` | `ApiException`           | The thrown exception        |
 | `response`  | `Response`               | Error Response object       |
-| `request`   | `Request`                | [Request object](https://pwjsonapi.fokke.fi/requests) |
+| `request`   | `Request`                | [Request object](#requests) |
 | `event`     | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
 | `endpoint`  | `Endpoint`               | Requested endpoint          |
 | `service`   | `Service`                | Requested service           |
@@ -1525,7 +1527,7 @@ $response = (new PageParser())
 
 ### As a paginated response <Badge type="tip" text="^2.1" />
 
-`toPaginatedResponse()` returns a [PaginatedResponse](https://pwjsonapi.fokke.fi/responses#paginated-responses) with pagination metadata read from the `PageArray` input. The input must be a `PageArray` — an `InvalidArgumentException` is thrown otherwise.
+`toPaginatedResponse()` returns a [PaginatedResponse](#paginated-responses) with pagination metadata read from the `PageArray` input. The input must be a `PageArray` — an `InvalidArgumentException` is thrown otherwise.
 
 ```php{4}
 $response = (new PageParser())

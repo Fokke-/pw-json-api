@@ -39,15 +39,6 @@ function parsePage(slug) {
     content = raw.slice(frontmatterMatch[0].length);
   }
 
-  // Convert relative markdown links to absolute URLs
-  // Matches [text](/path) and [text](./path) but not [text](http...) or [text](#anchor)
-  content = content.replace(
-    /\]\((?!https?:\/\/|#|mailto:)(\.?\/?)([\w/.@-]+?)(\.html)?(#[\w-]*)?\)/g,
-    (match, prefix, path, _ext, anchor) => {
-      return `](${baseUrl}/${path}${anchor || ''})`;
-    },
-  );
-
   // Get the first heading as the title
   const titleMatch = content.match(/^#\s+(.+)$/m);
   const title = titleMatch
@@ -87,6 +78,42 @@ function warnUnlisted() {
   }
 }
 
+/**
+ * Convert a heading text to a markdown anchor slug.
+ */
+function slugify(text) {
+  return text
+    .replace(/<[^>]+>/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-');
+}
+
+/**
+ * Convert relative markdown links to internal anchor links.
+ * Builds a slug→anchor map from page titles, then replaces links:
+ * - [text](/path) → [text](#page-heading-anchor)
+ * - [text](/path#section) → [text](#section)
+ */
+function convertToAnchorLinks(content, pages) {
+  const slugToAnchor = new Map();
+  for (const [slug, page] of pages) {
+    slugToAnchor.set(slug, slugify(page.title));
+  }
+
+  return content.replace(
+    /\]\((?!https?:\/\/|#|mailto:)(\.?\/?)([\w/.@-]+?)(\.html)?(#[\w-]*)?\)/g,
+    (_match, _prefix, path, _ext, anchor) => {
+      if (anchor) {
+        return `](${anchor})`;
+      }
+      const pageAnchor = slugToAnchor.get(path);
+      return pageAnchor ? `](#${pageAnchor})` : `](${baseUrl}/${path})`;
+    },
+  );
+}
+
 // Build llms.txt
 function buildLlmsTxt(pages) {
   const lines = [header, ''];
@@ -113,7 +140,7 @@ function buildLlmsFullTxt(pages) {
     for (const item of section.items) {
       const slug = item.link.slice(1);
       const page = pages.get(slug);
-      parts.push(page.content, '\n---\n');
+      parts.push(convertToAnchorLinks(page.content, pages), '\n---\n');
     }
   }
 
@@ -134,9 +161,35 @@ for (const slug of allPages) {
 const llmsTxt = buildLlmsTxt(pages);
 const llmsFullTxt = buildLlmsFullTxt(pages);
 
+/**
+ * Validate that every anchor link in llms-full.txt points to an
+ * existing heading.
+ */
+function validateAnchorLinks(content) {
+  const headings = new Set();
+  for (const [, heading] of content.matchAll(/^#{1,6}\s+(.+)$/gm)) {
+    headings.add(slugify(heading));
+  }
+
+  let ok = true;
+  for (const [, anchor] of content.matchAll(/\]\(#([\w-]+)\)/g)) {
+    if (!headings.has(anchor)) {
+      console.warn(`Warning: broken anchor link #${anchor} in llms-full.txt`);
+      ok = false;
+    }
+  }
+  return ok;
+}
+
 writeFileSync(join(rootDir, 'llms.txt'), llmsTxt);
 writeFileSync(join(rootDir, 'llms-full.txt'), llmsFullTxt);
+
+const valid = validateAnchorLinks(llmsFullTxt);
 
 console.log(
   `Generated llms.txt (${llmsTxt.length} bytes) and llms-full.txt (${llmsFullTxt.length} bytes)`,
 );
+
+if (!valid) {
+  process.exitCode = 1;
+}
