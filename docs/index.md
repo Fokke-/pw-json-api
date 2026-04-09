@@ -14,6 +14,9 @@ hero:
     - theme: alt
       text: Overview
       link: /overview
+    - theme: alt
+      text: Ask DeepWiki
+      link: https://deepwiki.com/Fokke-/pw-json-api
 features:
   - icon: 🏖️
     title: Convention over Configuration

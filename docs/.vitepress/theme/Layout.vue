@@ -4,6 +4,18 @@
       <ReloadPrompt />
     </template>
     <template #sidebar-nav-after>
+      <a
+        href="https://deepwiki.com/Fokke-/pw-json-api"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img
+          src="https://deepwiki.com/badge.svg"
+          alt="Ask DeepWiki"
+          loading="lazy"
+          style="margin-bottom: 1.1rem"
+        />
+      </a>
       <iframe
         src="https://github.com/sponsors/Fokke-/button"
         title="Sponsor Fokke-"
