@@ -742,7 +742,7 @@ class PageParser
    */
   public function toPaginatedResponse(): PaginatedResponse
   {
-    if (!$this->input instanceof PageArray) {
+    if (!($this->input instanceof PageArray)) {
       throw new \InvalidArgumentException(
         'toPaginatedResponse() requires a PageArray input',
       );

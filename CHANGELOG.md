@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.1.2
+
+### Bug fixes
+
+- Fixed links in `llms-full.txt`
+
 ## 2.1.1
 
 ### Bug fixes
