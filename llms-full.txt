@@ -15,8 +15,6 @@ Luckily, ProcessWire introduced [URL hooks](https://processwire.com/blog/posts/p
 
 Since we're using ProcessWire pages as the main data source, the library includes a versatile [Page parser](#processwire-page-parser) tool to convert entire page trees into structured data, ready to be served as an API response.
 
-[broken](#nonexistent-heading)
-
 ---
 
 # Getting started

@@ -2,7 +2,9 @@
 
 Structured APIs for ProcessWire, without the boilerplate.
 
-[Click here for documentation](https://pwjsonapi.fokke.fi)
+[Click here for documentation](https://pwjsonapi.fokke.fi).
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Fokke-/pw-json-api)
 
 For AI-assisted development, see [llms-full.txt](./llms-full.txt).
 
