@@ -1,0 +1,40 @@
+# ProcessWire JSON API
+
+> Build structured JSON APIs for ProcessWire without boilerplate.
+> Convention-based, extensible, and MIT licensed.
+> Requires PHP 8.2+ and ProcessWire 3.0.173+.
+> Install: composer require fokke/pw-json-api
+
+## Introduction
+
+- [Overview](https://pwjsonapi.fokke.fi/overview): Learn how ProcessWire JSON API provides a unified structure for defining JSON endpoints using URL hooks.
+- [Getting started](https://pwjsonapi.fokke.fi/getting-started): Install ProcessWire JSON API via Composer and create your first service and endpoint in minutes.
+- [Application lifecycle](https://pwjsonapi.fokke.fi/lifecycle): Overview of the full application lifecycle from bootstrapping to request handling and response output.
+
+## Core concepts
+
+- [API Instance](https://pwjsonapi.fokke.fi/api-instance): Configure the top-level Api class with base paths, JSON encoding options, and system-wide request hooks.
+- [Services](https://pwjsonapi.fokke.fi/services): Group endpoints into services with shared configuration, child service nesting, and hook inheritance.
+- [Endpoints](https://pwjsonapi.fokke.fi/endpoints): Define endpoint handlers for GET, POST, PUT, PATCH, DELETE and other HTTP methods using ProcessWire URL hooks.
+- [Requests](https://pwjsonapi.fokke.fi/requests): Access request properties like method, path, query parameters, headers, cookies, and body data in endpoint handlers.
+- [Responses](https://pwjsonapi.fokke.fi/responses): Return structured JSON responses with custom status codes, headers, and data payloads.
+- [Error handling](https://pwjsonapi.fokke.fi/error-handling): Throw ApiException to return structured error responses with custom status codes and messages.
+
+## Hooks
+
+- [Request hooks](https://pwjsonapi.fokke.fi/request-hooks): Add before and after hooks at the API, service, or endpoint level for authorization, validation, and response modification.
+- [Error hooks](https://pwjsonapi.fokke.fi/error-hooks): Customize error responses with API-level and service-level error hooks when exceptions are thrown.
+
+## Plugins
+
+- [Plugins](https://pwjsonapi.fokke.fi/plugins/plugins-overview): Extend API, service, or endpoint behavior with reusable plugins built on the ApiPlugin base class.
+- [CSRF protection](https://pwjsonapi.fokke.fi/plugins/csrf): Protect state-changing requests with CSRF token validation using ProcessWire's built-in session tokens.
+- [Rate limiting](https://pwjsonapi.fokke.fi/plugins/rate-limit): Limit API request rates per client using a fixed-window algorithm backed by ProcessWire's WireCache.
+
+## Tools
+
+- [ProcessWire Page Parser](https://pwjsonapi.fokke.fi/processwire-page-parser): Convert ProcessWire pages into structured data with field selection, child page traversal, and hook-based customization.
+
+## Recipes
+
+- [OpenAPI documentation](https://pwjsonapi.fokke.fi/recipes/openapi): Generate OpenAPI specifications from your services using swagger-php attributes and named endpoint methods.

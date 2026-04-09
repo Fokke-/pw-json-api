@@ -10,6 +10,7 @@ CLAUDE.md export-ignore
 .prettierrc.json export-ignore
 .zed export-ignore
 composer.lock export-ignore
+llms.txt export-ignore
 docs export-ignore
 index.php export-ignore
 node_modules export-ignore

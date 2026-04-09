@@ -1,1 +1,5 @@
+if git diff --cached --name-only -- docs/ | grep -q .; then
+  node scripts/generate-llms-txt.mjs
+  git add llms.txt llms-full.txt
+fi
 npx lint-staged

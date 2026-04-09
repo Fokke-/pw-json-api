@@ -1,10 +1,10 @@
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
-import { join, relative, dirname } from 'node:path';
+import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const docsDir = join(__dirname, '..', 'docs');
-const publicDir = join(docsDir, 'public');
+const rootDir = join(__dirname, '..');
+const docsDir = join(rootDir, 'docs');
 const baseUrl = 'https://pwjsonapi.fokke.fi';
 
 const sections = [
@@ -163,8 +163,8 @@ for (const slug of allPages) {
 const llmsTxt = buildLlmsTxt(pages);
 const llmsFullTxt = buildLlmsFullTxt(pages);
 
-writeFileSync(join(publicDir, 'llms.txt'), llmsTxt);
-writeFileSync(join(publicDir, 'llms-full.txt'), llmsFullTxt);
+writeFileSync(join(rootDir, 'llms.txt'), llmsTxt);
+writeFileSync(join(rootDir, 'llms-full.txt'), llmsFullTxt);
 
 console.log(
   `Generated llms.txt (${llmsTxt.length} bytes) and llms-full.txt (${llmsFullTxt.length} bytes)`,
