@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.1.1
+
+### Bug fixes
+
+- `llms-full.txt` is now included in the Composer package for AI-assisted development
+
 ## 2.1.0
 
 ### New features

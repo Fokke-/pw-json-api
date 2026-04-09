@@ -1,0 +1,1883 @@
+# ProcessWire JSON API
+
+> Build structured JSON APIs for ProcessWire without boilerplate.
+> Convention-based, extensible, and MIT licensed.
+> Requires PHP 8.2+ and ProcessWire 3.0.173+.
+> Install: composer require fokke/pw-json-api
+
+# Overview
+
+[ProcessWire](https://processwire.com) is a very flexible content management framework and CMS. In addition to building websites, it can be used as a headless CMS. My usual workflow is to use ProcessWire as a data backend, exposing JSON endpoints that are ready to be consumed by a Vue.js front-end application.
+
+The problem is that there's no unified way to define these endpoints. One approach is to create a template for each endpoint type (such as `User`), create a controller file for each template, juggle URL segments, validate request methods, and so on. This leads to quite a lot of boilerplate code. The page hierarchy does not always reflect the endpoint structure, and things can get messy quickly.
+
+Luckily, ProcessWire introduced [URL hooks](https://processwire.com/blog/posts/pw-3.0.173/) in version `3.0.173`. This enables a different approach for defining the API, completely decoupling the page tree from the endpoint hierarchy and keeping the page tree free of actual endpoints. With proper base path configuration, your JSON endpoints can coexist with the website itself.
+
+Since we're using ProcessWire pages as the main data source, the library includes a versatile [Page parser](https://pwjsonapi.fokke.fi/processwire-page-parser) tool to convert entire page trees into structured data, ready to be served as an API response.
+
+---
+
+# Getting started
+
+Please check that your environment meets the minimum system requirements:
+
+- **PHP** >=8.2
+- **ProcessWire** >=3.0.173
+
+## Install the library
+
+```console
+composer require fokke/pw-json-api
+```
+
+## Create your first service
+
+Create a new service file, such as `/site/services/HelloWorldService.php` with the following code:
+
+```php
+<?php namespace ProcessWire;
+
+use PwJsonApi\{Service, Response};
+
+class HelloWorldService extends Service
+{
+  protected function init()
+  {
+    // Listen to path /hello-world with GET handler
+    $this->addEndpoint('/hello-world')->get(function ($args) {
+      return new Response([
+        'hello' => 'world',
+        'request_method' => $args->request->method,
+        'path' => $args->request->path,
+      ]);
+    });
+  }
+}
+```
+
+## Create an API instance
+
+The library utilizes ProcessWire URL hooks to create listeners for your endpoints. Therefore, you must initialize the API instance either in the `/site/ready.php` or `/site/init.php` file.
+
+```php
+use PwJsonApi\Api;
+
+// Consider auto-loading all the services
+require_once './services/HelloWorldService.php';
+
+// API instance
+$api = new Api();
+$api->setBasePath('/api');
+
+// Services
+$api->addService(new HelloWorldService());
+
+// Run API
+$api->run();
+```
+
+## Test the endpoint
+
+Open the URL `/api/hello-world`. The server should respond with status code 200 and the following JSON:
+
+```json
+{
+  "data": {
+    "hello": "world",
+    "request_method": "GET",
+    "path": "/api/hello-world"
+  }
+}
+```
+
+---
+
+# Application lifecycle
+
+This page provides a high-level overview of the full application lifecycle, from bootstrapping to response output. Each step links to a detailed page — this page does not repeat their content.
+
+## Bootstrap
+
+The bootstrap phase runs once when the module file is loaded. It sets up the API structure before any HTTP request is handled.
+
+1. **Create an API instance** — `new Api()` creates the top-level container. [Read more about the API instance](https://pwjsonapi.fokke.fi/api-instance).
+2. **Configure** — `configure()` sets options like `trailingSlashes` and `jsonFlags`. [Read more about configuration](https://pwjsonapi.fokke.fi/api-instance#configuration).
+3. **Set base path** — `setBasePath()` defines the root path prefix for all endpoints. [Read more about the base path](https://pwjsonapi.fokke.fi/api-instance#base-path).
+4. **Add services** — `addService()` registers services. Each service's `init()` method is called, which registers endpoints, hooks, and child services. [Read more about services](https://pwjsonapi.fokke.fi/services).
+5. **Add hooks and plugins** — Request hooks and plugins can be added at the API, service, or endpoint level. [Read more about request hooks](https://pwjsonapi.fokke.fi/request-hooks). [Read more about plugins](https://pwjsonapi.fokke.fi/plugins/plugins-overview).
+6. **Run** — `run()` validates the configuration (no duplicate service names or endpoint paths), registers a [ProcessWire URL hook](https://processwire.com/docs/modules/hooks/#url-hooks-new-in-3-0-173) listener for each endpoint path, and locks the instance to prevent further mutations. [Read more about running the API](https://pwjsonapi.fokke.fi/api-instance#running-the-api).
+
+## Request handling
+
+The request handling phase runs for each incoming HTTP request that matches a registered endpoint path.
+
+1. **OPTIONS shortcut** — If the request method is `OPTIONS`, a `200` response with an `Allow` header is returned immediately. No hooks or handlers are executed. [Read more about endpoints](https://pwjsonapi.fokke.fi/endpoints).
+2. **Request object** — A `Request` object is created containing the HTTP method, path, query parameters, headers, body, and files. [Read more about requests](https://pwjsonapi.fokke.fi/requests).
+3. **Handler lookup** — The library looks up a handler for the request method. If no handler is registered, a `405` response with an `Allow` header is returned. [Read more about endpoints](https://pwjsonapi.fokke.fi/endpoints).
+4. **Before hooks** — Before hooks are executed in order: API → service → endpoint. [Read more about hook execution order](https://pwjsonapi.fokke.fi/request-hooks#hook-execution-order).
+5. **Handler execution** — The endpoint handler runs and returns a `Response`. [Read more about responses](https://pwjsonapi.fokke.fi/responses).
+6. **After hooks** — After hooks are executed in order: endpoint → service → API. [Read more about hook execution order](https://pwjsonapi.fokke.fi/request-hooks#hook-execution-order).
+7. **Error handling** — If an exception is thrown at any point, error hooks are executed and the exception is converted to a JSON response. [Read more about error handling](https://pwjsonapi.fokke.fi/error-handling). [Read more about error hooks](https://pwjsonapi.fokke.fi/error-hooks).
+8. **JSON response** — The final response is encoded as JSON and sent to the client.
+
+---
+
+# API Instance
+
+An API instance holds all the services. You can also define system-wide request hooks, which will apply to every endpoint. [Read more about hooks](https://pwjsonapi.fokke.fi/request-hooks).
+
+```php
+$api = new Api();
+```
+
+## Configuration
+
+Use `configure()` to configure the main instance.
+
+```php
+$api->configure(function ($config) {
+  // Should endpoint paths end with a trailing slash?
+  // (null = no preference)
+  $config->trailingSlashes = null;
+
+  // Flags to pass to the json_encode function
+  $config->jsonFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+});
+```
+
+## Base path
+
+All endpoint paths will be prefixed with the base path. You can set a custom base path with `setBasePath()`. The default value is `/`.
+
+```php
+$api->setBasePath('/api');
+```
+
+## Adding a service
+
+Call `addService()` to attach a service to the API.
+
+```php
+$api->addService(new HelloWorldService());
+```
+
+The newly added service can be accessed in an optional setup function. This can be used to reconfigure the service, add child services, define hooks, etc.
+
+```php
+$api->addService(new HelloWorldService(), function ($service) {
+  // Override the default base path
+  $service->setBasePath('/greet');
+
+  // Add a child service
+  $service->addService(new AnotherService());
+});
+```
+
+## Running the API
+
+Call `run()` to register all endpoint listeners and start handling requests. This should be called after all services and configuration have been set up.
+
+```php
+$api->run();
+```
+
+Under the hood, the method:
+
+1. Iterates all registered services and their endpoints
+2. Validates that there are no duplicate service names or endpoint paths
+3. Registers a [ProcessWire URL hook](https://processwire.com/docs/modules/hooks/#url-hooks-new-in-3-0-173) listener for each endpoint path
+
+::: tip
+For a complete overview of the initialization and request handling sequence, see [Application lifecycle](https://pwjsonapi.fokke.fi/lifecycle).
+:::
+
+### Locking
+
+After `run()` is called, the Api instance, all services, and all endpoints are **locked**. Locked objects reject structural mutations — this includes adding services, endpoints, plugins, hooks, and setting endpoint handlers.
+
+All configuration must happen either in a service's `init()` method or in the `addService()` setup callback.
+
+A `WireException` is thrown if a mutation is attempted after locking.
+
+## Exception handling
+
+Due to the nature of ProcessWire URL hooks, exceptions thrown in hook code cannot be caught in the main program flow. Use `handleException()` to define your own exception handler for other exception types, such as `WireException`.
+
+You can access the following properties via the `$args` parameter of the handler function.
+
+| Property    | Type                     | Description                 |
+| ----------- | ------------------------ | --------------------------- |
+| `exception` | `\Throwable`             | Exception                   |
+| `request`   | `Request`                | [Request object](https://pwjsonapi.fokke.fi/requests) |
+| `event`     | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
+| `endpoint`  | `Endpoint`               | Requested endpoint          |
+| `service`   | `Service`                | Requested service           |
+| `services`  | `ServiceList`            | List of all parent services |
+| `api`       | `Api`                    | API instance                |
+
+You need to return either a `Response` or an `ApiException` from the handler.
+
+```php
+$api->handleException(function ($args) {
+  // Handle WireExceptions
+  if ($args->exception instanceof WireException) {
+    return (new ApiException())->code(500)->with([
+      'message' => $args->exception->getMessage(),
+    ]);
+  }
+
+  return (new ApiException())->code(400)->with([
+    'message' => $args->exception->getMessage(),
+  ]);
+});
+```
+
+## Multiple instances
+
+You can create multiple API instances, each with its own configuration, services, and hooks. This can be useful for API versioning.
+
+::: tip
+To avoid path clashes, it's highly recommended to set unique base paths for all instances.
+:::
+
+```php
+$v1 = new Api();
+$v1->setBasePath('/v1');
+$v1->run();
+
+$v2 = new Api();
+$v2->setBasePath('/v2');
+$v2->run();
+```
+
+---
+
+# Services
+
+Services are used to group endpoints. Since services are classes, they can have properties and methods.
+
+A service can define any number of [endpoints](https://pwjsonapi.fokke.fi/endpoints), and services may also contain child services, which will inherit hooks from the parent service.
+
+You can also define service-wide request hooks, which will apply to every endpoint of the service and its child services. [Read more about request hooks](https://pwjsonapi.fokke.fi/request-hooks).
+
+## Example service
+
+Create a new service by extending the `Service` class. Override the `init()` method to define one or more endpoints with handlers for different request methods. [Read more about endpoints](https://pwjsonapi.fokke.fi/endpoints).
+
+```php
+<?php namespace ProcessWire;
+
+use PwJsonApi\{Service, Response};
+
+class HelloWorldService extends Service
+{
+  protected string $word = 'world';
+
+  public function __construct()
+  {
+    parent::__construct();
+    $this->setBasePath('/greet');
+  }
+
+  protected function init()
+  {
+    // Listen to the base path (/greet)
+    $this->addEndpoint('/')->get(function () {
+      return (new Response())->with([
+        'message' => 'Nothing to see here!',
+      ]);
+    });
+
+    // Listen to path /greet/hello-world with GET handler
+    $this->addEndpoint('/hello-world')->get(function () {
+      return new Response($this->getData());
+    });
+  }
+
+  public function getData(): array
+  {
+    return [
+      'hello' => $this->word,
+    ];
+  }
+}
+```
+
+## Base path
+
+Like the main instance, the service can also define its base path. Set the base path in the constructor so that [extending classes](#extending-a-service) can override it independently of the endpoint configuration.
+
+```php
+public function __construct()
+{
+  parent::__construct();
+  $this->setBasePath('/greet');
+}
+```
+
+## Child services
+
+In many cases, a flat service tree is enough, but for larger APIs you can define child services to further categorize the endpoints. Child services will inherit all hooks from parent service(s), and the base paths of the parent services will apply.
+
+Child services can be defined in the service `init()` method by calling `addService()`.
+
+```php
+// In init()
+$this->addService(new AnotherService());
+```
+
+This relationship can also be defined on the fly while adding the service to the main instance, allowing you to nest services that normally would not be related to each other. [See example of adding a child service on the fly](https://pwjsonapi.fokke.fi/api-instance#adding-a-service).
+
+## Extending a service
+
+Since services are classes, you can extend them to reuse or replace functionality. The `init()` method is intentionally separate from the constructor, giving the extending class full control over which endpoints are registered.
+
+Set the base path in the constructor so it can be overridden independently of the endpoint configuration.
+
+```php
+class GreetingService extends Service
+{
+  public function __construct()
+  {
+    parent::__construct();
+    $this->setBasePath('/greet');
+  }
+
+  protected function init()
+  {
+    $this->addEndpoint('/hello')->get(function () {
+      return new Response(['message' => 'Hello!']);
+    });
+
+    $this->addEndpoint('/goodbye')->get(function () {
+      return new Response(['message' => 'Goodbye!']);
+    });
+  }
+}
+```
+
+### Keeping parent endpoints
+
+An extending class can call `parent::init()` to keep the parent endpoints and add its own:
+
+```php
+class ExtendedGreetingService extends GreetingService
+{
+  protected function init()
+  {
+    parent::init();
+
+    $this->addEndpoint('/hey')->get(function () {
+      return new Response(['message' => 'Hey!']);
+    });
+  }
+}
+```
+
+### Replacing parent endpoints
+
+Or it can skip `parent::init()` entirely to replace the endpoints:
+
+```php
+class ReplacedGreetingService extends GreetingService
+{
+  protected function init()
+  {
+    // Only /howdy is registered — parent endpoints are not included
+    $this->addEndpoint('/howdy')->get(function () {
+      return new Response(['message' => 'Howdy!']);
+    });
+  }
+}
+```
+
+## Accessing the ProcessWire API in the service
+
+Use `wire` property to access ProcessWire API
+
+```php
+$page = $this->wire->pages->findOne('template=basic-page');
+```
+
+## Accessing the main instance in the service
+
+A reference to the main instance will be injected into the `api` property of the service. You can use this to access methods and properties of other services.
+
+::: warning
+The main instance will be injected into the service when `run()` is called. Therefore, you cannot access `api` directly in the service `init()` method.
+:::
+
+```php
+class HelloWorldService extends Service
+{
+  protected function init()
+  {
+    // ❌ Trying to access API too early
+    $anotherService = $this->api->findService('AnotherService')
+
+    $this->addEndpoint('/use-another-service')->get(function () {
+      // ✅ This will work
+      $anotherService = $this->api->findService('AnotherService')
+
+      return new Response([
+        'hello' => 'world',
+        ...($anotherService?->gimmeGimme() ?? []),
+      ]);
+    });
+  }
+}
+```
+
+---
+
+# Endpoints
+
+Under the hood, the endpoint path will be used to create a [ProcessWire URL hook](https://processwire.com/blog/posts/pw-3.0.173/#introducing-url-path-hooks). All URL hook features are supported.
+
+Each endpoint listener must either return a [`Response`](https://pwjsonapi.fokke.fi/responses) object or throw an [`ApiException`](https://pwjsonapi.fokke.fi/error-handling) to halt the process and respond with an error.
+
+::: info
+By default, all the request methods are denied, except for `OPTIONS`. You must add listeners for each request method you want to allow. Requests with disallowed methods will be denied with a 405 response that includes an `Allow` header listing the permitted methods.
+
+The `OPTIONS` method is always allowed for existing endpoints and will result in an empty response with a status code of `200`. The response includes an `Allow` header listing the permitted methods.
+:::
+
+The supported listeners are:
+
+- `get()`
+- `post()`
+- `head()`
+- `put()`
+- `patch()`
+- `delete()`
+
+Like an API instance or service, an endpoint can also contain request hooks. [Read more about request hooks](https://pwjsonapi.fokke.fi/request-hooks).
+
+## Example endpoint
+
+Call `addEndpoint()` in the service `init()` method and pass the `path` you want to listen to.
+
+```php
+use PwJsonApi\ApiException;
+```
+
+```php
+$this->addEndpoint('/user')
+  // Handle GET request
+  ->get(function () {
+    return new Response([
+      'first_name' => 'Jerry',
+      'last_name' => 'Cotton',
+    ]);
+  })
+
+  // Handle POST request
+  ->post(function ($args) {
+    // Validate post data etc.
+    // $data = $args->request->body;
+
+    // If something goes wrong...
+    // throw new ApiException('Snap, crackle and pop!');
+
+    // Save user details
+    // ...
+
+    // Respond with updated data
+    return new Response([
+      'first_name' => 'Jerry',
+      'last_name' => 'Cotton',
+    ]);
+  });
+```
+
+## Endpoint handler arguments
+
+You can access the following properties via the `$args` parameter of the handler function.
+
+| Property  | Type                     | Description                 |
+| --------- | ------------------------ | --------------------------- |
+| `request` | `Request`                | [Request object](https://pwjsonapi.fokke.fi/requests) |
+| `event`   | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
+
+```php{1}
+$this->addEndpoint('/test-request')->get(function ($args) {
+  return new Response([
+    'request_path' => $args->request->path,
+    'request_method' => $args->request->method,
+  ]);
+});
+```
+
+## Dynamic paths
+
+You can use named arguments to allow dynamic paths. Use `$args->request->routeParam()` to access named arguments.
+
+```php{3}
+$this->addEndpoint('/products/{product}')->get(function ($args) {
+  return new Response([
+    'product_name' => $args->request->routeParam('product'),
+  ]);
+});
+```
+
+Querying `/products/bunny-rabbit` results in a following JSON:
+
+```json
+{
+  "data": {
+    "product_name": "bunny-rabbit"
+  }
+}
+```
+
+---
+
+# Requests
+
+Request object can be accessed in callback functions of:
+
+- [Endpoint request handler](https://pwjsonapi.fokke.fi/endpoints#endpoint-handler-arguments)
+- [Request hook handler](https://pwjsonapi.fokke.fi/request-hooks#hook-arguments)
+- [Error hook handler](https://pwjsonapi.fokke.fi/error-hooks#error-hook-arguments)
+- [API instance exception handler](https://pwjsonapi.fokke.fi/api-instance#exception-handling)
+
+## Request properties
+
+| Property      | Type                  | Description                                                        |
+| ------------- | --------------------- | ------------------------------------------------------------------ |
+| `method`      | `string`              | Request method                                                     |
+| `methodEnum`  | `RequestMethod\|null` | Method as enum                                                     |
+| `path`        | `string\|null`        | Requested path                                                     |
+| `routeParams` | `array`               | Route parameters of [dynamic paths](https://pwjsonapi.fokke.fi/endpoints#dynamic-paths) |
+| `queryParams` | `array`               | Query parameters                                                   |
+| `headers`     | `array`               | Request headers                                                    |
+| `contentType` | `string\|null`        | `Content-Type` header                                              |
+| `accept`      | `string\|null`        | `Accept` header                                                    |
+| `cookies`     | `array`               | Shorthand for `$_COOKIE`                                           |
+| `ip`          | `string\|null`        | Shorthand for `$_SERVER['REMOTE_ADDR']`                            |
+| `userAgent`   | `string\|null`        | Shorthand for `$_SERVER['HTTP_USER_AGENT']`                        |
+| `protocol`    | `string\|null`        | Shorthand for `$_SERVER['SERVER_PROTOCOL']`                        |
+| `body`        | `mixed`               | Request body                                                       |
+| `files`       | `array`               | Normalized value of `$_FILES`                                      |
+
+### Body
+
+If the request `Content-Type` header is `application/json`, the request body will be parsed from `php://input`. In such cases, the body must be a valid JSON string. If the JSON is malformed, an `ApiException` will be thrown.
+
+For all other cases, the body will contain the raw value of `$_POST` superglobal.
+
+### Files
+
+By default, `$_FILES` superglobal has a non-intuitive structure when it contains multiple files for the same field. `files` property contains a normalized value. The structure is always an array, regardless of the number of files.
+
+#### Single file
+
+```json
+{
+  "my_file_field": [
+    {
+      "name": "foo.txt",
+      "full_path": "foo.txt",
+      "type": "text/plain",
+      "tmp_name": "/tmp/phprawUMP",
+      "error": 0,
+      "size": 4
+    }
+  ]
+}
+```
+
+#### Multiple files
+
+```json
+{
+  "my_file_field": [
+    {
+      "name": "foo.txt",
+      "full_path": "foo.txt",
+      "type": "text/plain",
+      "tmp_name": "/tmp/phprawUMP",
+      "error": 0,
+      "size": 4
+    },
+    {
+      "name": "bar.txt",
+      "full_path": "bar.txt",
+      "type": "text/plain",
+      "tmp_name": "/tmp/php8P7qcq",
+      "error": 0,
+      "size": 4
+    }
+  ]
+}
+```
+
+## Request methods
+
+### routeParam()
+
+Get route parameter. If parameter is not found, `null` is returned.
+
+```php
+$request->routeParam('product');
+```
+
+### queryParam()
+
+Get query parameter. If parameter is not found, `null` is returned.
+
+```php
+$request->queryParam('product');
+```
+
+### toArray()
+
+Return all request properties as an associative array.
+
+```php
+$request->toArray();
+```
+
+---
+
+# Responses
+
+The data you return with the response will be rendered under the `data` key in the resulting JSON.
+
+## Example response
+
+```php
+return new Response([
+  'first_name' => 'Jerry',
+  'last_name' => 'Cotton',
+]);
+```
+
+The resulting JSON:
+
+```json
+{
+  "data": {
+    "first_name": "Jerry",
+    "last_name": "Cotton"
+  }
+}
+```
+
+## Response code
+
+The default response code is `200`. Use `code()` to specify a custom response code.
+
+```php
+return (new Response([
+  'first_name' => 'Jerry',
+  'last_name' => 'Cotton',
+]))->code(201);
+```
+
+## Additional top-level keys
+
+Sometimes you need to return additional key-value pairs, such as a message, alongside the data. In this example, the response data contains user details, and the message would not belong there. Use `with()` to define additional keys.
+
+```php{4-6}
+return (new Response([
+  'first_name' => 'Jerry',
+  'last_name' => 'Cotton',
+]))->with([
+  'message' => 'Your details were saved successfully!',
+]);
+```
+
+The resulting JSON:
+
+```json
+{
+  "data": {
+    "first_name": "Jerry",
+    "last_name": "Cotton"
+  },
+  "message": "Your details were saved successfully!"
+}
+```
+
+## Response without data
+
+If you pass `null` to the constructor, the `data` key will be omitted from the response. This is useful when the response only contains additional keys.
+
+```php
+return (new Response(null))->with([
+  'message' => 'Action completed successfully!',
+]);
+```
+
+The resulting JSON:
+
+```json
+{
+  "message": "Action completed successfully!"
+}
+```
+
+## HTTP headers <Badge type="tip" text="^2.0" />
+
+Use `header()` to set custom HTTP headers on the response. Headers set this way are emitted alongside `Content-Type` when the response is sent.
+
+```php
+return (new Response([
+  'first_name' => 'Jerry',
+  'last_name' => 'Cotton',
+]))->header('X-Custom-Header', 'custom-value');
+```
+
+Multiple headers can be chained:
+
+```php
+return (new Response())->header('X-First', 'one')->header('X-Second', 'two');
+```
+
+## Paginated responses <Badge type="tip" text="^2.1" />
+
+`PaginatedResponse` extends `Response` and adds a `pagination` key to the output. It provides `start()`, `limit()`, and `total()` setters, plus computed `page` and `pages` values.
+
+::: warning
+This class does **not** perform pagination. It only attaches pagination metadata to the response. Actual pagination must be handled elsewhere, for example with ProcessWire selectors using `start` and `limit`.
+:::
+
+```php
+use PwJsonApi\PaginatedResponse;
+
+return (new PaginatedResponse(['foo', 'bar', 'baz']))
+  ->start(10)
+  ->limit(10)
+  ->total(85);
+```
+
+The resulting JSON:
+
+```json
+{
+  "data": ["foo", "bar", "baz"],
+  "pagination": {
+    "start": 10,
+    "limit": 10,
+    "total": 85,
+    "page": 2,
+    "pages": 9
+  }
+}
+```
+
+All three setters — `start()`, `limit()`, and `total()` — must be called before `toArray()` or `toJson()`. A `LogicException` is thrown if any value is missing.
+
+The computed values are derived as follows:
+
+- **`page`** — current page number (1-based): `floor(start / limit) + 1`
+- **`pages`** — total number of pages: `ceil(total / limit)`
+
+## Methods
+
+### toArray()
+
+Return the response as an associative array.
+
+```php
+$response->toArray();
+```
+
+---
+
+# Error handling
+
+The library catches any exception derived from the `ApiException` class and converts it to a response. You can throw an `ApiException` at any time to halt the process.
+
+::: tip
+To handle other exceptions, such as `WireException`, you need to specify custom handling function by calling `handleException()` method of the API instance. [Read more about exception handling](https://pwjsonapi.fokke.fi/api-instance#exception-handling).
+:::
+
+## Example exception
+
+```php
+throw new ApiException('Snap, crackle and pop!');
+```
+
+The resulting JSON:
+
+```json
+{
+  "error": "Snap, crackle and pop!"
+}
+```
+
+## Exception response code
+
+The default response code is `400`. Use `code()` to specify a custom code.
+
+```php
+throw (new ApiException('Snap, crackle and pop!'))->code(401);
+```
+
+## Additional top-level keys
+
+Like responses, exceptions can also contain additional key-value pairs.
+
+```php
+throw (new ApiException())->code(401)->with([
+  'login_url' => 'https://example.com/login',
+]);
+```
+
+The resulting JSON:
+
+```json
+{
+  "login_url": "https://example.com/login"
+}
+```
+
+## HTTP headers <Badge type="tip" text="^2.0" />
+
+Use `header()` to set custom HTTP headers on the error response.
+
+```php
+throw (new ApiException('Forbidden'))
+  ->code(403)
+  ->header('X-Reason', 'insufficient-permissions');
+```
+
+## Api404Exception
+
+This can be used as a shorthand for an exception with a `404` response code.
+
+```php
+throw new Api404Exception();
+```
+
+---
+
+# Request hooks
+
+Request hooks can be used to modify the behavior of endpoints. The most common use cases are to check for authorization before the request is handled, or to modify response data after the request has been handled. For these purposes, [hook arguments](#hook-arguments) will be passed to the hook handler functions.
+
+The examples below use the `hookBefore()` and `hookAfter()` methods, which apply to any request method. There are also [request type-specific hooks](#hook-methods-reference) available.
+
+## Hook scopes
+
+### API hooks
+
+Defined for the whole API instance. These hooks will apply to all endpoints.
+
+```php
+// Simple auth check for all requests, with any request method
+$api->hookBefore(function ($args) {
+  if ($this->wire->user->isLoggedin() === false) {
+    throw (new ApiException())->code(401)->with([
+      'login_url' => 'https://example.com/login',
+    ]);
+  }
+
+  if ($this->wire->user->hasRole('rabbit') === false) {
+    throw (new ApiException())->code(403);
+  }
+});
+
+// Modify response data of every successful response
+$api->hookAfter(function ($args) {
+  // Inject key to response data
+  $args->response->data['_foo'] = 'foo';
+
+  // Include additional top-level keys in the response
+  $args->response->with([
+    'bar' => 'bar',
+  ]);
+});
+```
+
+### Service hooks
+
+Defined for a single service branch. These hooks will apply to all endpoints within the given service (including child services). Service hooks can be defined directly in the service `init()` method or injected into the service object.
+
+#### Define in init()
+
+```php
+$this->hookAfter(function ($args) {
+  $args->response->data['_foo'] = 'foo';
+});
+```
+
+#### Inject in addService() callback
+
+```php
+$api->addService(new HelloWorldService(), function ($service) {
+  $service->hookAfter(function ($args) {
+    $args->response->data['_foo'] = 'foo';
+  });
+});
+```
+
+#### Find installed service and inject
+
+```php
+$api->findService('HelloWorldService')?->hookAfter(function ($args) {
+  $args->response->data['_foo'] = 'foo';
+});
+```
+
+### Endpoint hooks
+
+Defined for a single endpoint. Endpoint hooks can be defined directly when creating an endpoint, or they can be injected into the endpoint object.
+
+#### Define directly in endpoint
+
+```php
+$this->addEndpoint('/hello-world')
+  ->get(function () {
+    return new Response([
+      'hello' => 'world',
+    ]);
+  })
+  ->hookAfter(function ($args) {
+    $args->response->data['_foo'] = 'foo';
+  });
+```
+
+#### Find existing endpoint and inject
+
+```php
+$api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
+  $args->response->data['_foo'] = 'foo';
+});
+```
+
+## Multiple hooks
+
+Multiple hooks can affect the single target. [See hook execution order](#hook-execution-order).
+
+```php
+$api->hookAfter(function ($args) {
+  $args->response->data['_foo'] = 'foo';
+});
+
+$api->findService('HelloWorldService')?->hookAfter(function ($args) {
+  $args->response->data['_bar'] = 'bar';
+});
+
+$api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
+  $args->response->data['_baz'] = 'baz';
+});
+
+$api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
+  $args->response->data['_qux'] = 'qux';
+});
+```
+
+## Hook arguments
+
+You can access the following properties via the `$args` parameter of the handler function. The following properties are always included:
+
+| Property   | Type                     | Description                 |
+| ---------- | ------------------------ | --------------------------- |
+| `request`  | `Request`                | [Request object](https://pwjsonapi.fokke.fi/requests) |
+| `event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
+| `endpoint` | `Endpoint`               | Requested endpoint          |
+| `service`  | `Service`                | Requested service           |
+| `services` | `ServiceList`            | List of all parent services |
+| `api`      | `Api`                    | API instance                |
+
+### hookBefore\* arguments
+
+| Property  | Type       | Description              |
+| --------- | ---------- | ------------------------ |
+| `handler` | `callable` | Endpoint request handler |
+
+### hookAfter\* arguments
+
+| Property   | Type     | Description                            |
+| ---------- | -------- | -------------------------------------- |
+| `response` | Response | Response from endpoint request handler |
+
+## Hook methods reference
+
+### Before request
+
+| Method               | Description                |
+| -------------------- | -------------------------- |
+| `hookBefore()`       | Hook before any request    |
+| `hookBeforeGet()`    | Hook before GET request    |
+| `hookBeforePost()`   | Hook before POST request   |
+| `hookBeforeHead()`   | Hook before HEAD request   |
+| `hookBeforePut()`    | Hook before PUT request    |
+| `hookBeforePatch()`  | Hook before PATCH request  |
+| `hookBeforeDelete()` | Hook before DELETE request |
+
+### After request
+
+| Method              | Description               |
+| ------------------- | ------------------------- |
+| `hookAfter()`       | Hook after any request    |
+| `hookAfterGet()`    | Hook after GET request    |
+| `hookAfterPost()`   | Hook after POST request   |
+| `hookAfterHead()`   | Hook after HEAD request   |
+| `hookAfterPut()`    | Hook after PUT request    |
+| `hookAfterPatch()`  | Hook after PATCH request  |
+| `hookAfterDelete()` | Hook after DELETE request |
+
+## Hook execution order
+
+1. API before hooks
+2. Service before hooks
+3. Endpoint before hooks
+4. **Request handler**
+5. Endpoint after hooks
+6. Service after hooks
+7. API after hooks
+
+---
+
+# Error hooks
+
+Like request hooks, error hooks can be used to modify the response when an `ApiException` is thrown. The behavior of error hooks is similar, except that there are no 'before' or 'after' timings.
+
+An `ErrorHookReturn` object will be passed to the hook handler function. [The hook execution order](https://pwjsonapi.fokke.fi/request-hooks#hook-execution-order) remains the same.
+
+## Error hook scopes
+
+### API error hooks
+
+Defined for the whole API instance. These hooks will apply to all errors.
+
+```php
+// For 401 errors, provide login URL
+$api->hookOnError(function ($args) {
+  if ($args->response->code === 401) {
+    $args->response->with([
+      'login_url' => 'https://example.com/login',
+    ]);
+  }
+});
+```
+
+### Service error hooks
+
+Defined for a single service branch. These hooks will apply to all errors thrown in endpoints within the given service (including child services). Service hooks can be defined directly in the service `init()` method or injected into the service object.
+
+#### Define in init()
+
+```php
+$this->hookOnError(function ($args) {
+  if ($args->response->code === 401) {
+    $args->response->with([
+      'login_url' => 'https://example.com/login',
+    ]);
+  }
+});
+```
+
+#### Inject in addService() callback
+
+```php
+$api->addService(new HelloWorldService(), function ($service) {
+  $service->hookOnError(function ($args) {
+    if ($args->response->code === 401) {
+      $args->response->with([
+        'login_url' => 'https://example.com/login',
+      ]);
+    }
+  });
+});
+```
+
+#### Find installed service and inject
+
+```php
+$api->findService('HelloWorldService')?->hookOnError(function ($args) {
+  if ($args->response->code === 401) {
+    $args->response->with([
+      'login_url' => 'https://example.com/login',
+    ]);
+  }
+});
+```
+
+### Endpoint error hooks
+
+Defined for a single endpoint. Endpoint hooks can be defined directly when creating an endpoint, or they can be injected into the endpoint object.
+
+#### Define directly in endpoint
+
+```php
+$this->addEndpoint('/hello-world')
+  ->get(function () {
+    return new Response([
+      'hello' => 'world',
+    ]);
+  })
+  ->hookOnError(function ($args) {
+    $args->response->with(['_foo' => 'foo']);
+  });
+```
+
+#### Find existing endpoint and inject
+
+```php
+$api->findEndpoint('/api/hello-world')?->hookOnError(function ($args) {
+  $args->response->with(['_foo' => 'foo']);
+});
+```
+
+## Error hook arguments
+
+You can access the following properties via the `$args` parameter of the handler function.
+
+| Property    | Type                     | Description                 |
+| ----------- | ------------------------ | --------------------------- |
+| `exception` | `ApiException`           | The thrown exception        |
+| `response`  | `Response`               | Error Response object       |
+| `request`   | `Request`                | [Request object](https://pwjsonapi.fokke.fi/requests) |
+| `event`     | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
+| `endpoint`  | `Endpoint`               | Requested endpoint          |
+| `service`   | `Service`                | Requested service           |
+| `services`  | `ServiceList`            | List of all parent services |
+| `api`       | `Api`                    | API instance                |
+
+---
+
+# Plugins <Badge type="tip" text="^2.0" />
+
+Plugins are reusable packages of hooks, services, and configuration that can be installed on an API instance, a service, or an endpoint. They provide a way to encapsulate cross-cutting concerns and share them across projects.
+
+## The `ApiPlugin` class
+
+All plugins extend the abstract `ApiPlugin` class. Override the `init()` method to add hooks, services, or any other setup logic to the context where the plugin is installed.
+
+```php
+use PwJsonApi\Plugins\ApiPlugin;
+use PwJsonApi\{Api, Service, Endpoint};
+use ProcessWire\WireException;
+
+class MyPlugin extends ApiPlugin
+{
+  public function init(Api|Service|Endpoint $context): static
+  {
+    // Optional: restrict plugin to API-level only
+    // if (!($context instanceof Api)) {
+    //   throw new WireException('MyPlugin must be installed on Api');
+    // }
+
+    parent::init($context);
+
+    $context->hookAfter(function ($args) {
+      $args->response->with([
+        'plugin_active' => true,
+      ]);
+    });
+
+    return $this;
+  }
+}
+```
+
+## Installing a plugin
+
+Use the `addPlugin()` method available on `Api`, `Service`, and `Endpoint` instances.
+
+```php
+$api->addPlugin(new MyPlugin());
+```
+
+An optional setup callback gives you access to the plugin instance for configuration before it is initialized:
+
+```php
+$api->addPlugin(new MyPlugin(), function ($plugin) {
+  $plugin->someSetting = 'value';
+});
+```
+
+## Scopes
+
+Plugins can be installed at three different levels:
+
+### API-level
+
+API-level plugins affect the entire API.
+
+```php
+$api->addPlugin(new MyPlugin());
+```
+
+### Service-level
+
+Service-level plugins affect only the endpoints within that service and its child services.
+
+```php
+$api->addService(new MyService(), function ($service) {
+  $service->addPlugin(new MyPlugin());
+});
+```
+
+### Endpoint-level
+
+Endpoint-level plugins affect a single endpoint.
+
+```php
+$service->findEndpoint('/')?->addPlugin(new MyPlugin());
+```
+
+---
+
+# CSRF protection <Badge type="tip" text="^2.0" />
+
+This plugin adds [cross-site request forgery (CSRF)](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF) protection for your endpoints, utilising ProcessWire’s built-in token validation.
+
+The plugin hooks into every `POST`, `PUT`, `PATCH`, or `DELETE` request and expects a valid token to be included in the request payload. Any successful request of those types triggers token rotation, and the new token is included in the response. If validation fails, an `ApiException` is thrown with the current token included.
+
+The plugin also exposes a `/csrf-token` endpoint, which can be used to retrieve the current token.
+
+## Installation
+
+Install the plugin by calling the `addPlugin()` method of the `Api` instance.
+
+```php
+use PwJsonApi\Plugins\CSRFPlugin;
+
+$api->addPlugin(new CSRFPlugin());
+```
+
+## Configuration
+
+You can configure the plugin via the setup callback:
+
+```php
+$api->addPlugin(new CSRFPlugin(), function ($plugin) {
+  // Token name
+  $plugin->tokenName = 'pw_json_api_csrf_token';
+
+  // Key name for the token in responses
+  $plugin->tokenKey = 'csrf_token';
+
+  // Endpoint path for retrieving the current token
+  $plugin->endpointPath = '/csrf-token';
+});
+```
+
+## Front-end implementation
+
+Front-end implementation is outside the scope of this guide, but here is a basic flow:
+
+1. Implement a way to store the current token (e.g. in memory, or a state manager).
+2. Before any `POST`, `PUT`, `PATCH`, or `DELETE` request, check whether a current token is available. If not, query the `/csrf-token` endpoint to retrieve and store it.
+3. Pass the token as a header
+4. If the response is successful, read the new token from the response data using the `csrf_token` key and update your store.
+
+```js
+let token = null;
+
+// Fetch the initial token
+async function fetchToken() {
+  const res = await fetch('/api/csrf-token');
+  const json = await res.json();
+
+  if (json.data.csrf_token) {
+    token = json.data.csrf_token;
+  }
+}
+
+// Make a POST request with the token, then store the rotated token
+async function post(url, body) {
+  if (!token) {
+    await fetchToken();
+  }
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      [`X-${token.name}`]: token.value,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const json = await res.json();
+
+  // Store the rotated token
+  if (json.data.csrf_token) {
+    token = json.data.csrf_token;
+  }
+
+  return json;
+}
+
+const result = await post('/api/my-endpoint', { foo: 'bar' });
+```
+
+---
+
+# Rate limiting <Badge type="tip" text="^2.0" />
+
+This plugin adds rate limiting for your API endpoints using a fixed-window algorithm. It uses ProcessWire's WireCache for storage, which means request counts are persisted in the database and survive across requests.
+
+This plugin can only be installed on an `Api` instance.
+
+## Installation
+
+Install the plugin by calling the `addPlugin()` method on your `Api` instance.
+
+```php
+use PwJsonApi\Plugins\RateLimitPlugin;
+
+$api->addPlugin(new RateLimitPlugin());
+```
+
+## Configuration
+
+You can configure the plugin via the setup callback:
+
+```php
+$api->addPlugin(new RateLimitPlugin(), function ($plugin) {
+  // Maximum requests per window (default: 60)
+  $plugin->limit = 100;
+
+  // Window duration in seconds (default: 60)
+  $plugin->window = 120;
+
+  // Error message when limit is exceeded (default: 'Rate limit exceeded')
+  $plugin->errorMessage = 'Too many requests, please try again later';
+});
+```
+
+## Response headers
+
+The plugin sets the following headers on every response:
+
+| Header                  | Description                                        |
+| ----------------------- | -------------------------------------------------- |
+| `X-RateLimit-Limit`     | Maximum number of requests allowed per window      |
+| `X-RateLimit-Remaining` | Number of requests remaining in the current window |
+| `X-RateLimit-Reset`     | Unix timestamp when the current window resets      |
+
+When the rate limit is exceeded, additional headers are included:
+
+| Header        | Description                                       |
+| ------------- | ------------------------------------------------- |
+| `Retry-After` | Number of seconds until the current window resets |
+
+The response body also includes `retry_after` with the same value.
+
+## Custom client identifier
+
+By default, the plugin identifies clients by their IP address (`$request->ip`). If no IP address is available (e.g. in CLI contexts), rate limiting is skipped. You can provide a custom identifier using the `$clientId` callback — returning `null` will skip rate limiting for that request:
+
+```php
+use function ProcessWire\wire;
+
+$api->addPlugin(new RateLimitPlugin(), function ($plugin) {
+  $plugin->clientId = function ($request) {
+    // Rate limit by user ID for authenticated users, IP for guests
+    $user = wire()->user;
+    return $user->isGuest() ? $request->ip : (string) $user->id;
+  };
+});
+```
+
+## Algorithm
+
+The plugin uses a **fixed-window** algorithm:
+
+1. Time is divided into fixed windows (e.g. 60-second intervals).
+2. Each request increments a counter stored in WireCache.
+3. If the counter exceeds the limit, a `429` response is returned.
+4. When the window expires, the counter resets automatically via WireCache TTL.
+
+---
+
+# ProcessWire Page Parser
+
+The **Page Parser** is a flexible tool for converting ProcessWire pages into structured data, ready for API responses. It supports all ProcessWire core field types and offers extensive configuration and hook options.
+
+- Parse single pages or arrays of pages
+- Select specific fields to include or exclude
+- Optionally include child pages, with depth and selector controls
+- Use hooks to customize parsing at various stages (pages, fields, images, files)
+
+## Basic usage example
+
+::: tip
+Note that `toArray()` or `toResponse()` starts the actual parsing. Any configuration must be done before calling one of these methods.
+:::
+
+```php
+use PwJsonApi\PageParser;
+
+$output = (new PageParser())
+  ->input($this->wire->pages->find('template=basic-page'))
+  ->fields('title', 'body')
+  ->toArray();
+```
+
+## Configuration
+
+Configure the parser using the `configure()` method, which allows you to control recursion, child page selection, output format, and more.
+
+```php
+$parser->configure(function ($config) {
+  // Recursively parse child pages? (default: false)
+  $config->parseChildren = false;
+
+  // Selector for child pages (default: '')
+  $config->childrenSelector = '';
+
+  // Key name for child pages (default: '_children')
+  $config->childrenKey = '_children';
+
+  // Recursively parse children of page field references? (default: false)
+  $config->parsePageReferenceChildren = false;
+
+  // Maximum depth for recursive parsing (default: 3)
+  $config->maxDepth = 3;
+
+  // Output full file URLs (default: true)
+  $config->fullFileUrls = true;
+
+  // Parse custom fields of files? (default: false)
+  $config->parseFileCustomFields = false;
+
+  // Key name for custom fields of files (default: '_custom_fields')
+  $config->fileCustomFieldsKey = '_custom_fields';
+});
+```
+
+## Input
+
+Specify the pages to parse with `input()`. Accepts a `Page` or `PageArray`.
+
+```php
+$parser->input($this->wire->pages->find('template=basic-page'));
+```
+
+## Property selection
+
+By default, `id` and `name` will be included.
+
+### Include properties
+
+Use `properties()` to include additional `Page` properties beyond the defaults.
+
+```php
+$parser->properties('url', 'numChildren');
+```
+
+### Exclude properties
+
+Use `excludeProperties()` to omit certain properties.
+
+```php
+$parser->excludeProperties('name');
+```
+
+## Field Selection
+
+### Include fields
+
+By default, all fields of the input pages will be included. Use `fields()` to include only specific fields.
+
+::: tip
+If your input contains pages with different templates, you can still specify all fields here. If the parsed template does not have the given field, it will be ignored.
+:::
+
+```php
+$parser->fields('title', 'body');
+```
+
+### Exclude fields
+
+Use `excludeFields()` to omit certain fields.
+
+```php
+$parser->excludeFields('body');
+```
+
+## Child pages
+
+Enable child page parsing via [parser configuration](#configuration). Fine-tune with selectors, depth, and [`hooks`](#hookbeforepageparse).
+
+## Output
+
+### As an array
+
+`toArray()` returns the parsed data as an array.
+
+```php{4}
+$result = (new PageParser())
+  ->input($this->wire->pages->find('template=basic-page'))
+  ->fields('title', 'body')
+  ->toArray();
+```
+
+### As a response
+
+`toResponse()` returns a Response object.
+
+```php{4}
+$response = (new PageParser())
+  ->input($this->wire->pages->find('template=basic-page'))
+  ->fields('title', 'body')
+  ->toResponse();
+```
+
+### As a paginated response <Badge type="tip" text="^2.1" />
+
+`toPaginatedResponse()` returns a [PaginatedResponse](https://pwjsonapi.fokke.fi/responses#paginated-responses) with pagination metadata read from the `PageArray` input. The input must be a `PageArray` — an `InvalidArgumentException` is thrown otherwise.
+
+```php{4}
+$response = (new PageParser())
+  ->input($this->wire->pages->find('template=basic-page, start=0, limit=10'))
+  ->fields('title', 'body')
+  ->toPaginatedResponse();
+```
+
+## Hooks
+
+Hooks allow you to modify data before and after parsing pages, fields, images, and files. This enables advanced customization, such as resizing images, altering field values, or adding extra data.
+
+::: tip
+Hooks must be defined before the `toArray()` or `toResponse()` call.
+:::
+
+::: tip
+All hook callbacks receive an `$args->depth` property (int) indicating the
+current recursion depth (starting at 1). Use this to customize behavior at
+different nesting levels.
+:::
+
+### Skip <Badge type="tip" text="^2.1" />
+
+The `skip()` method is available in `hookBeforePageParse()`, `hookBeforePropertyParse()`, and `hookBeforeFieldParse()` callbacks. When called, the item is omitted from the output entirely — the key will not appear (not even as `null`). This also provides a performance benefit, as recursive fields are not parsed when skipped.
+
+```php
+// Skip unpublished pages
+$parser->hookBeforePageParse(function ($args) {
+  if ($args->page->isUnpublished()) {
+    $args->skip();
+  }
+});
+
+// Skip the body field at depth > 1
+$parser->hookBeforeFieldParse(function ($args) {
+  if ($args->field->name === 'body' && $args->depth > 1) {
+    $args->skip();
+  }
+});
+
+// Skip the id property
+$parser->hookBeforePropertyParse(function ($args) {
+  if ($args->propertyName === 'id') {
+    $args->skip();
+  }
+});
+```
+
+### hookBeforePageParse()
+
+Use this to modify the source page.
+
+```php
+$parser->hookBeforePageParse(function ($args) {
+  // Get only the first three tags
+  $args->page->tags = $args->page->tags->slice(0, 3);
+
+  // Do some other nasty modifications to the source page
+  $args->page->title = 'Remember that it was your idea...';
+
+  // Reconfigure parser for child pages
+  $args->parser->fields('title');
+});
+```
+
+### hookAfterPageParse()
+
+Use this to modify the final parsed data of the page, add extra keys etc.
+
+```php
+$parser->hookAfterPageParse(function ($args) {
+  $args->parsedPage['_foo'] = 'foo';
+
+  if ($args->page->template->name === 'bar') {
+    $args->parsedPage['_bar'] = 'bar';
+  }
+});
+```
+
+### hookBeforePropertyParse()
+
+Use this to modify property value before it's parsed.
+
+::: tip
+This hook applies only to page properties, such as `id`. Use the [hookBeforeFieldParse()](#hookbeforefieldparse) hook for fields.
+:::
+
+```php
+$parser->hookBeforePropertyParse(function ($args) {
+  if ($args->propertyName === 'id') {
+    $args->value = 99999;
+  }
+});
+```
+
+### hookAfterPropertyParse()
+
+Use this to modify final parsed output of property.
+
+::: tip
+This hook applies only to page properties, such as `id`. Use the [hookAfterFieldParse()](#hookafterfieldparse) hook for fields.
+:::
+
+```php
+$parser->hookAfterPropertyParse(function ($args) {
+  if ($args->propertyName === 'id') {
+    $args->parsedValue = 99999;
+  }
+});
+```
+
+### hookBeforeFieldParse()
+
+Use this to access field value, source field, source page, and another `PageParser` instance, which will be used for fields with `Page` or `PageArray` as a value.
+
+::: tip
+
+At first glance, this hook seems like the right place to resize images. However, since the image field may contain multiple images, resizing images here would force you to re-map the entire `Pageimages` object. Instead, use the dedicated [`hookBeforeImageParse()`](#hookbeforeimageparse) hook.
+:::
+
+```php
+$parser->hookBeforeFieldParse(function ($args) {
+  // Reconfigure parser for the field "tags" of
+  // "basic-page" template.
+  if (
+    $args->page->template->name === 'basic-page' &&
+    $args->field->name === 'tags'
+  ) {
+    $args->parser->fields('title');
+  }
+});
+```
+
+### hookAfterFieldParse()
+
+Use this to modify final parsed output of field.
+
+```php
+$parser->hookAfterFieldParse(function ($args) {
+  if ($args->field->name === 'title') {
+    $args->parsedValue = ucfirst($args->parsedValue);
+  }
+});
+```
+
+### hookBeforeImageParse()
+
+Use this to modify the source image. This hook will run for every image, regardless of whether the field contains multiple images. This is a good place to resize images to avoid serving them at their original size.
+
+`PageParser` instance for custom fields of files is exposed in `$args`.
+
+```php
+$parser->hookBeforeImageParse(function ($args) {
+  if ($args->field->name === 'my_image_field') {
+    // Resize image
+    $args->image = $args->image->size(300, 200);
+
+    // Reconfigure parser for custom fields
+    $args->parser->fields('title');
+  }
+});
+```
+
+### hookAfterImageParse()
+
+Use this to modify final parsed output of an image. The original (unmodified)
+image is available via `$args->originalImage`, which is useful for generating
+thumbnails or alternative sizes from the source image.
+
+```php
+$parser->hookAfterImageParse(function ($args) {
+  if ($args->field->name === 'my_image_field') {
+    // Even though the parser in $args is primarily used for
+    // custom fields of the image, you can use it to create thumbnails.
+    $args->parsedImage['_thumbnails'] = [
+      '200x200' => $args->parser->parseImage(
+        $args->originalImage->size(200, 200),
+      ),
+      '100x100' => $args->parser->parseImage(
+        $args->originalImage->size(100, 100),
+      ),
+    ];
+  }
+});
+```
+
+### hookBeforeFileParse()
+
+Use this to modify the source file. This hook will run for every file, regardless of whether the field contains multiple files.
+
+`PageParser` instance for custom fields of files is exposed in `$args`.
+
+```php
+$parser->hookBeforeFileParse(function ($args) {
+  if ($args->field->name === 'my_file_field') {
+    // Reconfigure parser for custom fields
+    $args->parser->fields('title');
+  }
+});
+```
+
+### hookAfterFileParse()
+
+Use this to modify final parsed output of a file.
+
+```php
+$parser->hookAfterFileParse(function ($args) {
+  if ($args->field->name === 'my_file_field') {
+    $args->parsedFile['_foo'] = 'bar';
+  }
+});
+```
+
+---
+
+# OpenAPI documentation
+
+You can use [swagger-php](https://zircote.github.io/swagger-php/) attributes to generate an [OpenAPI](https://www.openapis.org/) spec directly from your services. The key pattern is to define endpoint handlers as named class methods instead of inline closures, giving the attributes a target to attach to.
+
+## Install swagger-php
+
+```console
+composer require --dev zircote/swagger-php
+```
+
+## Extend the Api class
+
+API-level metadata like the title and version belongs on an `Api` subclass. Use the `#[OA\Info]` attribute to define it:
+
+```php
+<?php namespace ProcessWire;
+
+use PwJsonApi\Api;
+use OpenApi\Attributes as OA;
+
+#[
+  OA\Info(
+    title: 'Documented API',
+    version: '1.0.0',
+    description: 'Example API with OpenAPI documentation',
+  ),
+]
+class DocumentedApi extends Api {}
+```
+
+## Add attributes to a service
+
+Define each handler as a named method and annotate it with the matching OpenAPI attribute. In `init()`, pass the handler using first-class callable syntax (`$this->greet(...)`):
+
+::: info
+The `path` values in the attributes must include the full route as seen by the client (base path + endpoint path).
+:::
+
+```php
+<?php namespace ProcessWire;
+
+use PwJsonApi\{Service, Response, EndpointHandlerArgs};
+use OpenApi\Attributes as OA;
+
+class DocumentedService extends Service
+{
+  protected function init()
+  {
+    $this->addEndpoint('/greet')
+      ->get($this->greet(...))
+      ->post($this->createGreeting(...));
+  }
+
+  #[
+    OA\Get(
+      path: '/documented-api/greet',
+      operationId: 'greet',
+      parameters: [
+        new OA\Parameter(
+          name: 'name',
+          in: 'query',
+          required: false,
+          schema: new OA\Schema(type: 'string'),
+          description: 'Greeting message',
+        ),
+      ],
+      responses: [
+        new OA\Response(response: 200, description: 'Greeting response'),
+      ],
+    ),
+  ]
+  protected function greet(EndpointHandlerArgs $args): Response
+  {
+    return new Response([
+      'greeting' => $args->request->queryParam('name') ?? null,
+    ]);
+  }
+
+  #[
+    OA\Post(
+      path: '/documented-api/greet',
+      operationId: 'createGreeting',
+      requestBody: new OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+          properties: [
+            new OA\Property(
+              property: 'name',
+              type: 'string',
+              description: 'Greeting message',
+            ),
+          ],
+        ),
+      ),
+      responses: [
+        new OA\Response(response: 201, description: 'Greeting created'),
+      ],
+    ),
+  ]
+  protected function createGreeting(EndpointHandlerArgs $args): Response
+  {
+    return (new Response([
+      'greeting' => $args->request->body['name'] ?? null,
+    ]))->code(201);
+  }
+}
+```
+
+## Register the API
+
+Wire everything up in `ready.php` the same way you would with a regular API:
+
+```php
+(new DocumentedApi())
+  ->setBasePath('documented-api')
+  ->addService(new DocumentedService())
+  ->run();
+```
+
+## Generate the spec
+
+Use the `openapi` CLI tool to scan your service files and output the spec. Assuming the API classes are placed in `site/lib`:
+
+```console
+./vendor/bin/openapi site/lib -o openapi.yaml
+```
+
+To generate JSON instead:
+
+```console
+./vendor/bin/openapi site/lib --format json -o openapi.json
+```
+
+## View and explore the spec
+
+The generated spec file can be opened in an API client or documentation viewer:
+
+- [Bruno](https://www.usebruno.com/) — open-source API client that can import OpenAPI specs for testing and exploration
+- [Swagger UI](https://swagger.io/tools/swagger-ui/) — interactive documentation viewer that renders the spec as a browsable reference with a built-in request console

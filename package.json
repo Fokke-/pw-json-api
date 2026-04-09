@@ -9,7 +9,7 @@
     "format": "prettier --write src/",
     "docs:dev": "vitepress dev docs",
     "llms": "node scripts/generate-llms-txt.mjs",
-    "docs:build": "node scripts/generate-llms-txt.mjs && vitepress build docs",
+    "docs:build": "node scripts/generate-llms-txt.mjs && cp llms.txt llms-full.txt docs/public/ && vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "prepare": "husky"
   },

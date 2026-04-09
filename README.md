@@ -4,7 +4,7 @@ Structured APIs for ProcessWire, without the boilerplate.
 
 [Click here for documentation](https://pwjsonapi.fokke.fi)
 
-For AI-assisted development, see [llms.txt](https://pwjsonapi.fokke.fi/llms.txt).
+For AI-assisted development, see [llms-full.txt](https://pwjsonapi.fokke.fi/llms-full.txt) (also included in the Composer package).
 
 ## Tests
 
