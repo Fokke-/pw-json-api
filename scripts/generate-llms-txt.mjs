@@ -1,47 +1,16 @@
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { sections } from '../docs/.vitepress/pages.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, '..');
 const docsDir = join(rootDir, 'docs');
 const baseUrl = 'https://pwjsonapi.fokke.fi';
 
-const sections = [
-  {
-    title: 'Introduction',
-    pages: ['overview', 'getting-started', 'lifecycle'],
-  },
-  {
-    title: 'Core concepts',
-    pages: [
-      'api-instance',
-      'services',
-      'endpoints',
-      'requests',
-      'responses',
-      'error-handling',
-    ],
-  },
-  {
-    title: 'Hooks',
-    pages: ['request-hooks', 'error-hooks'],
-  },
-  {
-    title: 'Plugins',
-    pages: ['plugins/plugins-overview', 'plugins/csrf', 'plugins/rate-limit'],
-  },
-  {
-    title: 'Tools',
-    pages: ['processwire-page-parser'],
-  },
-  {
-    title: 'Recipes',
-    pages: ['recipes/openapi'],
-  },
-];
-
-const allPages = sections.flatMap((s) => s.pages);
+const allPages = sections.flatMap((s) =>
+  s.items.map((item) => item.link.slice(1)),
+);
 
 const header = `# ProcessWire JSON API
 
@@ -123,8 +92,9 @@ function buildLlmsTxt(pages) {
   const lines = [header, ''];
 
   for (const section of sections) {
-    lines.push(`## ${section.title}`, '');
-    for (const slug of section.pages) {
+    lines.push(`## ${section.text}`, '');
+    for (const item of section.items) {
+      const slug = item.link.slice(1);
       const page = pages.get(slug);
       const url = `${baseUrl}/${slug}`;
       lines.push(`- [${page.title}](${url}): ${page.description}`);
@@ -140,7 +110,8 @@ function buildLlmsFullTxt(pages) {
   const parts = [header, ''];
 
   for (const section of sections) {
-    for (const slug of section.pages) {
+    for (const item of section.items) {
+      const slug = item.link.slice(1);
       const page = pages.get(slug);
       parts.push(page.content, '\n---\n');
     }
