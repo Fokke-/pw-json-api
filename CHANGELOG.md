@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 2.2.0
+
+### New features
+
+- Authentication support via `AuthInterface` — set an authenticator on API, service, or endpoint level with `authenticate()`
+- Authorization support via `authorize()` callback — chain authorization checks across API → services → endpoint
+- New `AuthenticationException` (401) and `AuthorizationException` (403) exception classes
+
 ## 2.1.2
 
 ### Bug fixes

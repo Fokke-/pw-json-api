@@ -7,7 +7,7 @@ namespace PwJsonApi;
  *
  * Thrown when a request fails authorization.
  *
- * @see https://pwjsonapi.fokke.fi/authorization.html
+ * @see https://pwjsonapi.fokke.fi/authentication.html#authorization
  */
 class AuthorizationException extends ApiException
 {

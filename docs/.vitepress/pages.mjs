@@ -19,6 +19,12 @@ export const sections = [
     ],
   },
   {
+    text: 'Security',
+    items: [
+      { text: 'Authentication & authorization', link: '/authentication' },
+    ],
+  },
+  {
     text: 'Hooks',
     items: [
       { text: 'Request hooks', link: '/request-hooks' },

@@ -14,6 +14,10 @@ The examples below use the `hookBefore()` and `hookAfter()` methods, which apply
 
 Defined for the whole API instance. These hooks will apply to all endpoints.
 
+::: tip
+For authentication and authorization, consider using the dedicated [`authenticate()`](/authentication) and [`authorize()`](/authentication#authorization) methods instead of hooks.
+:::
+
 ```php
 // Simple auth check for all requests, with any request method
 $api->hookBefore(function ($args) {

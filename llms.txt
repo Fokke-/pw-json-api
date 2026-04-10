@@ -20,6 +20,10 @@
 - [Responses](https://pwjsonapi.fokke.fi/responses): Return structured JSON responses with custom status codes, headers, and data payloads.
 - [Error handling](https://pwjsonapi.fokke.fi/error-handling): Throw ApiException to return structured error responses with custom status codes and messages.
 
+## Security
+
+- [Authentication & authorization](https://pwjsonapi.fokke.fi/authentication): Protect API endpoints with authentication and authorization at the API, service, or endpoint level.
+
 ## Hooks
 
 - [Request hooks](https://pwjsonapi.fokke.fi/request-hooks): Add before and after hooks at the API, service, or endpoint level for authorization, validation, and response modification.
