@@ -105,6 +105,64 @@ class ApiSearchEndpointResult
   }
 
   /**
+   * Resolve authenticator from the nearest level
+   *
+   * Order: Endpoint → Services (leaf → root) → Api
+   */
+  public function resolveAuthenticator(Api $api): AuthInterface|null
+  {
+    $authenticator = $this->endpoint->_getAuthenticator();
+
+    if ($authenticator !== null) {
+      return $authenticator;
+    }
+
+    foreach (array_reverse($this->serviceSequence) as $service) {
+      $authenticator = $service->_getAuthenticator();
+
+      if ($authenticator !== null) {
+        return $authenticator;
+      }
+    }
+
+    return $api->_getAuthenticator();
+  }
+
+  /**
+   * Resolve authorizers from all levels
+   *
+   * Order: Api → Services (root → leaf) → Endpoint
+   *
+   * @return array<callable(AuthorizeArgs): bool>
+   */
+  public function resolveAuthorizers(Api $api): array
+  {
+    $authorizers = [];
+
+    $apiAuthorizer = $api->_getAuthorizer();
+
+    if ($apiAuthorizer !== null) {
+      $authorizers[] = $apiAuthorizer;
+    }
+
+    foreach ($this->serviceSequence as $service) {
+      $serviceAuthorizer = $service->_getAuthorizer();
+
+      if ($serviceAuthorizer !== null) {
+        $authorizers[] = $serviceAuthorizer;
+      }
+    }
+
+    $endpointAuthorizer = $this->endpoint->_getAuthorizer();
+
+    if ($endpointAuthorizer !== null) {
+      $authorizers[] = $endpointAuthorizer;
+    }
+
+    return $authorizers;
+  }
+
+  /**
    * Resolve onError hooks from result endpoint and all of its services
    *
    * @return callable[]

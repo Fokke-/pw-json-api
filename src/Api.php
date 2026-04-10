@@ -105,6 +105,32 @@ class Api
           );
       }
 
+      // Authenticate
+      $authenticator = $result->resolveAuthenticator($this);
+
+      if ($authenticator !== null) {
+        $authenticateArgs = new AuthenticateArgs();
+        $authenticateArgs->request = $request;
+        $authenticateArgs->event = $event;
+        $authenticator->authenticate($authenticateArgs);
+      }
+
+      // Authorize
+      $authorizers = $result->resolveAuthorizers($this);
+
+      if (!empty($authorizers)) {
+        $authorizeArgs = new AuthorizeArgs();
+        $authorizeArgs->request = $request;
+        $authorizeArgs->user = $this->wire->user;
+        $authorizeArgs->event = $event;
+
+        foreach ($authorizers as $authorizeFn) {
+          if (call_user_func($authorizeFn, $authorizeArgs) !== true) {
+            throw new AuthorizationException();
+          }
+        }
+      }
+
       // Before hooks
       $beforeHooks = [
         // API
