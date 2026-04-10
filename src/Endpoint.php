@@ -12,6 +12,8 @@ class Endpoint
   use Utils;
   use HasRequestHooks;
   use HasPluginList;
+  use HasAuthentication;
+  use HasAuthorization;
   use HasLock;
 
   /**

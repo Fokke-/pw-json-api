@@ -18,6 +18,8 @@ class Api
   use HasRequestHooks;
   use HasApiSearch;
   use HasPluginList;
+  use HasAuthentication;
+  use HasAuthorization;
   use HasWire;
   use HasLock;
 
