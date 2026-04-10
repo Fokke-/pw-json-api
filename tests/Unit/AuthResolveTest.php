@@ -4,7 +4,7 @@ use ProcessWire\{FoodService, FruitService};
 use PwJsonApi\{
   Api,
   AuthenticateArgs,
-  AuthInterface,
+  Authenticator,
   AuthorizeArgs,
   ApiSearchEndpointResult,
   Endpoint,
@@ -25,7 +25,7 @@ test('resolveAuthenticator() returns null when no auth is set', function () {
 
 test('resolveAuthenticator() returns Api authenticator', function () {
   $api = new Api();
-  $auth = new class implements AuthInterface {
+  $auth = new class extends Authenticator {
     public function authenticate(AuthenticateArgs $args): void {}
   };
   $api->authenticate($auth);
@@ -43,12 +43,12 @@ test(
   'resolveAuthenticator() returns Service authenticator over Api',
   function () {
     $api = new Api();
-    $apiAuth = new class implements AuthInterface {
+    $apiAuth = new class extends Authenticator {
       public function authenticate(AuthenticateArgs $args): void {}
     };
     $api->authenticate($apiAuth);
 
-    $serviceAuth = new class implements AuthInterface {
+    $serviceAuth = new class extends Authenticator {
       public function authenticate(AuthenticateArgs $args): void {}
     };
 
@@ -67,15 +67,15 @@ test(
   'resolveAuthenticator() returns Endpoint authenticator over Service and Api',
   function () {
     $api = new Api();
-    $apiAuth = new class implements AuthInterface {
+    $apiAuth = new class extends Authenticator {
       public function authenticate(AuthenticateArgs $args): void {}
     };
     $api->authenticate($apiAuth);
 
-    $serviceAuth = new class implements AuthInterface {
+    $serviceAuth = new class extends Authenticator {
       public function authenticate(AuthenticateArgs $args): void {}
     };
-    $endpointAuth = new class implements AuthInterface {
+    $endpointAuth = new class extends Authenticator {
       public function authenticate(AuthenticateArgs $args): void {}
     };
 
@@ -96,10 +96,10 @@ test(
   function () {
     $api = new Api();
 
-    $parentAuth = new class implements AuthInterface {
+    $parentAuth = new class extends Authenticator {
       public function authenticate(AuthenticateArgs $args): void {}
     };
-    $childAuth = new class implements AuthInterface {
+    $childAuth = new class extends Authenticator {
       public function authenticate(AuthenticateArgs $args): void {}
     };
 

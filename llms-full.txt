@@ -862,7 +862,7 @@ Authentication verifies _who_ the user is. Authorization verifies _what_ the use
 
 ## Authentication
 
-Authentication is configured by passing an `AuthInterface` implementation to the `authenticate()` method. This can be done at three levels: API, service, or endpoint.
+Authentication is configured by passing an `Authenticator` subclass to the `authenticate()` method. This can be done at three levels: API, service, or endpoint.
 
 ```php
 use PwJsonApi\Api;
@@ -878,7 +878,7 @@ When set on a level, **all children inherit it**. If the API instance has an aut
 $api->addService(new PublicService());
 $api->addService(
   new ProtectedService(),
-  fn ($s) => $s->authenticate(new PwAuth()),
+  fn($s) => $s->authenticate(new PwAuth()),
 );
 ```
 
@@ -886,14 +886,14 @@ $api->addService(
 
 If multiple levels define an authenticator, the **closest to the endpoint wins** (endpoint > service > API). Authenticators are not chained.
 
-### The `AuthInterface`
+### The `Authenticator` class
 
-All authenticators implement `AuthInterface`. The `authenticate()` method receives an `AuthenticateArgs` DTO and should throw `AuthenticationException` on failure.
+All authenticators extend the abstract `Authenticator` class. It provides access to the ProcessWire API via `$this->wire` (like `ApiPlugin`). The `authenticate()` method receives an `AuthenticateArgs` DTO and should throw `AuthenticationException` on failure.
 
 ```php
-use PwJsonApi\{AuthenticateArgs, AuthenticationException, AuthInterface};
+use PwJsonApi\{AuthenticateArgs, AuthenticationException, Authenticator};
 
-class PwAuth implements AuthInterface
+class PwAuth extends Authenticator
 {
   public function authenticate(AuthenticateArgs $args): void
   {
@@ -906,10 +906,10 @@ class PwAuth implements AuthInterface
 
 `AuthenticateArgs` contains:
 
-| Property   | Type                      | Description                  |
-| ---------- | ------------------------- | ---------------------------- |
-| `$request` | `Request`                 | The current request          |
-| `$event`   | `ProcessWire\HookEvent`   | ProcessWire URL hook event   |
+| Property   | Type                    | Description                |
+| ---------- | ----------------------- | -------------------------- |
+| `$request` | `Request`               | The current request        |
+| `$event`   | `ProcessWire\HookEvent` | ProcessWire URL hook event |
 
 `AuthenticationException` extends `ApiException` and returns a `401` response.
 
@@ -919,7 +919,7 @@ Authorization is configured by passing a callback to the `authorize()` method. T
 
 ```php
 $service->authorize(
-  static fn (AuthorizeArgs $args) => $args->user->hasRole('editor'),
+  static fn(AuthorizeArgs $args) => $args->user->hasRole('editor'),
 );
 ```
 
@@ -929,14 +929,12 @@ Unlike authentication, **all authorization callbacks in the chain are executed**
 
 ```php
 // API: must be logged in
-$api->authorize(
-  static fn (AuthorizeArgs $args) => $args->user->isLoggedin(),
-);
+$api->authorize(static fn(AuthorizeArgs $args) => $args->user->isLoggedin());
 
 // Service: must have editor role
 $api->addService(new ContentService(), function ($s) {
   $s->authorize(
-    static fn (AuthorizeArgs $args) => $args->user->hasRole('editor'),
+    static fn(AuthorizeArgs $args) => $args->user->hasRole('editor'),
   );
 });
 
@@ -945,11 +943,11 @@ $api->addService(new ContentService(), function ($s) {
 
 ### `AuthorizeArgs`
 
-| Property   | Type                      | Description                  |
-| ---------- | ------------------------- | ---------------------------- |
-| `$request` | `Request`                 | The current request          |
-| `$user`    | `ProcessWire\User`        | The current ProcessWire user |
-| `$event`   | `ProcessWire\HookEvent`   | ProcessWire URL hook event   |
+| Property   | Type                    | Description                  |
+| ---------- | ----------------------- | ---------------------------- |
+| `$request` | `Request`               | The current request          |
+| `$user`    | `ProcessWire\User`      | The current ProcessWire user |
+| `$event`   | `ProcessWire\HookEvent` | ProcessWire URL hook event   |
 
 ## Execution order
 

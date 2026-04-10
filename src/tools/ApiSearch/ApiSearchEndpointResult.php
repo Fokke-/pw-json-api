@@ -109,7 +109,7 @@ class ApiSearchEndpointResult
    *
    * Order: Endpoint → Services (leaf → root) → Api
    */
-  public function resolveAuthenticator(Api $api): AuthInterface|null
+  public function resolveAuthenticator(Api $api): Authenticator|null
   {
     $authenticator = $this->endpoint->_getAuthenticator();
 

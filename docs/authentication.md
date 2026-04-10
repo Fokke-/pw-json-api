@@ -8,7 +8,7 @@ Authentication verifies _who_ the user is. Authorization verifies _what_ the use
 
 ## Authentication
 
-Authentication is configured by passing an `AuthInterface` implementation to the `authenticate()` method. This can be done at three levels: API, service, or endpoint.
+Authentication is configured by passing an `Authenticator` subclass to the `authenticate()` method. This can be done at three levels: API, service, or endpoint.
 
 ```php
 use PwJsonApi\Api;
@@ -32,14 +32,14 @@ $api->addService(
 
 If multiple levels define an authenticator, the **closest to the endpoint wins** (endpoint > service > API). Authenticators are not chained.
 
-### The `AuthInterface`
+### The `Authenticator` class
 
-All authenticators implement `AuthInterface`. The `authenticate()` method receives an `AuthenticateArgs` DTO and should throw `AuthenticationException` on failure.
+All authenticators extend the abstract `Authenticator` class. It provides access to the ProcessWire API via `$this->wire` (like `ApiPlugin`). The `authenticate()` method receives an `AuthenticateArgs` DTO and should throw `AuthenticationException` on failure.
 
 ```php
-use PwJsonApi\{AuthenticateArgs, AuthenticationException, AuthInterface};
+use PwJsonApi\{AuthenticateArgs, AuthenticationException, Authenticator};
 
-class PwAuth implements AuthInterface
+class PwAuth extends Authenticator
 {
   public function authenticate(AuthenticateArgs $args): void
   {

@@ -4,7 +4,7 @@ use ProcessWire\{FoodService, FruitService, WireException};
 use PwJsonApi\{
   Api,
   AuthenticateArgs,
-  AuthInterface,
+  Authenticator,
   AuthenticationException,
   AuthorizationException,
   AuthorizeArgs,
@@ -39,7 +39,7 @@ test('AuthorizationException extends ApiException', function () {
 
 test('authenticate() sets authenticator on Api', function () {
   $api = new Api();
-  $auth = new class implements AuthInterface {
+  $auth = new class extends Authenticator {
     public function authenticate(AuthenticateArgs $args): void {}
   };
 
@@ -50,7 +50,7 @@ test('authenticate() sets authenticator on Api', function () {
 test('authenticate() sets authenticator on Service', function () {
   $service = new FoodService();
   $service->_prepare();
-  $auth = new class implements AuthInterface {
+  $auth = new class extends Authenticator {
     public function authenticate(AuthenticateArgs $args): void {}
   };
 
@@ -60,7 +60,7 @@ test('authenticate() sets authenticator on Service', function () {
 
 test('authenticate() sets authenticator on Endpoint', function () {
   $endpoint = new Endpoint('/test');
-  $auth = new class implements AuthInterface {
+  $auth = new class extends Authenticator {
     public function authenticate(AuthenticateArgs $args): void {}
   };
 
@@ -70,7 +70,7 @@ test('authenticate() sets authenticator on Endpoint', function () {
 
 test('authenticate() returns static for fluent interface', function () {
   $api = new Api();
-  $auth = new class implements AuthInterface {
+  $auth = new class extends Authenticator {
     public function authenticate(AuthenticateArgs $args): void {}
   };
 
@@ -87,7 +87,7 @@ test('locked api rejects authenticate()', function () {
   $api = new Api();
   $api->run();
 
-  $auth = new class implements AuthInterface {
+  $auth = new class extends Authenticator {
     public function authenticate(AuthenticateArgs $args): void {}
   };
 
@@ -100,7 +100,7 @@ test('locked service rejects authenticate()', function () {
   $api->run();
 
   $service = $api->getService('FoodService');
-  $auth = new class implements AuthInterface {
+  $auth = new class extends Authenticator {
     public function authenticate(AuthenticateArgs $args): void {}
   };
 
@@ -113,7 +113,7 @@ test('locked endpoint rejects authenticate()', function () {
   $api->run();
 
   $endpoint = $api->findEndpoint('/fruits');
-  $auth = new class implements AuthInterface {
+  $auth = new class extends Authenticator {
     public function authenticate(AuthenticateArgs $args): void {}
   };
 

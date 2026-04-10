@@ -1,18 +1,15 @@
 <?php namespace ProcessWire;
 
-use PwJsonApi\{AuthenticateArgs, AuthenticationException, AuthInterface};
+use PwJsonApi\{AuthenticateArgs, AuthenticationException, Authenticator};
 
 /**
  * Test authenticator that requires a logged-in ProcessWire user
  */
-class TestAuth implements AuthInterface
+class TestAuth extends Authenticator
 {
   public function authenticate(AuthenticateArgs $args): void
   {
-    /** @var \ProcessWire\ProcessWire */
-    $wire = wire();
-
-    if ($wire->user->isLoggedin() === false) {
+    if ($this->wire->user->isLoggedin() === false) {
       throw new AuthenticationException();
     }
   }
