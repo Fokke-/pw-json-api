@@ -27,6 +27,7 @@ Requires PHP 8.2+, developed in a DDEV environment.
 - **Control structures:** always use braces, no one-liner `if` statements
 - **Array operations:** avoid `array_filter` + `array_map` combos — use `array_reduce` when both filtering and mapping are needed
 - **Callbacks:** use `static fn`/`static function` for callbacks (e.g. `array_reduce`, `array_map`) that don't reference `$this`
+- **Callback arguments:** hooks and other user-facing closures always receive a single DTO object (e.g. `AuthorizeArgs`, `RequestHookReturnBefore`) — never multiple arguments. This ensures extensibility without breaking changes.
 
 ## Architecture
 
@@ -53,7 +54,7 @@ When modifying code, always verify:
 
 ## Git
 
-- **Never commit** — only the developer commits. `git add` is allowed when requested.
+- **Never commit** — only the developer commits. `git add` is allowed when requested. Suggest a commit message when pausing for review.
 - Imperative mood, ~50 chars, no trailing period
 
 ## Multi-step plans

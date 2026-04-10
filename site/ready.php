@@ -139,6 +139,13 @@ if ($page->template->name !== 'admin') {
     ->addService(new DocumentedService())
     ->run();
 
+  // Authentication and authorization
+  (new Api())
+    ->setBasePath('auth-api')
+    ->authenticate(new TestAuth())
+    ->addService(new AuthService())
+    ->run();
+
   // Response headers
   (new Api())
     ->setBasePath('response-headers')
