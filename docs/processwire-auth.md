@@ -22,7 +22,7 @@ $api = new Api();
 
 // Login and logout endpoints (public)
 $api->addService(new ProcessWireAuthService(), function ($service) {
-  // Optional: hook into login to produce side effects
+  // Optional: run code after a successful login
   // $service->findEndpoint('/login')?->hookAfterPost(function ($args) {
   //   $args->user->setAndSave('last_login', time());
   // });
