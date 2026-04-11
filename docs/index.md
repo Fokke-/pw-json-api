@@ -39,6 +39,9 @@ features:
   - icon: 🔧
     title: Built-in Tools
     details: Convert ProcessWire pages into structured data, ready for API responses.
+  - icon: 🤖
+    title: AI-Friendly
+    details: Includes llms-full.txt for AI-assisted development. Feed it to your AI coding assistant to get contextual help while building your API.
   - icon: 🫶
     title: MIT Licensed
     details: Free for commercial use.

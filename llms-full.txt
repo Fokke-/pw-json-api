@@ -30,6 +30,10 @@ Please check that your environment meets the minimum system requirements:
 composer require fokke/pw-json-api
 ```
 
+::: tip AI-assisted development
+The Composer package includes an `llms-full.txt` file with the complete documentation in a single file. Feed it to your AI coding assistant to get contextual help while building your API.
+:::
+
 ## Create your first service
 
 Create a new service file, such as `/site/services/HelloWorldService.php` with the following code:
