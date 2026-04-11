@@ -52,10 +52,11 @@ class PwAuth extends Authenticator
 
 `AuthenticateArgs` contains:
 
-| Property   | Type                    | Description                |
-| ---------- | ----------------------- | -------------------------- |
-| `$request` | `Request`               | The current request        |
-| `$event`   | `ProcessWire\HookEvent` | ProcessWire URL hook event |
+| Property   | Type                    | Description                  |
+| ---------- | ----------------------- | ---------------------------- |
+| `$request` | `Request`               | The current request          |
+| `$user`    | `ProcessWire\User`      | The current ProcessWire user |
+| `$event`   | `ProcessWire\HookEvent` | ProcessWire URL hook event   |
 
 `AuthenticationException` extends `ApiException` and returns a `401` response.
 

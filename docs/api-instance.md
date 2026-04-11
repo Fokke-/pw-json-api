@@ -85,15 +85,16 @@ Due to the nature of ProcessWire URL hooks, exceptions thrown in hook code canno
 
 You can access the following properties via the `$args` parameter of the handler function.
 
-| Property    | Type                     | Description                 |
-| ----------- | ------------------------ | --------------------------- |
-| `exception` | `\Throwable`             | Exception                   |
-| `request`   | `Request`                | [Request object](/requests) |
-| `event`     | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
-| `endpoint`  | `Endpoint`               | Requested endpoint          |
-| `service`   | `Service`                | Requested service           |
-| `services`  | `ServiceList`            | List of all parent services |
-| `api`       | `Api`                    | API instance                |
+| Property    | Type                     | Description                  |
+| ----------- | ------------------------ | ---------------------------- |
+| `exception` | `\Throwable`             | Exception                    |
+| `request`   | `Request`                | [Request object](/requests)  |
+| `user`      | `\ProcessWire\User`      | The current ProcessWire user |
+| `event`     | `\ProcessWire\HookEvent` | ProcessWire URL hook event   |
+| `endpoint`  | `Endpoint`               | Requested endpoint           |
+| `service`   | `Service`                | Requested service            |
+| `services`  | `ServiceList`            | List of all parent services  |
+| `api`       | `Api`                    | API instance                 |
 
 You need to return either a `Response` or an `ApiException` from the handler.
 

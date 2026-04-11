@@ -12,6 +12,9 @@ abstract class RequestHookReturn
   /** Request */
   public Request $request;
 
+  /** ProcessWire user */
+  public \ProcessWire\User $user;
+
   /** ProcessWire URL hook event */
   public \ProcessWire\HookEvent $event;
 

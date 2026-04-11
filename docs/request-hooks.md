@@ -126,14 +126,15 @@ $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
 
 You can access the following properties via the `$args` parameter of the handler function. The following properties are always included:
 
-| Property   | Type                     | Description                 |
-| ---------- | ------------------------ | --------------------------- |
-| `request`  | `Request`                | [Request object](/requests) |
-| `event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
-| `endpoint` | `Endpoint`               | Requested endpoint          |
-| `service`  | `Service`                | Requested service           |
-| `services` | `ServiceList`            | List of all parent services |
-| `api`      | `Api`                    | API instance                |
+| Property   | Type                     | Description                  |
+| ---------- | ------------------------ | ---------------------------- |
+| `request`  | `Request`                | [Request object](/requests)  |
+| `user`     | `\ProcessWire\User`      | The current ProcessWire user |
+| `event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event   |
+| `endpoint` | `Endpoint`               | Requested endpoint           |
+| `service`  | `Service`                | Requested service            |
+| `services` | `ServiceList`            | List of all parent services  |
+| `api`      | `Api`                    | API instance                 |
 
 ### hookBefore\* arguments
 
