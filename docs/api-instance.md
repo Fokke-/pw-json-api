@@ -21,13 +21,23 @@ $api->configure(function ($config) {
   $config->trailingSlashes = null;
 
   // Flags to pass to the json_encode function
+  // (default: JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
   $config->jsonFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+
+  // Optional: pretty-print JSON in debug mode
+  // if (wire()->config->debug) {
+  //   $config->jsonFlags |= JSON_PRETTY_PRINT;
+  // }
 });
 ```
 
 ## Base path
 
 All endpoint paths will be prefixed with the base path. You can set a custom base path with `setBasePath()`. The default value is `/`.
+
+::: warning
+Always set a base path. Without one, endpoint paths may collide with ProcessWire page URLs — in which case the page takes priority and the endpoint becomes unreachable.
+:::
 
 ```php
 $api->setBasePath('/api');

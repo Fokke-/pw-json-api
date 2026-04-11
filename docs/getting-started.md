@@ -50,7 +50,7 @@ use PwJsonApi\Api;
 // Consider auto-loading all the services
 require_once './services/HelloWorldService.php';
 
-// API instance
+// API instance — always set a base path to avoid collisions with PW pages
 $api = new Api();
 $api->setBasePath('/api');
 
