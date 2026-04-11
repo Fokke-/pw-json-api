@@ -2,6 +2,8 @@
 
 ## 2.2.0
 
+This release adds an authentication and authorization layer to the library, with a built-in ProcessWire session authenticator.
+
 ### New features
 
 - Authentication support via `Authenticator` — set an authenticator on API, service, or endpoint level with `authenticate()`
