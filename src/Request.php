@@ -22,7 +22,7 @@ class Request
   public readonly string|null $path;
 
   /**
-   * Route parameters of dynamic paths
+   * Route parameters of dynamic paths — unsanitized user input
    *
    * @var array<string|int, string>
    * @see https://pwjsonapi.fokke.fi/endpoints.html#dynamic-paths
@@ -30,14 +30,14 @@ class Request
   public readonly array $routeParams;
 
   /**
-   * Query parameters
+   * Query parameters — unsanitized user input
    *
    * @var array<string, mixed>
    */
   public readonly array $queryParams;
 
   /**
-   * Headers
+   * Request headers — unsanitized user input
    *
    * @var array<string, string>
    */
@@ -50,7 +50,7 @@ class Request
   public readonly string|null $accept;
 
   /**
-   * Shorthand for $_COOKIE
+   * Cookies — unsanitized user input
    *
    * @var array<string, string>
    */
@@ -59,17 +59,17 @@ class Request
   /** Shorthand for $_SERVER['REMOTE_ADDR'] */
   public readonly string|null $ip;
 
-  /** Shorthand for $_SERVER['HTTP_USER_AGENT'] */
+  /** User agent — unsanitized user input */
   public readonly string|null $userAgent;
 
   /** Shorthand for $_SERVER['SERVER_PROTOCOL'] */
   public readonly string|null $protocol;
 
-  /** Request body */
+  /** Request body — unsanitized user input */
   public readonly mixed $body;
 
   /**
-   * Normalized value of $_FILES
+   * Normalized file uploads — unsanitized user input
    *
    * @var array<string, list<array<string, mixed>>>
    */
@@ -148,7 +148,7 @@ class Request
   }
 
   /**
-   * Get route parameter
+   * Get route parameter — unsanitized user input
    */
   public function routeParam(string $key): string|null
   {
@@ -156,7 +156,7 @@ class Request
   }
 
   /**
-   * Get query parameter
+   * Get query parameter — unsanitized user input
    *
    * @return mixed
    */

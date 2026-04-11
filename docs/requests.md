@@ -30,6 +30,10 @@ Request object can be accessed in callback functions of:
 | `body`        | `mixed`               | Request body                                                       |
 | `files`       | `array`               | Normalized value of `$_FILES`                                      |
 
+::: warning
+Properties like `body`, `queryParams`, `routeParams`, `headers`, `cookies`, and `files` contain raw, unsanitized input from the client. Always sanitize values before using them — for example with ProcessWire's [$sanitizer API](https://processwire.com/api/ref/sanitizer/).
+:::
+
 ### Body
 
 If the request `Content-Type` header is `application/json`, the request body will be parsed from `php://input`. In such cases, the body must be a valid JSON string. If the JSON is malformed, an `ApiException` will be thrown.

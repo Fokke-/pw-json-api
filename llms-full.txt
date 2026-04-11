@@ -486,20 +486,27 @@ $this->addEndpoint('/user')
 
   // Handle POST request
   ->post(function ($args) {
-    // Validate post data etc.
-    // $data = $args->request->body;
+    $body = $args->request->body;
 
-    // If something goes wrong...
-    // throw new ApiException('Snap, crackle and pop!');
+    // Sanitize input
+    $firstName = $this->wire->sanitizer->text($body['first_name'] ?? '');
+    $lastName = $this->wire->sanitizer->text($body['last_name'] ?? '');
 
-    // Save user details
-    // ...
+    // Validate required fields
+    if (empty($firstName)) {
+      throw new ApiException('First name is required.');
+    }
 
-    // Respond with updated data
-    return new Response([
-      'first_name' => 'Jerry',
-      'last_name' => 'Cotton',
-    ]);
+    if (empty($lastName)) {
+      throw new ApiException('Last name is required.');
+    }
+
+    // Save user details...
+
+    return (new Response([
+      'first_name' => $firstName,
+      'last_name' => $lastName,
+    ]))->with(['message' => 'User details saved successfully!']);
   });
 ```
 
@@ -573,6 +580,10 @@ Request object can be accessed in callback functions of:
 | `protocol`    | `string\|null`        | Shorthand for `$_SERVER['SERVER_PROTOCOL']`                        |
 | `body`        | `mixed`               | Request body                                                       |
 | `files`       | `array`               | Normalized value of `$_FILES`                                      |
+
+::: warning
+Properties like `body`, `queryParams`, `routeParams`, `headers`, `cookies`, and `files` contain raw, unsanitized input from the client. Always sanitize values before using them — for example with ProcessWire's [$sanitizer API](https://processwire.com/api/ref/sanitizer/).
+:::
 
 ### Body
 
@@ -1057,11 +1068,11 @@ Authenticates a user with username and password.
 
 **Responses:**
 
-| Status | Description                            |
-| ------ | -------------------------------------- |
-| 200    | Login successful                       |
-| 401    | Invalid credentials                    |
-| 429    | Too many attempts (login throttled)    |
+| Status | Description                         |
+| ------ | ----------------------------------- |
+| 200    | Login successful                    |
+| 401    | Invalid credentials                 |
+| 429    | Too many attempts (login throttled) |
 
 When the `SessionLoginThrottle` module is installed (default in ProcessWire), repeated failed login attempts will result in `429` responses. See [Login throttling](#login-throttling) for important limitations.
 
