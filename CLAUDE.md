@@ -29,6 +29,7 @@ Requires PHP 8.2+, developed in a DDEV environment.
 - **Callbacks:** use `static fn`/`static function` for callbacks (e.g. `array_reduce`, `array_map`) that don't reference `$this`
 - **Callback arguments:** hooks and other user-facing closures always receive a single DTO object (e.g. `AuthorizeArgs`, `RequestHookReturnBefore`) — never multiple arguments. This ensures extensibility without breaking changes.
 - **Documentation code examples:** always use `function` for callbacks — no `fn` arrow functions or `static function`. Keep examples simple and consistent.
+- **Documentation terminology:** use "object" instead of "DTO" when referring to argument objects
 
 ## Architecture
 

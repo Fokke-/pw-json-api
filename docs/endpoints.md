@@ -86,9 +86,9 @@ $this->addEndpoint('/test-request')->get(function ($args) {
 You can use named arguments to allow dynamic paths. Use `$args->request->routeParam()` to access named arguments.
 
 ```php{3}
-$this->addEndpoint('/animals/{product}')->get(function ($args) {
+$this->addEndpoint('/animals/{animal}')->get(function ($args) {
   return new Response([
-    'animal_name' => $args->request->routeParam('product'),
+    'animal_name' => $args->request->routeParam('animal'),
   ]);
 });
 ```

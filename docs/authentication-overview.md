@@ -37,7 +37,7 @@ If multiple levels define an authenticator, the **closest to the endpoint wins**
 
 ### The `Authenticator` class
 
-All authenticators extend the abstract `Authenticator` class. It provides access to the ProcessWire API via `$this->wire` (like `ApiPlugin`). The `authenticate()` method receives an `AuthenticateArgs` DTO and should throw `AuthenticationException` on failure.
+All authenticators extend the abstract `Authenticator` class. It provides access to the ProcessWire API via `$this->wire` (like `ApiPlugin`). The `authenticate()` method receives an `AuthenticateArgs` object and should throw `AuthenticationException` on failure.
 
 ```php
 use PwJsonApi\{AuthenticateArgs, AuthenticationException, Authenticator};
@@ -65,7 +65,7 @@ class ExampleAuth extends Authenticator
 
 ## Authorization
 
-Authorization is configured by passing a callback to the `authorize()` method. The callback receives an `AuthorizeArgs` DTO and returns `bool` — `false` results in a `403` response.
+Authorization is configured by passing a callback to the `authorize()` method. The callback receives an `AuthorizeArgs` object and returns `bool` — `false` results in a `403` response.
 
 ```php
 $service->authorize(function (AuthorizeArgs $args) {
@@ -107,10 +107,9 @@ Authentication and authorization run **before** plugins and request hooks:
 
 1. **Authenticate** — closest authenticator runs
 2. **Authorize** — all authorizers in chain run (API → services → endpoint)
-3. Plugin before hooks
-4. Request before hooks
-5. Endpoint handler
-6. Request after hooks
+3. Before hooks
+4. Endpoint handler
+5. After hooks
 
 ## Exceptions
 
