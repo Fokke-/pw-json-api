@@ -1013,7 +1013,7 @@ $api = new Api();
 
 // Login and logout endpoints (public)
 $api->addService(new ProcessWireAuthService(), function ($service) {
-  // Optional: hook into login to produce side effects
+  // Optional: run code after a successful login
   // $service->findEndpoint('/login')?->hookAfterPost(function ($args) {
   //   $args->user->setAndSave('last_login', time());
   // });
@@ -1087,6 +1087,28 @@ $api->addService(new AdminService(), function ($service) {
   $service->authorize(function (AuthorizeArgs $args) {
     return $args->user->isSuperuser();
   });
+});
+```
+
+## Customizing error responses
+
+Use [error hooks](#error-hooks) to add data to authentication or authorization error responses:
+
+```php
+use PwJsonApi\{AuthenticationException, AuthorizationException};
+
+$api->hookOnError(function ($args) {
+  if ($args->exception instanceof AuthenticationException) {
+    $args->response->with([
+      'message' => 'Please log in to access this resource.',
+    ]);
+  }
+
+  if ($args->exception instanceof AuthorizationException) {
+    $args->response->with([
+      'message' => 'You do not have permission to access this resource.',
+    ]);
+  }
 });
 ```
 

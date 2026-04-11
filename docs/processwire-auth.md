@@ -98,3 +98,25 @@ $api->addService(new AdminService(), function ($service) {
   });
 });
 ```
+
+## Customizing error responses
+
+Use [error hooks](/error-hooks) to add data to authentication or authorization error responses:
+
+```php
+use PwJsonApi\{AuthenticationException, AuthorizationException};
+
+$api->hookOnError(function ($args) {
+  if ($args->exception instanceof AuthenticationException) {
+    $args->response->with([
+      'message' => 'Please log in to access this resource.',
+    ]);
+  }
+
+  if ($args->exception instanceof AuthorizationException) {
+    $args->response->with([
+      'message' => 'You do not have permission to access this resource.',
+    ]);
+  }
+});
+```
