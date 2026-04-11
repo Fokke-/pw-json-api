@@ -30,6 +30,12 @@ features:
   - icon: 📦
     title: Extensible
     details: With multiple API instances, service stacks, hooks and plugins, your API is ready to scale.
+  - icon: 🔒
+    title: Authentication
+    details: Protect endpoints with authentication and authorization. Bring your own authenticator or use the built-in ProcessWire session auth.
+  - icon: 🚨
+    title: Error Handling
+    details: Structured JSON error responses out of the box, with error hooks for logging and custom behavior.
   - icon: 🔧
     title: Built-in Tools
     details: Convert ProcessWire pages into structured data, ready for API responses.
