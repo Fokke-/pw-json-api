@@ -2,7 +2,13 @@
 
 namespace PwJsonApi\Auth;
 
-use PwJsonApi\{AuthenticationException, EndpointHandlerArgs, Response, Service};
+use PwJsonApi\{
+  ApiException,
+  AuthenticationException,
+  EndpointHandlerArgs,
+  Response,
+  Service,
+};
 
 /**
  * Login and logout service for ProcessWire session authentication
@@ -23,8 +29,12 @@ class ProcessWireAuthService extends Service
       $username = $body['username'] ?? '';
       $password = $body['password'] ?? '';
 
-      /** @var \ProcessWire\User|null $user */
-      $user = $this->wire->session->login($username, $password); // @phpstan-ignore arguments.count
+      try {
+        /** @var \ProcessWire\User|null $user */
+        $user = $this->wire->session->login($username, $password); // @phpstan-ignore arguments.count
+      } catch (\ProcessWire\SessionLoginThrottleException $e) {
+        throw (new ApiException(null, $e))->code(429);
+      }
 
       if ($user === null) {
         throw new AuthenticationException();

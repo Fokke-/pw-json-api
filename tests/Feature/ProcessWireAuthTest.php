@@ -32,6 +32,34 @@ test('login with empty body returns 401', function () {
   expect($res->getStatusCode())->toBe(401);
 });
 
+// --- Login throttle ---
+
+test('login throttle returns 429 instead of 500', function () {
+  $client = getHttp('pw-auth-api');
+
+  // Use a unique username to avoid affecting other tests.
+  // Form-encoded body triggers SessionLoginThrottle autoload
+  // (it checks count($_POST) > 0).
+  $username = 'throttle-test-' . time();
+
+  $lastStatus = null;
+  for ($i = 0; $i < 10; $i++) {
+    $res = $client->post('auth/login', [
+      'form_params' => [
+        'username' => $username,
+        'password' => 'wrong',
+      ],
+    ]);
+    $lastStatus = $res->getStatusCode();
+    if ($lastStatus === 429) {
+      break;
+    }
+  }
+
+  // Should eventually be throttled — expect 429, not 500
+  expect($lastStatus)->toBe(429);
+});
+
 // --- Logout ---
 
 test('logout returns 200', function () {

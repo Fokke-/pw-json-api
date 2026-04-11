@@ -55,6 +55,10 @@ When modifying code, always verify:
 - After code changes, check modified files for unused variables and imports — remove them
 - Document new features, bug fixes, and breaking changes in `CHANGELOG.md` under the next version number (determine from git tags — use `git ls-remote --tags origin` and treat existing CHANGELOG entries as unreleased). Use subsections matching existing entries: `### Breaking changes`, `### New features`, `### Bug fixes`. Do not document beta versions in the changelog.
 
+## Communication
+
+- Report unexpected findings during development (e.g. framework quirks, undocumented behavior, edge cases) to the developer — don't silently work around them
+
 ## Git
 
 - **Never commit** — only the developer commits. `git add` is allowed when requested. Suggest a commit message when pausing for review.

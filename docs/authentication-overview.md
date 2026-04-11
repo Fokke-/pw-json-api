@@ -24,9 +24,9 @@ $api->authenticate(new ExampleAuth());
 When set on a level, **all children inherit it**. If the API instance has an authenticator, every service and endpoint under it is protected — there is no way to opt out. If you need both public and protected endpoints, set the authenticator on specific services instead of the API.
 
 ```php
-// Only ProtectedService requires authentication
-$api->addService(new PublicService());
-$api->addService(new ProtectedService(), function ($service) {
+// Only MyProtectedService requires authentication
+$api->addService(new MyPublicService());
+$api->addService(new MyProtectedService(), function ($service) {
   $service->authenticate(new ExampleAuth());
 });
 ```

@@ -10,6 +10,8 @@ A built-in authenticator that uses ProcessWire's session-based authentication. I
 
 `ProcessWireAuth` is the authenticator class. `ProcessWireAuthService` provides login and logout endpoints.
 
+When using session-based authentication, it is recommended to also install the [CSRF plugin](/plugins/csrf) and [Rate Limit plugin](/plugins/rate-limit) on the API instance. The CSRF plugin protects against cross-site request forgery, and the Rate Limit plugin provides brute force protection for all endpoints — including the login endpoint. ProcessWire's built-in `SessionLoginThrottle` [does not activate for JSON requests](#login-throttling).
+
 ::: tip Authentication level
 Set the authenticator on individual services, not on the API instance. The login and logout endpoints must remain publicly accessible — they cannot be behind authentication.
 :::
@@ -17,8 +19,12 @@ Set the authenticator on individual services, not on the API instance. The login
 ```php
 use PwJsonApi\Api;
 use PwJsonApi\Auth\{ProcessWireAuth, ProcessWireAuthService};
+use PwJsonApi\Plugins\{CSRFPlugin, RateLimitPlugin};
 
 $api = new Api();
+
+$api->addPlugin(new CSRFPlugin());
+$api->addPlugin(new RateLimitPlugin());
 
 // Login and logout endpoints (public)
 $api->addService(new ProcessWireAuthService(), function ($service) {
@@ -28,9 +34,14 @@ $api->addService(new ProcessWireAuthService(), function ($service) {
   // });
 });
 
-// Protected service
-$api->addService(new ProtectedService(), function ($service) {
+// Parent service for all protected services (no base path needed)
+$api->addService(new MyProtectedService(), function ($service) {
+  // Require authentication for this service and all its children
   $service->authenticate(new ProcessWireAuth());
+
+  // Child services inherit authentication from the parent
+  $service->addService(new ProductService());
+  $service->addService(new OrderService());
 });
 
 $api->run();
@@ -55,10 +66,13 @@ Authenticates a user with username and password.
 
 **Responses:**
 
-| Status | Description         |
-| ------ | ------------------- |
-| 200    | Login successful    |
-| 401    | Invalid credentials |
+| Status | Description                         |
+| ------ | ----------------------------------- |
+| 200    | Login successful                    |
+| 401    | Invalid credentials                 |
+| 429    | Too many attempts (login throttled) |
+
+When the `SessionLoginThrottle` module is installed (default in ProcessWire), repeated failed login attempts will result in `429` responses. See [Login throttling](#login-throttling) for important limitations.
 
 ### POST /auth/logout
 
@@ -83,6 +97,12 @@ $api->addPlugin(new CSRFPlugin());
 ```
 
 In ProcessWire, every user has a session (including guests), so the CSRF token is always available. When the CSRF plugin is installed, it automatically protects all POST endpoints — including login and logout.
+
+## Login throttling
+
+ProcessWire's `SessionLoginThrottle` module (installed by default) throttles repeated failed login attempts. However, it only activates when the request body is sent as `application/x-www-form-urlencoded` or `multipart/form-data`. Requests with a JSON body — the standard content type for API clients — bypass the throttle entirely.
+
+The [Rate Limit plugin](/plugins/rate-limit) provides reliable rate limiting that works regardless of content type. It is recommended to always install it alongside `ProcessWireAuthService` as shown in the [setup example](#setup).
 
 ## Authorization
 
