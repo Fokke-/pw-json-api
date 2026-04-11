@@ -20,13 +20,14 @@
 - [Responses](https://pwjsonapi.fokke.fi/responses): Return structured JSON responses with custom status codes, headers, and data payloads.
 - [Error handling](https://pwjsonapi.fokke.fi/error-handling): Throw ApiException to return structured error responses with custom status codes and messages.
 
-## Security
+## Authentication
 
-- [Authentication & authorization](https://pwjsonapi.fokke.fi/authentication): Protect API endpoints with authentication and authorization at the API, service, or endpoint level.
+- [Authentication & authorization](https://pwjsonapi.fokke.fi/authentication-overview): Protect API endpoints with authentication and authorization at the API, service, or endpoint level.
+- [ProcessWire authentication](https://pwjsonapi.fokke.fi/processwire-auth): Built-in ProcessWire session authenticator with login and logout endpoints.
 
 ## Hooks
 
-- [Request hooks](https://pwjsonapi.fokke.fi/request-hooks): Add before and after hooks at the API, service, or endpoint level for authorization, validation, and response modification.
+- [Request hooks](https://pwjsonapi.fokke.fi/request-hooks): Add before and after hooks at the API, service, or endpoint level to validate requests and modify responses.
 - [Error hooks](https://pwjsonapi.fokke.fi/error-hooks): Customize error responses with API-level and service-level error hooks when exceptions are thrown.
 
 ## Plugins

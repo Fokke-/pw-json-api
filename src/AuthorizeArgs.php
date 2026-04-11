@@ -5,7 +5,7 @@ namespace PwJsonApi;
 /**
  * Authorization handler arguments
  *
- * @see https://pwjsonapi.fokke.fi/authentication.html#authorization
+ * @see https://pwjsonapi.fokke.fi/authentication-overview.html#authorization
  */
 class AuthorizeArgs
 {

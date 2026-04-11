@@ -28,6 +28,7 @@ Requires PHP 8.2+, developed in a DDEV environment.
 - **Array operations:** avoid `array_filter` + `array_map` combos — use `array_reduce` when both filtering and mapping are needed
 - **Callbacks:** use `static fn`/`static function` for callbacks (e.g. `array_reduce`, `array_map`) that don't reference `$this`
 - **Callback arguments:** hooks and other user-facing closures always receive a single DTO object (e.g. `AuthorizeArgs`, `RequestHookReturnBefore`) — never multiple arguments. This ensures extensibility without breaking changes.
+- **Documentation code examples:** always use `function` for callbacks — no `fn` arrow functions or `static function`. Keep examples simple and consistent.
 
 ## Architecture
 
@@ -50,6 +51,7 @@ When modifying code, always verify:
 - Each documentation page has a frontmatter `description` — a short, concise meta description for SEO
 - When renaming a documentation file (which changes its URL), check all `docs/` files and `src/` `@see` links for references to the old path
 - If the feature is not documented at all, ask the developer whether to add it
+- After code changes, check modified files for unused variables and imports — remove them
 - Document new features, bug fixes, and breaking changes in `CHANGELOG.md` under the next version number (determine from git tags — use `git ls-remote --tags origin` and treat existing CHANGELOG entries as unreleased). Use subsections matching existing entries: `### Breaking changes`, `### New features`, `### Bug fixes`. Do not document beta versions in the changelog.
 
 ## Git

@@ -2,9 +2,13 @@
 description: 'Protect API endpoints with authentication and authorization at the API, service, or endpoint level.'
 ---
 
-# Authentication & authorization
+# Authentication & authorization <Badge type="tip" text="^2.2" />
 
 Authentication verifies _who_ the user is. Authorization verifies _what_ the user is allowed to do. These are two independent mechanisms — you can use either or both.
+
+::: tip Looking for a ready-made solution?
+See [ProcessWire authentication](/processwire-auth) for a built-in authenticator and login/logout service that uses ProcessWire's session system.
+:::
 
 ## Authentication
 
@@ -14,7 +18,7 @@ Authentication is configured by passing an `Authenticator` subclass to the `auth
 use PwJsonApi\Api;
 
 $api = new Api();
-$api->authenticate(new PwAuth());
+$api->authenticate(new ExampleAuth());
 ```
 
 When set on a level, **all children inherit it**. If the API instance has an authenticator, every service and endpoint under it is protected — there is no way to opt out. If you need both public and protected endpoints, set the authenticator on specific services instead of the API.
@@ -22,10 +26,9 @@ When set on a level, **all children inherit it**. If the API instance has an aut
 ```php
 // Only ProtectedService requires authentication
 $api->addService(new PublicService());
-$api->addService(
-  new ProtectedService(),
-  fn($s) => $s->authenticate(new PwAuth()),
-);
+$api->addService(new ProtectedService(), function ($service) {
+  $service->authenticate(new ExampleAuth());
+});
 ```
 
 ### Closest level wins
@@ -39,7 +42,7 @@ All authenticators extend the abstract `Authenticator` class. It provides access
 ```php
 use PwJsonApi\{AuthenticateArgs, AuthenticationException, Authenticator};
 
-class PwAuth extends Authenticator
+class ExampleAuth extends Authenticator
 {
   public function authenticate(AuthenticateArgs $args): void
   {
@@ -65,9 +68,9 @@ class PwAuth extends Authenticator
 Authorization is configured by passing a callback to the `authorize()` method. The callback receives an `AuthorizeArgs` DTO and returns `bool` — `false` results in a `403` response.
 
 ```php
-$service->authorize(
-  static fn(AuthorizeArgs $args) => $args->user->hasRole('editor'),
-);
+$service->authorize(function (AuthorizeArgs $args) {
+  return $args->user->hasRole('editor');
+});
 ```
 
 ### Authorization is chained
@@ -76,13 +79,15 @@ Unlike authentication, **all authorization callbacks in the chain are executed**
 
 ```php
 // API: must be logged in
-$api->authorize(static fn(AuthorizeArgs $args) => $args->user->isLoggedin());
+$api->authorize(function (AuthorizeArgs $args) {
+  return $args->user->isLoggedin();
+});
 
 // Service: must have editor role
-$api->addService(new ContentService(), function ($s) {
-  $s->authorize(
-    static fn(AuthorizeArgs $args) => $args->user->hasRole('editor'),
-  );
+$api->addService(new ContentService(), function ($service) {
+  $service->authorize(function (AuthorizeArgs $args) {
+    return $args->user->hasRole('editor');
+  });
 });
 
 // Both callbacks run: first API, then service

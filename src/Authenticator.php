@@ -7,7 +7,7 @@ use function ProcessWire\wire;
 /**
  * Base class for authenticators
  *
- * @see https://pwjsonapi.fokke.fi/authentication.html
+ * @see https://pwjsonapi.fokke.fi/authentication-overview.html
  */
 abstract class Authenticator
 {

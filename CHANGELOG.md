@@ -8,6 +8,7 @@
 - Authorization support via `authorize()` callback — chain authorization checks across API → services → endpoint
 - New `AuthenticationException` (401) and `AuthorizationException` (403) exception classes
 - `$user` property added to all argument DTOs (`AuthenticateArgs`, `EndpointHandlerArgs`, `RequestHookReturn`, `ExceptionHandlerArgs`)
+- Built-in `ProcessWireAuth` authenticator and `ProcessWireAuthService` with login/logout endpoints
 
 ## 2.1.2
 
