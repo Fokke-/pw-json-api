@@ -532,7 +532,7 @@ $this->addEndpoint('/test-request')->get(function ($args) {
 
 ## Dynamic paths
 
-You can use named arguments to allow dynamic paths. Use `$args->request->routeParam()` to access named arguments.
+You can use named arguments to allow dynamic paths. Use `$args->request->routeParam()` to access named arguments. Endpoint paths support all features provided by [ProcessWire URL path hooks](https://processwire.com/blog/posts/pw-3.0.173/#introducing-url-path-hooks), including optional segments and regex constraints.
 
 ```php{3}
 $this->addEndpoint('/animals/{animal}')->get(function ($args) {
