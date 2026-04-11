@@ -484,8 +484,8 @@ $this->addEndpoint('/user')
     ]);
   })
 
-  // Handle POST request
-  ->post(function ($args) {
+  // Handle PUT request
+  ->put(function ($args) {
     $body = $args->request->body;
 
     // Sanitize input
@@ -503,6 +503,7 @@ $this->addEndpoint('/user')
 
     // Save user details...
 
+    // Respond with updated data
     return (new Response([
       'first_name' => $firstName,
       'last_name' => $lastName,

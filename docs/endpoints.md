@@ -43,22 +43,30 @@ $this->addEndpoint('/user')
     ]);
   })
 
-  // Handle POST request
-  ->post(function ($args) {
-    // Validate post data etc.
-    // $data = $args->request->body;
+  // Handle PUT request
+  ->put(function ($args) {
+    $body = $args->request->body;
 
-    // If something goes wrong...
-    // throw new ApiException('Snap, crackle and pop!');
+    // Sanitize input
+    $firstName = $this->wire->sanitizer->text($body['first_name'] ?? '');
+    $lastName = $this->wire->sanitizer->text($body['last_name'] ?? '');
 
-    // Save user details
-    // ...
+    // Validate required fields
+    if (empty($firstName)) {
+      throw new ApiException('First name is required.');
+    }
+
+    if (empty($lastName)) {
+      throw new ApiException('Last name is required.');
+    }
+
+    // Save user details...
 
     // Respond with updated data
-    return new Response([
-      'first_name' => 'Jerry',
-      'last_name' => 'Cotton',
-    ]);
+    return (new Response([
+      'first_name' => $firstName,
+      'last_name' => $lastName,
+    ]))->with(['message' => 'User details saved successfully!']);
   });
 ```
 
