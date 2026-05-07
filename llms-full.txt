@@ -630,6 +630,15 @@ Get query parameter. If parameter is not found, `null` is returned.
 $request->queryParam('product');
 ```
 
+### header()
+
+Get a header value by name. The lookup is case-insensitive per [RFC 7230](https://www.rfc-editor.org/rfc/rfc7230#section-3.2). Returns `null` if not found.
+
+```php
+$request->header('Content-Type');
+$request->header('x-custom-header');
+```
+
 ### toArray()
 
 Return all request properties as an associative array.
