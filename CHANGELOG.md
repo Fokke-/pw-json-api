@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 2.2.0
+
+### New features
+
+- New `header()` method on `Request` for case-insensitive header lookup
+
+### Bug fixes
+
+- Fixed `contentType` and `accept` properties not being populated when headers are returned in lowercase (e.g. nginx + php-fpm environments)
+
 ## 2.1.2
 
 ### Bug fixes

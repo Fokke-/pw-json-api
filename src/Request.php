@@ -82,8 +82,8 @@ class Request
     $this->path = $this->getPath($this->getServerVar('REQUEST_URI'));
     $this->queryParams = $this->getQueryParams();
     $this->headers = $this->getHeaders();
-    $this->contentType = $this->headers['Content-Type'] ?? null;
-    $this->accept = $this->headers['Accept'] ?? null;
+    $this->contentType = $this->header('Content-Type');
+    $this->accept = $this->header('Accept');
     $this->cookies = $this->getCookies();
     $this->ip = $this->getServerVar('REMOTE_ADDR');
     $this->userAgent = $this->getServerVar('HTTP_USER_AGENT');
@@ -174,6 +174,20 @@ class Request
   {
     $headers = function_exists('getallheaders') ? getallheaders() : [];
     return array_filter($headers, static fn($val) => is_string($val));
+  }
+
+  /**
+   * Get a header value by name (case-insensitive)
+   */
+  public function header(string $name): string|null
+  {
+    $lower = strtolower($name);
+    foreach ($this->headers as $key => $value) {
+      if (strtolower($key) === $lower) {
+        return $value;
+      }
+    }
+    return null;
   }
 
   /**
