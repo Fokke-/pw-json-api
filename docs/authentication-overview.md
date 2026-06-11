@@ -2,7 +2,7 @@
 description: 'Protect API endpoints with authentication and authorization at the API, service, or endpoint level.'
 ---
 
-# Authentication & authorization <Badge type="tip" text="^2.2" />
+# Authentication & authorization <Badge type="tip" text="^2.3" />
 
 Authentication verifies _who_ the user is. Authorization verifies _what_ the user is allowed to do. These are two independent mechanisms — you can use either or both.
 

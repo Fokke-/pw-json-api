@@ -2,7 +2,7 @@
 description: 'Built-in ProcessWire session authenticator with login and logout endpoints.'
 ---
 
-# ProcessWire authentication <Badge type="tip" text="^2.2" />
+# ProcessWire authentication <Badge type="tip" text="^2.3" />
 
 A built-in authenticator that uses ProcessWire's session-based authentication. It checks whether the current user is logged in via `$user->isLoggedin()`.
 
