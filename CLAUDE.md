@@ -42,6 +42,10 @@ Requires PHP 8.2+, developed in a DDEV environment.
 - Unit tests: `tests/Unit/`, feature tests: `tests/Feature/`
 - Test helpers: `tests/Pest.php`
 
+## Development model
+
+- **TDD** — write a failing test first, then implement the fix/feature to make it pass
+
 ## Workflow checklist
 
 When modifying code, always verify:

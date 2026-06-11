@@ -29,6 +29,10 @@ class ProcessWireAuthService extends Service
       $username = $body['username'] ?? '';
       $password = $body['password'] ?? '';
 
+      // Ensure SessionLoginThrottle is loaded so its hooks are
+      // registered regardless of $_POST content.
+      $this->wire->modules->get('SessionLoginThrottle');
+
       try {
         /** @var \ProcessWire\User|null $user */
         $user = $this->wire->session->login($username, $password); // @phpstan-ignore arguments.count

@@ -1,5 +1,11 @@
 <?php
 
+use function ProcessWire\wire;
+
+beforeEach(function () {
+  wire()->database->exec('TRUNCATE TABLE session_login_throttle');
+});
+
 // --- Login ---
 
 test('login with valid credentials returns 200', function () {
@@ -34,21 +40,14 @@ test('login with empty body returns 401', function () {
 
 // --- Login throttle ---
 
-test('login throttle returns 429 instead of 500', function () {
+test('login throttle activates with JSON body', function () {
   $client = getHttp('pw-auth-api');
-
-  // Use a unique username to avoid affecting other tests.
-  // Form-encoded body triggers SessionLoginThrottle autoload
-  // (it checks count($_POST) > 0).
-  $username = 'throttle-test-' . time();
+  $username = 'throttle-json-' . time();
 
   $lastStatus = null;
   for ($i = 0; $i < 10; $i++) {
     $res = $client->post('auth/login', [
-      'form_params' => [
-        'username' => $username,
-        'password' => 'wrong',
-      ],
+      'json' => ['username' => $username, 'password' => 'wrong'],
     ]);
     $lastStatus = $res->getStatusCode();
     if ($lastStatus === 429) {
@@ -56,7 +55,24 @@ test('login throttle returns 429 instead of 500', function () {
     }
   }
 
-  // Should eventually be throttled — expect 429, not 500
+  expect($lastStatus)->toBe(429);
+});
+
+test('login throttle activates with form-encoded body', function () {
+  $client = getHttp('pw-auth-api');
+  $username = 'throttle-form-' . time();
+
+  $lastStatus = null;
+  for ($i = 0; $i < 10; $i++) {
+    $res = $client->post('auth/login', [
+      'form_params' => ['username' => $username, 'password' => 'wrong'],
+    ]);
+    $lastStatus = $res->getStatusCode();
+    if ($lastStatus === 429) {
+      break;
+    }
+  }
+
   expect($lastStatus)->toBe(429);
 });
 
