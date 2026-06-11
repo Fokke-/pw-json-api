@@ -26,24 +26,38 @@ $api = new Api();
 $api->addPlugin(new CSRFPlugin());
 
 // Login and logout endpoints (public)
-$api->addService(new ProcessWireAuthService(), function ($service) {
-  // Optional: run code after a successful login
-  // $service->findEndpoint('/login')?->hookAfterPost(function ($args) {
-  //   $args->user->setAndSave('last_login', time());
-  // });
-});
+$api->addService(new ProcessWireAuthService());
 
-// Parent service for all protected services (no base path needed)
-$api->addService(new MyProtectedService(), function ($service) {
-  // Require authentication for this service and all its children
-  $service->authenticate(new ProcessWireAuth());
-
-  // Child services inherit authentication from the parent
-  $service->addService(new ProductService());
-  $service->addService(new OrderService());
-});
+// This protected service requires authentication
+$api->addService(new MyProtectedService());
 
 $api->run();
+```
+
+`MyProtectedService` configures authentication in its `init()` method:
+
+```php
+use PwJsonApi\Auth\ProcessWireAuth;
+use PwJsonApi\{Response, Service};
+
+class MyProtectedService extends Service
+{
+  protected function init()
+  {
+    // Require authentication for this service
+    $this->authenticate(new ProcessWireAuth());
+
+    $this->addEndpoint('/me')->get(function ($args) {
+      return new Response([
+        'name' => $args->user->name,
+      ]);
+    });
+
+    // Child services inherit authentication
+    $this->addService(new ProductService());
+    $this->addService(new OrderService());
+  }
+}
 ```
 
 ## Endpoints
@@ -71,7 +85,7 @@ Authenticates a user with username and password.
 | 401    | Invalid credentials                 |
 | 429    | Too many attempts (login throttled) |
 
-When the `SessionLoginThrottle` module is installed (default in ProcessWire), repeated failed login attempts will result in `429` responses. See [Login throttling](#login-throttling) for important limitations.
+When the `SessionLoginThrottle` module is installed (default in ProcessWire), repeated failed login attempts will result in `429` responses. See [Login throttling](#login-throttling).
 
 ### POST /auth/logout
 

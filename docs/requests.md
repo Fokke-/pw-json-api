@@ -13,6 +13,10 @@ Request object can be accessed in callback functions of:
 
 ## Request properties
 
+::: warning
+Properties like `body`, `queryParams`, `routeParams`, `headers`, `cookies`, and `files` contain **raw, unsanitized input from the client**. Always sanitize values before using them — for example with ProcessWire's [$sanitizer API](https://processwire.com/api/ref/sanitizer/).
+:::
+
 | Property      | Type                  | Description                                                        |
 | ------------- | --------------------- | ------------------------------------------------------------------ |
 | `method`      | `string`              | Request method                                                     |
@@ -29,10 +33,6 @@ Request object can be accessed in callback functions of:
 | `protocol`    | `string\|null`        | Shorthand for `$_SERVER['SERVER_PROTOCOL']`                        |
 | `body`        | `mixed`               | Request body                                                       |
 | `files`       | `array`               | Normalized value of `$_FILES`                                      |
-
-::: warning
-Properties like `body`, `queryParams`, `routeParams`, `headers`, `cookies`, and `files` contain raw, unsanitized input from the client. Always sanitize values before using them — for example with ProcessWire's [$sanitizer API](https://processwire.com/api/ref/sanitizer/).
-:::
 
 ### Body
 
