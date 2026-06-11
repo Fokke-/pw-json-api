@@ -1,10 +1,10 @@
 ---
-description: 'Add before and after hooks at the API, service, or endpoint level for authorization, validation, and response modification.'
+description: 'Add before and after hooks at the API, service, or endpoint level to validate requests and modify responses.'
 ---
 
 # Request hooks
 
-Request hooks can be used to modify the behavior of endpoints. The most common use cases are to check for authorization before the request is handled, or to modify response data after the request has been handled. For these purposes, [hook arguments](#hook-arguments) will be passed to the hook handler functions.
+Request hooks can be used to modify the behavior of endpoints. The most common use cases are to validate or modify requests before they are handled, or to modify response data after the request has been handled. For these purposes, [hook arguments](#hook-arguments) will be passed to the hook handler functions.
 
 The examples below use the `hookBefore()` and `hookAfter()` methods, which apply to any request method. There are also [request type-specific hooks](#hook-methods-reference) available.
 
@@ -14,17 +14,19 @@ The examples below use the `hookBefore()` and `hookAfter()` methods, which apply
 
 Defined for the whole API instance. These hooks will apply to all endpoints.
 
-```php
-// Simple auth check for all requests, with any request method
-$api->hookBefore(function ($args) {
-  if ($this->wire->user->isLoggedin() === false) {
-    throw (new ApiException())->code(401)->with([
-      'login_url' => 'https://example.com/login',
-    ]);
-  }
+::: tip
+For authentication and authorization, consider using the dedicated [`authenticate()`](/authentication-overview) and [`authorize()`](/authentication-overview#authorization) methods instead of hooks.
+:::
 
-  if ($this->wire->user->hasRole('rabbit') === false) {
-    throw (new ApiException())->code(403);
+```php
+// Require JSON content type for POST requests
+$api->hookBeforePost(function ($args) {
+  $contentType = $args->event->request->getHeader('Content-Type');
+
+  if (str_contains($contentType, 'application/json') === false) {
+    throw (new ApiException('Content-Type must be application/json'))->code(
+      415,
+    );
   }
 });
 
@@ -122,14 +124,15 @@ $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
 
 You can access the following properties via the `$args` parameter of the handler function. The following properties are always included:
 
-| Property   | Type                     | Description                 |
-| ---------- | ------------------------ | --------------------------- |
-| `request`  | `Request`                | [Request object](/requests) |
-| `event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
-| `endpoint` | `Endpoint`               | Requested endpoint          |
-| `service`  | `Service`                | Requested service           |
-| `services` | `ServiceList`            | List of all parent services |
-| `api`      | `Api`                    | API instance                |
+| Property   | Type                     | Description                  |
+| ---------- | ------------------------ | ---------------------------- |
+| `request`  | `Request`                | [Request object](/requests)  |
+| `user`     | `\ProcessWire\User`      | The current ProcessWire user |
+| `event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event   |
+| `endpoint` | `Endpoint`               | Requested endpoint           |
+| `service`  | `Service`                | Requested service            |
+| `services` | `ServiceList`            | List of all parent services  |
+| `api`      | `Api`                    | API instance                 |
 
 ### hookBefore\* arguments
 

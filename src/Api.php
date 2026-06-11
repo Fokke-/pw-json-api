@@ -18,6 +18,8 @@ class Api
   use HasRequestHooks;
   use HasApiSearch;
   use HasPluginList;
+  use HasAuthentication;
+  use HasAuthorization;
   use HasWire;
   use HasLock;
 
@@ -103,6 +105,33 @@ class Api
           );
       }
 
+      // Authenticate
+      $authenticator = $result->resolveAuthenticator($this);
+
+      if ($authenticator !== null) {
+        $authenticateArgs = new AuthenticateArgs();
+        $authenticateArgs->request = $request;
+        $authenticateArgs->user = $this->wire->user;
+        $authenticateArgs->event = $event;
+        $authenticator->authenticate($authenticateArgs);
+      }
+
+      // Authorize
+      $authorizers = $result->resolveAuthorizers($this);
+
+      if (!empty($authorizers)) {
+        $authorizeArgs = new AuthorizeArgs();
+        $authorizeArgs->request = $request;
+        $authorizeArgs->user = $this->wire->user;
+        $authorizeArgs->event = $event;
+
+        foreach ($authorizers as $authorizeFn) {
+          if (call_user_func($authorizeFn, $authorizeArgs) !== true) {
+            throw new AuthorizationException();
+          }
+        }
+      }
+
       // Before hooks
       $beforeHooks = [
         // API
@@ -118,6 +147,7 @@ class Api
       if (!empty($beforeHooks)) {
         $hookReturnBefore = new RequestHookReturnBefore();
         $hookReturnBefore->request = $request;
+        $hookReturnBefore->user = $this->wire->user;
         $hookReturnBefore->event = $event;
         $hookReturnBefore->handler = $handler;
         $hookReturnBefore->endpoint = $result->endpoint;
@@ -136,6 +166,7 @@ class Api
       try {
         $handlerArgs = new EndpointHandlerArgs();
         $handlerArgs->request = $request;
+        $handlerArgs->user = $this->wire->user;
         $handlerArgs->event = $event;
 
         $response = call_user_func($handler, $handlerArgs);
@@ -157,6 +188,7 @@ class Api
           $exceptionHandlerArgs = new ExceptionHandlerArgs();
           $exceptionHandlerArgs->exception = $e;
           $exceptionHandlerArgs->request = $request;
+          $exceptionHandlerArgs->user = $this->wire->user;
           $exceptionHandlerArgs->event = $event;
           $exceptionHandlerArgs->endpoint = $result->endpoint;
           $exceptionHandlerArgs->service = $result->service;
@@ -195,6 +227,7 @@ class Api
       if (!empty($afterHooks)) {
         $hookReturnAfter = new RequestHookReturnAfter();
         $hookReturnAfter->request = $request;
+        $hookReturnAfter->user = $this->wire->user;
         $hookReturnAfter->event = $event;
         $hookReturnAfter->response = $response;
         $hookReturnAfter->endpoint = $result->endpoint;
@@ -219,6 +252,7 @@ class Api
       if (!empty($errorHooks)) {
         $hookReturnError = new ErrorHookReturn();
         $hookReturnError->request = $request;
+        $hookReturnError->user = $this->wire->user;
         $hookReturnError->event = $event;
         $hookReturnError->endpoint = $result->endpoint;
         $hookReturnError->service = $result->service;

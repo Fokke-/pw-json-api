@@ -43,22 +43,30 @@ $this->addEndpoint('/user')
     ]);
   })
 
-  // Handle POST request
-  ->post(function ($args) {
-    // Validate post data etc.
-    // $data = $args->request->body;
+  // Handle PUT request
+  ->put(function ($args) {
+    $body = $args->request->body;
 
-    // If something goes wrong...
-    // throw new ApiException('Snap, crackle and pop!');
+    // Sanitize input
+    $firstName = $this->wire->sanitizer->text($body['first_name'] ?? '');
+    $lastName = $this->wire->sanitizer->text($body['last_name'] ?? '');
 
-    // Save user details
-    // ...
+    // Validate required fields
+    if (empty($firstName)) {
+      throw new ApiException('First name is required.');
+    }
+
+    if (empty($lastName)) {
+      throw new ApiException('Last name is required.');
+    }
+
+    // Save user details...
 
     // Respond with updated data
-    return new Response([
-      'first_name' => 'Jerry',
-      'last_name' => 'Cotton',
-    ]);
+    return (new Response([
+      'first_name' => $firstName,
+      'last_name' => $lastName,
+    ]))->with(['message' => 'User details saved successfully!']);
   });
 ```
 
@@ -66,10 +74,11 @@ $this->addEndpoint('/user')
 
 You can access the following properties via the `$args` parameter of the handler function.
 
-| Property  | Type                     | Description                 |
-| --------- | ------------------------ | --------------------------- |
-| `request` | `Request`                | [Request object](/requests) |
-| `event`   | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
+| Property  | Type                     | Description                  |
+| --------- | ------------------------ | ---------------------------- |
+| `request` | `Request`                | [Request object](/requests)  |
+| `user`    | `\ProcessWire\User`      | The current ProcessWire user |
+| `event`   | `\ProcessWire\HookEvent` | ProcessWire URL hook event   |
 
 ```php{1}
 $this->addEndpoint('/test-request')->get(function ($args) {
@@ -82,22 +91,22 @@ $this->addEndpoint('/test-request')->get(function ($args) {
 
 ## Dynamic paths
 
-You can use named arguments to allow dynamic paths. Use `$args->request->routeParam()` to access named arguments.
+You can use named arguments to allow dynamic paths. Use `$args->request->routeParam()` to access named arguments. Endpoint paths support all features provided by [ProcessWire URL path hooks](https://processwire.com/blog/posts/pw-3.0.173/#introducing-url-path-hooks), including optional segments and regex constraints.
 
 ```php{3}
-$this->addEndpoint('/products/{product}')->get(function ($args) {
+$this->addEndpoint('/animals/{animal}')->get(function ($args) {
   return new Response([
-    'product_name' => $args->request->routeParam('product'),
+    'animal_name' => $args->request->routeParam('animal'),
   ]);
 });
 ```
 
-Querying `/products/bunny-rabbit` results in a following JSON:
+Querying `/animals/bunny-rabbit` results in a following JSON:
 
 ```json
 {
   "data": {
-    "product_name": "bunny-rabbit"
+    "animal_name": "bunny-rabbit"
   }
 }
 ```

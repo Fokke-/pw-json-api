@@ -8,6 +8,7 @@ test('before hook arguments', function () {
   expect($json['before_hook_args'])->toBe([
     'type' => 'PwJsonApi\\RequestHookReturnBefore',
     'request' => 'PwJsonApi\\Request',
+    'user' => 'ProcessWire\\User',
     'endpoint' => 'PwJsonApi\\Endpoint',
     'service' => 'ProcessWire\\HooksService',
     'services' => 'PwJsonApi\\ServiceList',
@@ -24,6 +25,7 @@ test('after hook arguments', function () {
   expect($json['after_hook_args'])->toBe([
     'type' => 'PwJsonApi\\RequestHookReturnAfter',
     'request' => 'PwJsonApi\\Request',
+    'user' => 'ProcessWire\\User',
     'endpoint' => 'PwJsonApi\\Endpoint',
     'service' => 'ProcessWire\\HooksService',
     'services' => 'PwJsonApi\\ServiceList',
@@ -121,6 +123,7 @@ test('error hook arguments', function () {
   expect($json['error_hook_args'])->toBe([
     'type' => 'PwJsonApi\\ErrorHookReturn',
     'request' => 'PwJsonApi\\Request',
+    'user' => 'ProcessWire\\User',
     'response' => 'PwJsonApi\\Response',
     'endpoint' => 'PwJsonApi\\Endpoint',
     'service' => 'ProcessWire\\ExceptionService',

@@ -5,6 +5,15 @@
 {
   "hard_tabs": false,
   "format_on_save": "on",
+  "lsp": {
+    "intelephense": {
+      "settings": {
+        "files": {
+          "associations": ["*.php", "*.module"]
+        }
+      }
+    }
+  },
   "languages": {
     "PHP": {
       "show_edit_predictions": true,

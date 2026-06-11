@@ -97,13 +97,14 @@ $api->findEndpoint('/api/hello-world')?->hookOnError(function ($args) {
 
 You can access the following properties via the `$args` parameter of the handler function.
 
-| Property    | Type                     | Description                 |
-| ----------- | ------------------------ | --------------------------- |
-| `exception` | `ApiException`           | The thrown exception        |
-| `response`  | `Response`               | Error Response object       |
-| `request`   | `Request`                | [Request object](/requests) |
-| `event`     | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
-| `endpoint`  | `Endpoint`               | Requested endpoint          |
-| `service`   | `Service`                | Requested service           |
-| `services`  | `ServiceList`            | List of all parent services |
-| `api`       | `Api`                    | API instance                |
+| Property    | Type                     | Description                  |
+| ----------- | ------------------------ | ---------------------------- |
+| `exception` | `ApiException`           | The thrown exception         |
+| `response`  | `Response`               | Error Response object        |
+| `request`   | `Request`                | [Request object](/requests)  |
+| `user`      | `\ProcessWire\User`      | The current ProcessWire user |
+| `event`     | `\ProcessWire\HookEvent` | ProcessWire URL hook event   |
+| `endpoint`  | `Endpoint`               | Requested endpoint           |
+| `service`   | `Service`                | Requested service            |
+| `services`  | `ServiceList`            | List of all parent services  |
+| `api`       | `Api`                    | API instance                 |

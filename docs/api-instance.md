@@ -21,13 +21,23 @@ $api->configure(function ($config) {
   $config->trailingSlashes = null;
 
   // Flags to pass to the json_encode function
+  // (default: JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
   $config->jsonFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+
+  // Optional: pretty-print JSON in debug mode
+  // if (wire()->config->debug) {
+  //   $config->jsonFlags |= JSON_PRETTY_PRINT;
+  // }
 });
 ```
 
 ## Base path
 
 All endpoint paths will be prefixed with the base path. You can set a custom base path with `setBasePath()`. The default value is `/`.
+
+::: warning
+Always set a base path. Without one, endpoint paths may collide with ProcessWire page URLs — in which case the page takes priority and the endpoint becomes unreachable.
+:::
 
 ```php
 $api->setBasePath('/api');
@@ -85,15 +95,16 @@ Due to the nature of ProcessWire URL hooks, exceptions thrown in hook code canno
 
 You can access the following properties via the `$args` parameter of the handler function.
 
-| Property    | Type                     | Description                 |
-| ----------- | ------------------------ | --------------------------- |
-| `exception` | `\Throwable`             | Exception                   |
-| `request`   | `Request`                | [Request object](/requests) |
-| `event`     | `\ProcessWire\HookEvent` | ProcessWire URL hook event  |
-| `endpoint`  | `Endpoint`               | Requested endpoint          |
-| `service`   | `Service`                | Requested service           |
-| `services`  | `ServiceList`            | List of all parent services |
-| `api`       | `Api`                    | API instance                |
+| Property    | Type                     | Description                  |
+| ----------- | ------------------------ | ---------------------------- |
+| `exception` | `\Throwable`             | Exception                    |
+| `request`   | `Request`                | [Request object](/requests)  |
+| `user`      | `\ProcessWire\User`      | The current ProcessWire user |
+| `event`     | `\ProcessWire\HookEvent` | ProcessWire URL hook event   |
+| `endpoint`  | `Endpoint`               | Requested endpoint           |
+| `service`   | `Service`                | Requested service            |
+| `services`  | `ServiceList`            | List of all parent services  |
+| `api`       | `Api`                    | API instance                 |
 
 You need to return either a `Response` or an `ApiException` from the handler.
 

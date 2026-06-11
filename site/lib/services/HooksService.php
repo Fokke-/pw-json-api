@@ -33,6 +33,7 @@ class HooksService extends Service
       self::$beforeArgs = [
         'type' => get_class($beforeArgs),
         'request' => get_class($beforeArgs->request),
+        'user' => get_class($beforeArgs->user),
         'endpoint' => get_class($beforeArgs->endpoint),
         'service' => get_class($beforeArgs->service),
         'services' => get_class($beforeArgs->services),
@@ -61,6 +62,7 @@ class HooksService extends Service
         'after_hook_args' => [
           'type' => get_class($args),
           'request' => get_class($args->request),
+          'user' => get_class($args->user),
           'endpoint' => get_class($args->endpoint),
           'service' => get_class($args->service),
           'services' => get_class($args->services),

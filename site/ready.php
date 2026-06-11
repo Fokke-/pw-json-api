@@ -2,6 +2,7 @@
 
 // JSON API
 use PwJsonApi\{Api, ApiException, Response};
+use PwJsonApi\Auth\{ProcessWireAuth, ProcessWireAuthService};
 use PwJsonApi\Plugins\{CSRFPlugin, RateLimitPlugin};
 
 if (!defined('PROCESSWIRE')) {
@@ -137,6 +138,27 @@ if ($page->template->name !== 'admin') {
   (new DocumentedApi())
     ->setBasePath('documented-api')
     ->addService(new DocumentedService())
+    ->run();
+
+  // Authentication and authorization
+  (new Api())
+    ->setBasePath('auth-api')
+    ->addService(new ProcessWireAuthService())
+    ->addService(new AuthService(), function ($service) {
+      $service->authenticate(new TestAuth());
+    })
+    ->hookOnError(function ($args) {
+      $args->response->with([
+        'exception_class' => get_class($args->exception),
+      ]);
+    })
+    ->run();
+
+  // ProcessWireAuth (mirrors docs/processwire-auth.md setup example)
+  (new Api())
+    ->setBasePath('pw-auth-api')
+    ->addService(new ProcessWireAuthService())
+    ->addService(new PwAuthProtectedService())
     ->run();
 
   // Response headers

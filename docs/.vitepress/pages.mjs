@@ -19,6 +19,13 @@ export const sections = [
     ],
   },
   {
+    text: 'Authentication',
+    items: [
+      { text: 'Overview', link: '/authentication-overview' },
+      { text: 'ProcessWire authentication', link: '/processwire-auth' },
+    ],
+  },
+  {
     text: 'Hooks',
     items: [
       { text: 'Request hooks', link: '/request-hooks' },

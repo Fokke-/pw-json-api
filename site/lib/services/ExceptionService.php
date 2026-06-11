@@ -21,6 +21,7 @@ class ExceptionService extends Service
         'error_hook_args' => [
           'type' => get_class($args),
           'request' => get_class($args->request),
+          'user' => get_class($args->user),
           'response' => get_class($args->response),
           'endpoint' => get_class($args->endpoint),
           'service' => get_class($args->service),
