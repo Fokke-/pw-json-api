@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.2.0
+## 2.3.0
 
 This release adds an authentication and authorization layer to the library, with a built-in ProcessWire session authenticator.
 
