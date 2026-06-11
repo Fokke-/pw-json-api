@@ -47,6 +47,11 @@ class MyProtectedService extends Service
     // Require authentication for this service
     $this->authenticate(new ProcessWireAuth());
 
+    // Optional: require specific role
+    // $this->authorize(function ($args) {
+    //   return $args->user->hasRole('editor');
+    // });
+
     $this->addEndpoint('/me')->get(function ($args) {
       return new Response([
         'name' => $args->user->name,

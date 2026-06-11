@@ -154,14 +154,11 @@ if ($page->template->name !== 'admin') {
     })
     ->run();
 
-  // ProcessWireAuth
+  // ProcessWireAuth (mirrors docs/processwire-auth.md setup example)
   (new Api())
     ->setBasePath('pw-auth-api')
     ->addService(new ProcessWireAuthService())
-    ->addService(
-      new RequestService(),
-      static fn($s) => $s->authenticate(new ProcessWireAuth()),
-    )
+    ->addService(new PwAuthProtectedService())
     ->run();
 
   // Response headers

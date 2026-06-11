@@ -31,9 +31,9 @@ $api->addService(new MyProtectedService(), function ($service) {
 });
 ```
 
-### Closest level wins
+### Authenticator is not chained
 
-If multiple levels define an authenticator, the **closest to the endpoint wins** (endpoint > service > API). Authenticators are not chained.
+If multiple levels define an authenticator, the **closest to the endpoint wins** (endpoint > service > API).
 
 ### The `Authenticator` class
 
