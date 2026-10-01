@@ -68,6 +68,40 @@ test('AuthorizationException is catchable in error hook', function () {
   expect($body['exception_class'])->toBe(AuthorizationException::class);
 });
 
+// --- Argument objects ---
+
+test('authenticator arguments', function () {
+  $client = getHttp('auth-context-api');
+  $res = $client->get('auth-context/child');
+  $json = resToJson($res);
+
+  expect($json['data']['authenticate_args'])->toBe([
+    'type' => 'PwJsonApi\\AuthenticateArgs',
+    'request' => 'PwJsonApi\\Request',
+    'user' => 'ProcessWire\\User',
+    'endpoint' => 'PwJsonApi\\Endpoint',
+    'service' => 'ProcessWire\\AuthContextChildService',
+    'services' => 'PwJsonApi\\ServiceList',
+    'api' => 'PwJsonApi\\Api',
+  ]);
+});
+
+test('authorizer arguments', function () {
+  $client = getHttp('auth-context-api');
+  $res = $client->get('auth-context/child');
+  $json = resToJson($res);
+
+  expect($json['data']['authorize_args'])->toBe([
+    'type' => 'PwJsonApi\\AuthorizeArgs',
+    'request' => 'PwJsonApi\\Request',
+    'user' => 'ProcessWire\\User',
+    'endpoint' => 'PwJsonApi\\Endpoint',
+    'service' => 'ProcessWire\\AuthContextChildService',
+    'services' => 'PwJsonApi\\ServiceList',
+    'api' => 'PwJsonApi\\Api',
+  ]);
+});
+
 // --- Authenticator override ---
 
 test(

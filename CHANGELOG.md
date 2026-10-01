@@ -5,6 +5,7 @@
 ### New features
 
 - Built-in `PublicAuth` authenticator — opt a service or endpoint out of an inherited authenticator
+- `$endpoint`, `$service`, `$services` and `$api` properties added to `AuthenticateArgs` and `AuthorizeArgs`
 
 ## 2.3.0
 

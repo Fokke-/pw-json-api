@@ -164,6 +164,19 @@ if ($page->template->name !== 'admin') {
     })
     ->run();
 
+  // Authentication and authorization argument objects
+  (new Api())
+    ->setBasePath('auth-context-api')
+    ->authenticate(new ContextAuth())
+    ->authorize(function ($args) {
+      AuthContextChildService::$authorizeArgs = AuthContextChildService::describeArgs(
+        $args,
+      );
+      return true;
+    })
+    ->addService(new AuthContextService())
+    ->run();
+
   // ProcessWireAuth (mirrors docs/processwire-auth.md setup example)
   (new Api())
     ->setBasePath('pw-auth-api')
