@@ -67,3 +67,63 @@ test('AuthorizationException is catchable in error hook', function () {
   expect($res->getStatusCode())->toBe(403);
   expect($body['exception_class'])->toBe(AuthorizationException::class);
 });
+
+// --- Argument objects ---
+
+test('authenticator arguments', function () {
+  $client = getHttp('auth-context-api');
+  $res = $client->get('auth-context/child');
+  $json = resToJson($res);
+
+  expect($json['data']['authenticate_args'])->toBe([
+    'type' => 'PwJsonApi\\AuthenticateArgs',
+    'request' => 'PwJsonApi\\Request',
+    'user' => 'ProcessWire\\User',
+    'endpoint' => 'PwJsonApi\\Endpoint',
+    'service' => 'ProcessWire\\AuthContextChildService',
+    'services' => 'PwJsonApi\\ServiceList',
+    'api' => 'PwJsonApi\\Api',
+  ]);
+});
+
+test('authorizer arguments', function () {
+  $client = getHttp('auth-context-api');
+  $res = $client->get('auth-context/child');
+  $json = resToJson($res);
+
+  expect($json['data']['authorize_args'])->toBe([
+    'type' => 'PwJsonApi\\AuthorizeArgs',
+    'request' => 'PwJsonApi\\Request',
+    'user' => 'ProcessWire\\User',
+    'endpoint' => 'PwJsonApi\\Endpoint',
+    'service' => 'ProcessWire\\AuthContextChildService',
+    'services' => 'PwJsonApi\\ServiceList',
+    'api' => 'PwJsonApi\\Api',
+  ]);
+});
+
+// --- Authenticator override ---
+
+test(
+  'endpoint without own authenticator inherits Api authenticator',
+  function () {
+    $client = getHttp('auth-override-api');
+    $res = $client->get('auth-override/protected');
+
+    expect($res->getStatusCode())->toBe(401);
+  },
+);
+
+test('endpoint authenticator overrides Api authenticator', function () {
+  $client = getHttp('auth-override-api');
+  $res = $client->get('auth-override/public');
+
+  expect($res->getStatusCode())->toBe(200);
+});
+
+test('service authenticator overrides Api authenticator', function () {
+  $client = getHttp('auth-override-api');
+  $res = $client->get('auth-override-public');
+
+  expect($res->getStatusCode())->toBe(200);
+});

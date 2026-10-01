@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# PHP 8.2 is not included because Pest 4 requires PHP 8.3+.
+# PHP 8.2 compatibility is checked statically by PHPStan (phpVersion).
 VERSIONS="8.3 8.4 8.5"
 CONFIG=".ddev/config.yaml"
 EXIT_CODE=0

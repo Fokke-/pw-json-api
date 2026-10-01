@@ -2,7 +2,7 @@
 
 // JSON API
 use PwJsonApi\{Api, ApiException, Response};
-use PwJsonApi\Auth\{ProcessWireAuth, ProcessWireAuthService};
+use PwJsonApi\Auth\{ProcessWireAuth, ProcessWireAuthService, PublicAuth};
 use PwJsonApi\Plugins\{CSRFPlugin, RateLimitPlugin};
 
 if (!defined('PROCESSWIRE')) {
@@ -152,6 +152,29 @@ if ($page->template->name !== 'admin') {
         'exception_class' => get_class($args->exception),
       ]);
     })
+    ->run();
+
+  // Authenticator override
+  (new Api())
+    ->setBasePath('auth-override-api')
+    ->authenticate(new TestAuth())
+    ->addService(new AuthOverrideService())
+    ->addService(new AuthOverridePublicService(), function ($service) {
+      $service->authenticate(new PublicAuth());
+    })
+    ->run();
+
+  // Authentication and authorization argument objects
+  (new Api())
+    ->setBasePath('auth-context-api')
+    ->authenticate(new ContextAuth())
+    ->authorize(function ($args) {
+      AuthContextChildService::$authorizeArgs = AuthContextChildService::describeArgs(
+        $args,
+      );
+      return true;
+    })
+    ->addService(new AuthContextService())
     ->run();
 
   // ProcessWireAuth (mirrors docs/processwire-auth.md setup example)

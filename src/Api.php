@@ -113,6 +113,10 @@ class Api
         $authenticateArgs->request = $request;
         $authenticateArgs->user = $this->wire->user;
         $authenticateArgs->event = $event;
+        $authenticateArgs->endpoint = $result->endpoint;
+        $authenticateArgs->service = $result->service;
+        $authenticateArgs->services = $result->endpoint->services;
+        $authenticateArgs->api = $this;
         $authenticator->authenticate($authenticateArgs);
       }
 
@@ -124,6 +128,10 @@ class Api
         $authorizeArgs->request = $request;
         $authorizeArgs->user = $this->wire->user;
         $authorizeArgs->event = $event;
+        $authorizeArgs->endpoint = $result->endpoint;
+        $authorizeArgs->service = $result->service;
+        $authorizeArgs->services = $result->endpoint->services;
+        $authorizeArgs->api = $this;
 
         foreach ($authorizers as $authorizeFn) {
           if (call_user_func($authorizeFn, $authorizeArgs) !== true) {

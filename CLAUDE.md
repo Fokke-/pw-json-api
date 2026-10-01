@@ -7,6 +7,7 @@ Requires PHP 8.2+, developed in a DDEV environment.
 ## Commands
 
 - `composer run test` — run tests (Pest PHP, requires DDEV)
+- `composer run test-all-php` — run tests on PHP 8.3–8.5. Switches the DDEV PHP version and runs `composer update`, so check `composer.lock` afterwards. PHP 8.2 cannot be tested at runtime (Pest 4 requires 8.3+) — 8.2 compatibility is enforced statically by PHPStan (`phpVersion: 80200`)
 - `composer run analyse` — static analysis (PHPStan level 9)
 - `npm run format` — format code (Prettier)
 
@@ -23,7 +24,7 @@ Requires PHP 8.2+, developed in a DDEV environment.
 - **Architecture:** trait-based composition with `Has...` naming (e.g. `HasServiceList`)
 - **Naming:** `...Args` for DTOs, `...Exception`, `...Interface`, `...Config`
 - **PHPDoc:** required for complex callables/generics; omit when native types suffice
-- **@see links:** add `@see https://pwjsonapi.fokke.fi/...` to class-level PHPDoc when a matching documentation page or section exists. Verify link validity with curl or by inspecting the markdown source in `docs/`.
+- **@see links:** add `@see https://pwjsonapi.fokke.fi/...` to class-level PHPDoc when a matching documentation page or section exists. Verify link validity with curl or by inspecting the markdown source in `docs/`. Links to unreleased documentation only exist in `docs/` (see [Documentation deployment](#documentation-deployment)).
 - **Control structures:** always use braces, no one-liner `if` statements
 - **Array operations:** avoid `array_filter` + `array_map` combos — use `array_reduce` when both filtering and mapping are needed
 - **Callbacks:** use `static fn`/`static function` for callbacks (e.g. `array_reduce`, `array_map`) that don't reference `$this`
@@ -50,7 +51,7 @@ Requires PHP 8.2+, developed in a DDEV environment.
 
 When modifying code, always verify:
 
-- When adding files or directories to the project root, ensure `.gitattributes` marks them `export-ignore` if they should not be included in the Composer package (only `src/`, `CHANGELOG.md`, `LICENSE`, `README.md`, and `composer.json` ship)
+- When adding files or directories to the project root, ensure `.gitattributes` marks them `export-ignore` if they should not be included in the Composer package (only `src/`, `CHANGELOG.md`, `LICENSE`, `README.md`, `composer.json`, and `llms-full.txt` ship — `llms-full.txt` is intentionally included so developers can feed the documentation to their AI assistant)
 - The feature has an existing test, and the test is up to date with the change
 - Documentation in `docs/` is up to date for the affected feature
 - Each documentation page has a frontmatter `description` — a short, concise meta description for SEO
@@ -67,6 +68,11 @@ When modifying code, always verify:
 
 - **Never commit** — only the developer commits. `git add` is allowed when requested. Suggest a commit message when pausing for review.
 - Imperative mood, ~50 chars, no trailing period
+- **Pre-commit hook** (Husky, `.husky/pre-commit`) runs lint-staged (Prettier, PHPStan for `src/`) and then regenerates `llms.txt`/`llms-full.txt` when `docs/` changes. Do not run these manually before commit or edit `llms-full.txt` by hand.
+
+## Documentation deployment
+
+- Docs deploy automatically to pwjsonapi.fokke.fi on push to `master` (`.github/workflows/deploy-docs.yml`). Changes on `dev` are not live until merged — verify new `@see` links against the markdown source in `docs/` instead of curl.
 
 ## Multi-step plans
 

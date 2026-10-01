@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2.4.0
+
+### New features
+
+- Built-in `PublicAuth` authenticator — opt a service or endpoint out of an inherited authenticator
+- `$endpoint`, `$service`, `$services` and `$api` properties added to `AuthenticateArgs` and `AuthorizeArgs`
+
 ## 2.3.0
 
 This release adds an authentication and authorization layer to the library, with a built-in ProcessWire session authenticator.
