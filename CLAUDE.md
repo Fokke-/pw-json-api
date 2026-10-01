@@ -50,7 +50,7 @@ Requires PHP 8.2+, developed in a DDEV environment.
 
 When modifying code, always verify:
 
-- When adding files or directories to the project root, ensure `.gitattributes` marks them `export-ignore` if they should not be included in the Composer package (only `src/`, `CHANGELOG.md`, `LICENSE`, `README.md`, and `composer.json` ship)
+- When adding files or directories to the project root, ensure `.gitattributes` marks them `export-ignore` if they should not be included in the Composer package (only `src/`, `CHANGELOG.md`, `LICENSE`, `README.md`, `composer.json`, and `llms-full.txt` ship — `llms-full.txt` is intentionally included so developers can feed the documentation to their AI assistant)
 - The feature has an existing test, and the test is up to date with the change
 - Documentation in `docs/` is up to date for the affected feature
 - Each documentation page has a frontmatter `description` — a short, concise meta description for SEO
