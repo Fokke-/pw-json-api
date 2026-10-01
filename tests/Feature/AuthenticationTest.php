@@ -67,3 +67,29 @@ test('AuthorizationException is catchable in error hook', function () {
   expect($res->getStatusCode())->toBe(403);
   expect($body['exception_class'])->toBe(AuthorizationException::class);
 });
+
+// --- Authenticator override ---
+
+test(
+  'endpoint without own authenticator inherits Api authenticator',
+  function () {
+    $client = getHttp('auth-override-api');
+    $res = $client->get('auth-override/protected');
+
+    expect($res->getStatusCode())->toBe(401);
+  },
+);
+
+test('endpoint authenticator overrides Api authenticator', function () {
+  $client = getHttp('auth-override-api');
+  $res = $client->get('auth-override/public');
+
+  expect($res->getStatusCode())->toBe(200);
+});
+
+test('service authenticator overrides Api authenticator', function () {
+  $client = getHttp('auth-override-api');
+  $res = $client->get('auth-override-public');
+
+  expect($res->getStatusCode())->toBe(200);
+});

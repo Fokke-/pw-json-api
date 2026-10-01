@@ -2,7 +2,7 @@
 
 // JSON API
 use PwJsonApi\{Api, ApiException, Response};
-use PwJsonApi\Auth\{ProcessWireAuth, ProcessWireAuthService};
+use PwJsonApi\Auth\{ProcessWireAuth, ProcessWireAuthService, PublicAuth};
 use PwJsonApi\Plugins\{CSRFPlugin, RateLimitPlugin};
 
 if (!defined('PROCESSWIRE')) {
@@ -151,6 +151,16 @@ if ($page->template->name !== 'admin') {
       $args->response->with([
         'exception_class' => get_class($args->exception),
       ]);
+    })
+    ->run();
+
+  // Authenticator override
+  (new Api())
+    ->setBasePath('auth-override-api')
+    ->authenticate(new TestAuth())
+    ->addService(new AuthOverrideService())
+    ->addService(new AuthOverridePublicService(), function ($service) {
+      $service->authenticate(new PublicAuth());
     })
     ->run();
 

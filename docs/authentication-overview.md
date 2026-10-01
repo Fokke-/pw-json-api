@@ -21,7 +21,7 @@ $api = new Api();
 $api->authenticate(new ExampleAuth());
 ```
 
-When set on a level, **all children inherit it**. If the API instance has an authenticator, every service and endpoint under it is protected — there is no way to opt out. If you need both public and protected endpoints, set the authenticator on specific services instead of the API.
+When set on a level, **all children inherit it**. If the API instance has an authenticator, every service and endpoint under it is protected unless a child level overrides it (see [Opting out](#opting-out)). If you need both public and protected endpoints, the simplest approach is to set the authenticator on specific services instead of the API.
 
 ```php
 // Only MyProtectedService requires authentication
@@ -33,7 +33,32 @@ $api->addService(new MyProtectedService(), function ($service) {
 
 ### Authenticator is not chained
 
-If multiple levels define an authenticator, the **closest to the endpoint wins** (endpoint > service > API).
+If multiple levels define an authenticator, the **closest to the endpoint wins** (endpoint > service > API). Only that authenticator runs — the authenticators on the levels above it are skipped.
+
+### Opting out <Badge type="tip" text="^2.4" />
+
+Because the closest authenticator wins, you can make a service or endpoint public by giving it the built-in `PublicAuth` authenticator, which accepts every request:
+
+```php
+use PwJsonApi\Auth\PublicAuth;
+```
+
+```php
+$api->authenticate(new ExampleAuth());
+
+// In service init(): this endpoint is public despite the API authenticator
+$this->addEndpoint('/status')
+  ->get(function () {
+    return new Response(['status' => 'ok']);
+  })
+  ->authenticate(new PublicAuth());
+```
+
+`PublicAuth` can also be extended, for example to log or track requests to public endpoints.
+
+::: warning
+Opting out only affects authentication. [Authorization](#authorization) callbacks are chained and always run, so an authorizer set on a parent level still applies to the opted-out endpoint.
+:::
 
 ### The `Authenticator` class
 
