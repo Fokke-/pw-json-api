@@ -172,3 +172,41 @@ test('sibling service still follows Api authorization', function () {
 
   expect($res->getStatusCode())->toBe(403);
 });
+
+test('CSRF token endpoint can skip Api authorization', function () {
+  $client = getHttp('authz-skip-api');
+  $res = $client->get('csrf-token');
+
+  expect($res->getStatusCode())->toBe(200);
+});
+
+// --- Opt-out chains (/foo → /foo/bar → /foo/bar/baz) ---
+
+test('opt-out chain', function (string $api, string $path, int $status) {
+  $client = getHttp($api);
+  $res = $client->get($path);
+
+  expect($res->getStatusCode())->toBe($status);
+})->with([
+  // Authentication
+  'authn scenario 1: /foo' => ['authn-s1-api', 'foo', 403],
+  'authn scenario 1: /foo/bar' => ['authn-s1-api', 'foo/bar', 200],
+  'authn scenario 2: /foo' => ['authn-s2-api', 'foo', 200],
+  'authn scenario 2: /foo/bar' => ['authn-s2-api', 'foo/bar', 403],
+  'authn scenario 3: /foo' => ['authn-s3-api', 'foo', 200],
+  'authn scenario 3: /foo/bar' => ['authn-s3-api', 'foo/bar', 403],
+  'authn scenario 3: /foo/bar/baz' => ['authn-s3-api', 'foo/bar/baz', 200],
+  'authn endpoint: /foo' => ['authn-endpoint-api', 'foo', 200],
+  'authn endpoint: /foo/sibling' => ['authn-endpoint-api', 'foo/sibling', 403],
+
+  // Authorization
+  'authz scenario 1: /foo' => ['authz-s1-api', 'foo', 403],
+  'authz scenario 1: /foo/bar' => ['authz-s1-api', 'foo/bar', 200],
+  'authz scenario 2: /foo' => ['authz-s2-api', 'foo', 200],
+  'authz scenario 2: /foo/bar' => ['authz-s2-api', 'foo/bar', 403],
+  'authz scenario 3: /foo' => ['authz-s3-api', 'foo', 200],
+  'authz scenario 3: /foo/bar' => ['authz-s3-api', 'foo/bar', 403],
+  'authz scenario 3: /foo/bar/baz' => ['authz-s3-api', 'foo/bar/baz', 200],
+  'authz endpoint: /foo' => ['authz-endpoint-api', 'foo', 200],
+  'authz endpoint: /foo/sibling' => ['authz-endpoint-api', 'foo/sibling', 403],
+]);

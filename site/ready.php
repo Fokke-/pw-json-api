@@ -204,10 +204,113 @@ if ($page->template->name !== 'admin') {
     ->authorize(function ($args) {
       return false;
     })
+    ->addPlugin(new CSRFPlugin(), function ($plugin) {
+      $plugin->setupService(function ($service) {
+        $service->skipAuthorization();
+      });
+    })
     ->addService(new AuthSkipService(), function ($service) {
       $service->skipAuthorization();
     })
     ->addService(new HelloWorldService())
+    ->run();
+
+  // Authentication opt-out chains (/foo → /foo/bar → /foo/bar/baz)
+
+  // Scenario 1: authenticator on foo, bar skips
+  (new Api())
+    ->setBasePath('authn-s1-api')
+    ->addService(
+      (new ChainService('foo', [
+        (new ChainService('bar'))->skipAuthentication(),
+      ]))->authenticate(new GateAuth()),
+    )
+    ->run();
+
+  // Scenario 2: authenticator on bar only
+  (new Api())
+    ->setBasePath('authn-s2-api')
+    ->addService(
+      new ChainService('foo', [
+        (new ChainService('bar'))->authenticate(new GateAuth()),
+      ]),
+    )
+    ->run();
+
+  // Scenario 3: authenticator on bar, baz skips
+  (new Api())
+    ->setBasePath('authn-s3-api')
+    ->addService(
+      new ChainService('foo', [
+        (new ChainService('bar', [
+          (new ChainService('baz'))->skipAuthentication(),
+        ]))->authenticate(new GateAuth()),
+      ]),
+    )
+    ->run();
+
+  // Endpoint level: authenticator on foo, its root endpoint skips
+  (new Api())
+    ->setBasePath('authn-endpoint-api')
+    ->addService(
+      (new ChainService('foo'))->authenticate(new GateAuth()),
+      function ($service) {
+        $service->findEndpoint('/')->skipAuthentication();
+      },
+    )
+    ->run();
+
+  // Authorization opt-out chains (/foo → /foo/bar → /foo/bar/baz)
+
+  // Scenario 1: authorizer on foo, bar skips
+  (new Api())
+    ->setBasePath('authz-s1-api')
+    ->addService(
+      (new ChainService('foo', [
+        (new ChainService('bar'))->skipAuthorization(),
+      ]))->authorize(function ($args) {
+        return false;
+      }),
+    )
+    ->run();
+
+  // Scenario 2: authorizer on bar only
+  (new Api())
+    ->setBasePath('authz-s2-api')
+    ->addService(
+      new ChainService('foo', [
+        (new ChainService('bar'))->authorize(function ($args) {
+          return false;
+        }),
+      ]),
+    )
+    ->run();
+
+  // Scenario 3: authorizer on bar, baz skips
+  (new Api())
+    ->setBasePath('authz-s3-api')
+    ->addService(
+      new ChainService('foo', [
+        (new ChainService('bar', [
+          (new ChainService('baz'))->skipAuthorization(),
+        ]))->authorize(function ($args) {
+          return false;
+        }),
+      ]),
+    )
+    ->run();
+
+  // Endpoint level: authorizer on foo, its root endpoint skips
+  (new Api())
+    ->setBasePath('authz-endpoint-api')
+    ->addService(
+      (new ChainService('foo'))->authorize(function ($args) {
+        return false;
+      }),
+      function ($service) {
+        $service->findEndpoint('/')->skipAuthorization();
+      },
+    )
     ->run();
 
   // ProcessWireAuth (mirrors docs/processwire-auth.md setup example)
