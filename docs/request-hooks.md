@@ -1,5 +1,5 @@
 ---
-description: 'Add before and after hooks at the API, service, or endpoint level to validate requests and modify responses.'
+description: 'Add on-request, before, and after hooks at the API, service, or endpoint level to set headers, validate requests, and modify responses.'
 ---
 
 # Request hooks
@@ -120,6 +120,42 @@ $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
 });
 ```
 
+## hookOnRequest() <Badge type="tip" text="^2.5" />
+
+`hookOnRequest()` runs as soon as the request is matched to an endpoint — before the `OPTIONS` response, the request method check (`405`), [authentication](/authentication-overview), authorization, and other hooks. Use it for anything that must apply to every response of the API, such as CORS headers.
+
+Headers added to `$args->headers` are added to every response: successful responses, error responses, and `OPTIONS` responses. If the response already has a header with the same name — set by the endpoint handler, an after hook, or an error hook — the response header wins.
+
+```php
+// Allow requests from the frontend, including CORS preflight requests
+$api->hookOnRequest(function ($args) {
+  $args->headers['Access-Control-Allow-Origin'] = 'https://example.com';
+  $args->headers['Access-Control-Allow-Credentials'] = 'true';
+
+  if ($args->request->method === 'OPTIONS') {
+    // Same methods as in the Allow header of the endpoint
+    $args->headers['Access-Control-Allow-Methods'] = implode(', ', [
+      'OPTIONS',
+      ...$args->endpoint->getAllowedMethods(),
+    ]);
+    $args->headers['Access-Control-Allow-Headers'] = 'Content-Type';
+  }
+});
+```
+
+The library adds the `Allow` header to `OPTIONS` responses automatically, but browsers only use the `Access-Control-Allow-*` headers for CORS. These headers are a security policy, so the library never adds them on its own.
+
+Like other hooks, on-request hooks can be defined on the API, service, or endpoint level. They run in order API → services → endpoint, and they all share the same `$args->headers`.
+
+To reject a request, throw an `ApiException`. [Error hooks](/error-hooks) are executed, and the headers set so far are included in the error response.
+
+::: warning Limitations
+
+- Requests to paths that do not match any endpoint are not handled by the API, so on-request hooks do not run for them.
+- If the request body is malformed JSON, the request is rejected before on-request hooks run, and the error response does not include their headers.
+
+:::
+
 ## Hook arguments
 
 You can access the following properties via the `$args` parameter of the handler function. The following properties are always included:
@@ -134,6 +170,12 @@ You can access the following properties via the `$args` parameter of the handler
 | `services` | `ServiceList`            | List of all parent services  |
 | `api`      | `Api`                    | API instance                 |
 
+### hookOnRequest arguments
+
+| Property  | Type    | Description                    |
+| --------- | ------- | ------------------------------ |
+| `headers` | `array` | Headers to add to the response |
+
 ### hookBefore\* arguments
 
 | Property  | Type       | Description              |
@@ -147,6 +189,12 @@ You can access the following properties via the `$args` parameter of the handler
 | `response` | Response | Response from endpoint request handler |
 
 ## Hook methods reference
+
+### On request
+
+| Method            | Description                                  |
+| ----------------- | -------------------------------------------- |
+| `hookOnRequest()` | Hook on request, before any other processing |
 
 ### Before request
 
@@ -174,10 +222,15 @@ You can access the following properties via the `$args` parameter of the handler
 
 ## Hook execution order
 
-1. API before hooks
-2. Service before hooks
-3. Endpoint before hooks
-4. **Request handler**
-5. Endpoint after hooks
-6. Service after hooks
-7. API after hooks
+1. API on-request hooks
+2. Service on-request hooks
+3. Endpoint on-request hooks
+4. API before hooks
+5. Service before hooks
+6. Endpoint before hooks
+7. **Request handler**
+8. Endpoint after hooks
+9. Service after hooks
+10. API after hooks
+
+Authentication and authorization run between the on-request hooks and the before hooks. See [Application lifecycle](/lifecycle#request-handling) for the full sequence.

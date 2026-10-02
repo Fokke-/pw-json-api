@@ -115,16 +115,17 @@ The bootstrap phase runs once when the module file is loaded. It sets up the API
 
 The request handling phase runs for each incoming HTTP request that matches a registered endpoint path.
 
-1. **OPTIONS shortcut** — If the request method is `OPTIONS`, a `200` response with an `Allow` header is returned immediately. No hooks or handlers are executed. [Read more about endpoints](#endpoints).
-2. **Request object** — A `Request` object is created containing the HTTP method, path, query parameters, headers, body, and files. [Read more about requests](#requests).
-3. **Handler lookup** — The library looks up a handler for the request method. If no handler is registered, a `405` response with an `Allow` header is returned. [Read more about endpoints](#endpoints).
-4. **Authentication** — If an authenticator is configured, it runs now. The closest level to the endpoint wins (endpoint > service > API). A level that [opts out](#opting-out) with `skipAuthentication()` ignores the authenticators of the levels above it. [Read more about authentication](#authentication-authorization).
-5. **Authorization** — All authorization callbacks in the chain run in order: API → services → endpoint. A level that [opts out](#opting-out) with `skipAuthorization()` ignores the callbacks of the levels above it. [Read more about authorization](#authorization).
-6. **Before hooks** — Before hooks are executed in order: API → service → endpoint. [Read more about hook execution order](#hook-execution-order).
-7. **Handler execution** — The endpoint handler runs and returns a `Response`. [Read more about responses](#responses).
-8. **After hooks** — After hooks are executed in order: endpoint → service → API. [Read more about hook execution order](#hook-execution-order).
-9. **Error handling** — If an exception is thrown at any point, error hooks are executed and the exception is converted to a JSON response. [Read more about error handling](#error-handling). [Read more about error hooks](#error-hooks).
-10. **JSON response** — The final response is encoded as JSON and sent to the client.
+1. **Request object** — A `Request` object is created containing the HTTP method, path, query parameters, headers, body, and files. [Read more about requests](#requests).
+2. **On-request hooks** — On-request hooks are executed in order: API → services → endpoint. Headers set by them are added to every response, including the `OPTIONS` and error responses. [Read more about on-request hooks](#hookonrequest).
+3. **OPTIONS shortcut** — If the request method is `OPTIONS`, a `200` response with an `Allow` header is returned immediately. No other hooks or handlers are executed. [Read more about endpoints](#endpoints).
+4. **Handler lookup** — The library looks up a handler for the request method. If no handler is registered, a `405` response with an `Allow` header is returned. [Read more about endpoints](#endpoints).
+5. **Authentication** — If an authenticator is configured, it runs now. The closest level to the endpoint wins (endpoint > service > API). A level that [opts out](#opting-out) with `skipAuthentication()` ignores the authenticators of the levels above it. [Read more about authentication](#authentication-authorization).
+6. **Authorization** — All authorization callbacks in the chain run in order: API → services → endpoint. A level that [opts out](#opting-out) with `skipAuthorization()` ignores the callbacks of the levels above it. [Read more about authorization](#authorization).
+7. **Before hooks** — Before hooks are executed in order: API → service → endpoint. [Read more about hook execution order](#hook-execution-order).
+8. **Handler execution** — The endpoint handler runs and returns a `Response`. [Read more about responses](#responses).
+9. **After hooks** — After hooks are executed in order: endpoint → service → API. [Read more about hook execution order](#hook-execution-order).
+10. **Error handling** — If an exception is thrown at any point, it is converted to a JSON response. For exceptions thrown after the request object is created, error hooks are executed first. [Read more about error handling](#error-handling). [Read more about error hooks](#error-hooks).
+11. **JSON response** — The final response is encoded as JSON and sent to the client.
 
 ---
 
@@ -1095,13 +1096,14 @@ $api->addService(new MyPublicService(), function ($service) {
 
 ## Execution order
 
-Authentication and authorization run **before** request hooks and plugins:
+Authentication and authorization run **after** [on-request hooks](#hookonrequest), but **before** other request hooks and plugins:
 
-1. **Authenticate** — closest authenticator runs, unless skipped
-2. **Authorize** — all authorization callbacks in the chain run (API → services → endpoint), except the ones skipped
-3. Before hooks, including hooks registered by [plugins](#plugins)
-4. Endpoint handler
-5. After hooks
+1. On-request hooks
+2. **Authenticate** — closest authenticator runs, unless skipped
+3. **Authorize** — all authorization callbacks in the chain run (API → services → endpoint), except the ones skipped
+4. Before hooks, including hooks registered by [plugins](#plugins)
+5. Endpoint handler
+6. After hooks
 
 See [Application lifecycle](#request-handling) for the full sequence.
 
@@ -1431,6 +1433,42 @@ $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
 });
 ```
 
+## hookOnRequest() <Badge type="tip" text="^2.5" />
+
+`hookOnRequest()` runs as soon as the request is matched to an endpoint — before the `OPTIONS` response, the request method check (`405`), [authentication](#authentication-authorization), authorization, and other hooks. Use it for anything that must apply to every response of the API, such as CORS headers.
+
+Headers added to `$args->headers` are added to every response: successful responses, error responses, and `OPTIONS` responses. If the response already has a header with the same name — set by the endpoint handler, an after hook, or an error hook — the response header wins.
+
+```php
+// Allow requests from the frontend, including CORS preflight requests
+$api->hookOnRequest(function ($args) {
+  $args->headers['Access-Control-Allow-Origin'] = 'https://example.com';
+  $args->headers['Access-Control-Allow-Credentials'] = 'true';
+
+  if ($args->request->method === 'OPTIONS') {
+    // Same methods as in the Allow header of the endpoint
+    $args->headers['Access-Control-Allow-Methods'] = implode(', ', [
+      'OPTIONS',
+      ...$args->endpoint->getAllowedMethods(),
+    ]);
+    $args->headers['Access-Control-Allow-Headers'] = 'Content-Type';
+  }
+});
+```
+
+The library adds the `Allow` header to `OPTIONS` responses automatically, but browsers only use the `Access-Control-Allow-*` headers for CORS. These headers are a security policy, so the library never adds them on its own.
+
+Like other hooks, on-request hooks can be defined on the API, service, or endpoint level. They run in order API → services → endpoint, and they all share the same `$args->headers`.
+
+To reject a request, throw an `ApiException`. [Error hooks](#error-hooks) are executed, and the headers set so far are included in the error response.
+
+::: warning Limitations
+
+- Requests to paths that do not match any endpoint are not handled by the API, so on-request hooks do not run for them.
+- If the request body is malformed JSON, the request is rejected before on-request hooks run, and the error response does not include their headers.
+
+:::
+
 ## Hook arguments
 
 You can access the following properties via the `$args` parameter of the handler function. The following properties are always included:
@@ -1445,6 +1483,12 @@ You can access the following properties via the `$args` parameter of the handler
 | `services` | `ServiceList`            | List of all parent services  |
 | `api`      | `Api`                    | API instance                 |
 
+### hookOnRequest arguments
+
+| Property  | Type    | Description                    |
+| --------- | ------- | ------------------------------ |
+| `headers` | `array` | Headers to add to the response |
+
 ### hookBefore\* arguments
 
 | Property  | Type       | Description              |
@@ -1458,6 +1502,12 @@ You can access the following properties via the `$args` parameter of the handler
 | `response` | Response | Response from endpoint request handler |
 
 ## Hook methods reference
+
+### On request
+
+| Method            | Description                                  |
+| ----------------- | -------------------------------------------- |
+| `hookOnRequest()` | Hook on request, before any other processing |
 
 ### Before request
 
@@ -1485,13 +1535,18 @@ You can access the following properties via the `$args` parameter of the handler
 
 ## Hook execution order
 
-1. API before hooks
-2. Service before hooks
-3. Endpoint before hooks
-4. **Request handler**
-5. Endpoint after hooks
-6. Service after hooks
-7. API after hooks
+1. API on-request hooks
+2. Service on-request hooks
+3. Endpoint on-request hooks
+4. API before hooks
+5. Service before hooks
+6. Endpoint before hooks
+7. **Request handler**
+8. Endpoint after hooks
+9. Service after hooks
+10. API after hooks
+
+Authentication and authorization run between the on-request hooks and the before hooks. See [Application lifecycle](#request-handling) for the full sequence.
 
 ---
 

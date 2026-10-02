@@ -203,13 +203,14 @@ $api->addService(new MyPublicService(), function ($service) {
 
 ## Execution order
 
-Authentication and authorization run **before** request hooks and plugins:
+Authentication and authorization run **after** [on-request hooks](/request-hooks#hookonrequest), but **before** other request hooks and plugins:
 
-1. **Authenticate** — closest authenticator runs, unless skipped
-2. **Authorize** — all authorization callbacks in the chain run (API → services → endpoint), except the ones skipped
-3. Before hooks, including hooks registered by [plugins](/plugins/plugins-overview)
-4. Endpoint handler
-5. After hooks
+1. On-request hooks
+2. **Authenticate** — closest authenticator runs, unless skipped
+3. **Authorize** — all authorization callbacks in the chain run (API → services → endpoint), except the ones skipped
+4. Before hooks, including hooks registered by [plugins](/plugins/plugins-overview)
+5. Endpoint handler
+6. After hooks
 
 See [Application lifecycle](/lifecycle#request-handling) for the full sequence.
 

@@ -27,7 +27,7 @@
 
 ## Hooks
 
-- [Request hooks](https://pwjsonapi.fokke.fi/request-hooks): Add before and after hooks at the API, service, or endpoint level to validate requests and modify responses.
+- [Request hooks](https://pwjsonapi.fokke.fi/request-hooks): Add on-request, before, and after hooks at the API, service, or endpoint level to set headers, validate requests, and modify responses.
 - [Error hooks](https://pwjsonapi.fokke.fi/error-hooks): Customize error responses with API-level and service-level error hooks when exceptions are thrown.
 
 ## Plugins

@@ -21,13 +21,14 @@ The bootstrap phase runs once when the module file is loaded. It sets up the API
 
 The request handling phase runs for each incoming HTTP request that matches a registered endpoint path.
 
-1. **OPTIONS shortcut** — If the request method is `OPTIONS`, a `200` response with an `Allow` header is returned immediately. No hooks or handlers are executed. [Read more about endpoints](/endpoints).
-2. **Request object** — A `Request` object is created containing the HTTP method, path, query parameters, headers, body, and files. [Read more about requests](/requests).
-3. **Handler lookup** — The library looks up a handler for the request method. If no handler is registered, a `405` response with an `Allow` header is returned. [Read more about endpoints](/endpoints).
-4. **Authentication** — If an authenticator is configured, it runs now. The closest level to the endpoint wins (endpoint > service > API). A level that [opts out](/authentication-overview#opting-out) with `skipAuthentication()` ignores the authenticators of the levels above it. [Read more about authentication](/authentication-overview).
-5. **Authorization** — All authorization callbacks in the chain run in order: API → services → endpoint. A level that [opts out](/authentication-overview#opting-out) with `skipAuthorization()` ignores the callbacks of the levels above it. [Read more about authorization](/authentication-overview#authorization).
-6. **Before hooks** — Before hooks are executed in order: API → service → endpoint. [Read more about hook execution order](/request-hooks#hook-execution-order).
-7. **Handler execution** — The endpoint handler runs and returns a `Response`. [Read more about responses](/responses).
-8. **After hooks** — After hooks are executed in order: endpoint → service → API. [Read more about hook execution order](/request-hooks#hook-execution-order).
-9. **Error handling** — If an exception is thrown at any point, error hooks are executed and the exception is converted to a JSON response. [Read more about error handling](/error-handling). [Read more about error hooks](/error-hooks).
-10. **JSON response** — The final response is encoded as JSON and sent to the client.
+1. **Request object** — A `Request` object is created containing the HTTP method, path, query parameters, headers, body, and files. [Read more about requests](/requests).
+2. **On-request hooks** — On-request hooks are executed in order: API → services → endpoint. Headers set by them are added to every response, including the `OPTIONS` and error responses. [Read more about on-request hooks](/request-hooks#hookonrequest).
+3. **OPTIONS shortcut** — If the request method is `OPTIONS`, a `200` response with an `Allow` header is returned immediately. No other hooks or handlers are executed. [Read more about endpoints](/endpoints).
+4. **Handler lookup** — The library looks up a handler for the request method. If no handler is registered, a `405` response with an `Allow` header is returned. [Read more about endpoints](/endpoints).
+5. **Authentication** — If an authenticator is configured, it runs now. The closest level to the endpoint wins (endpoint > service > API). A level that [opts out](/authentication-overview#opting-out) with `skipAuthentication()` ignores the authenticators of the levels above it. [Read more about authentication](/authentication-overview).
+6. **Authorization** — All authorization callbacks in the chain run in order: API → services → endpoint. A level that [opts out](/authentication-overview#opting-out) with `skipAuthorization()` ignores the callbacks of the levels above it. [Read more about authorization](/authentication-overview#authorization).
+7. **Before hooks** — Before hooks are executed in order: API → service → endpoint. [Read more about hook execution order](/request-hooks#hook-execution-order).
+8. **Handler execution** — The endpoint handler runs and returns a `Response`. [Read more about responses](/responses).
+9. **After hooks** — After hooks are executed in order: endpoint → service → API. [Read more about hook execution order](/request-hooks#hook-execution-order).
+10. **Error handling** — If an exception is thrown at any point, it is converted to a JSON response. For exceptions thrown after the request object is created, error hooks are executed first. [Read more about error handling](/error-handling). [Read more about error hooks](/error-hooks).
+11. **JSON response** — The final response is encoded as JSON and sent to the client.
