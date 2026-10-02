@@ -13,7 +13,7 @@ A built-in authenticator that uses ProcessWire's session-based authentication. I
 When using session-based authentication with a browser frontend, it is recommended to also install the [CSRF plugin](/plugins/csrf) on the API instance to protect against cross-site request forgery.
 
 ::: tip Authentication level
-Set the authenticator on individual services, not on the API instance. The login and logout endpoints must remain publicly accessible — they cannot be behind authentication.
+The login and logout endpoints must be reachable without a ProcessWire session. Set the authenticator on individual services as shown below, or [set it on the API instance](#authentication-on-the-api-level) and opt the login and logout endpoints out explicitly.
 :::
 
 ```php
@@ -65,6 +65,41 @@ class MyProtectedService extends Service
 }
 ```
 
+## Authentication on the API level <Badge type="tip" text="^2.5" />
+
+To protect the whole API, set the authenticator on the API instance and opt out the endpoints that must be reachable without a session: the login and logout endpoints, and the [CSRF token endpoint](/plugins/csrf#configuring-the-token-endpoint) if the CSRF plugin is installed.
+
+```php
+use PwJsonApi\Api;
+use PwJsonApi\Auth\{ProcessWireAuth, ProcessWireAuthService};
+use PwJsonApi\Plugins\CSRFPlugin;
+
+$api = new Api();
+
+// Every service requires authentication...
+$api->authenticate(new ProcessWireAuth());
+
+// ...except the CSRF token endpoint
+$api->addPlugin(new CSRFPlugin(), function ($plugin) {
+  $plugin->setupService(function ($service) {
+    $service->skipAuthentication();
+  });
+});
+
+// ...and the login and logout endpoints
+$api->addService(new ProcessWireAuthService(), function ($service) {
+  $service->skipAuthentication();
+});
+
+$api->addService(new MyProtectedService());
+
+$api->run();
+```
+
+`ProcessWireAuthService` never opts out on its own — it always follows the rules you set. If the API authenticator is a different kind of gate, such as an API key check, the login endpoint should normally stay behind it. In that case, keep the gate on the API and set `ProcessWireAuth` on the protected services instead.
+
+Opting out of authentication does not affect [authorization](#authorization). If the API instance has authorization callbacks, they still apply to the login and logout endpoints. Use `skipAuthorization()` to opt out of them as well. See [Opting out](/authentication-overview#opting-out) for details.
+
 ## Endpoints
 
 `ProcessWireAuthService` registers endpoints under the `/auth` base path.
@@ -114,7 +149,7 @@ use PwJsonApi\Plugins\CSRFPlugin;
 $api->addPlugin(new CSRFPlugin());
 ```
 
-In ProcessWire, every user has a session (including guests), so the CSRF token is always available. When the CSRF plugin is installed, it automatically protects all POST endpoints — including login and logout.
+In ProcessWire, every user has a session (including guests), so the CSRF token is always available. When the CSRF plugin is installed, it automatically protects all POST endpoints — including login and logout. If the authenticator is set on the API instance, opt the token endpoint out so that guests can retrieve a token before logging in (see [Authentication on the API level](#authentication-on-the-api-level)).
 
 ## Login throttling
 

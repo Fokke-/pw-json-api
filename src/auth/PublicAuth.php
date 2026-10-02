@@ -10,7 +10,7 @@ use PwJsonApi\{AuthenticateArgs, Authenticator};
  * Accepts all requests. Use it to opt a service or endpoint out of
  * an authenticator inherited from a parent level.
  *
- * @see https://pwjsonapi.fokke.fi/authentication-overview.html#opting-out
+ * @see https://pwjsonapi.fokke.fi/authentication-overview.html#publicauth
  */
 class PublicAuth extends Authenticator
 {

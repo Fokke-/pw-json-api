@@ -37,6 +37,29 @@ $api->addPlugin(new CSRFPlugin(), function ($plugin) {
 });
 ```
 
+## Configuring the token endpoint <Badge type="tip" text="^2.5" />
+
+The token endpoint follows the [authentication and authorization](/authentication-overview) rules of the API instance, like any other endpoint. If the API instance has an authenticator, guests cannot retrieve a token — for example, before logging in.
+
+Use `setupService()` to configure the service that provides the token endpoint. The setup function receives the service, so you can [opt it out](/authentication-overview#opting-out) of the API rules:
+
+```php
+$api->authenticate(new ExampleAuth());
+
+$api->addPlugin(new CSRFPlugin(), function ($plugin) {
+  $plugin->setupService(function ($service) {
+    // Guests can retrieve a token
+    $service->skipAuthentication();
+  });
+});
+```
+
+If the API instance also has authorization callbacks, call `skipAuthorization()` as well.
+
+::: tip
+If a request fails the token validation, the error response also includes the current token.
+:::
+
 ## Front-end implementation
 
 Front-end implementation is outside the scope of this guide, but here is a basic flow:

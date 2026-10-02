@@ -14,12 +14,13 @@ See [ProcessWire authentication](/processwire-auth) for a built-in authenticator
 
 Both mechanisms can be configured on three levels: API, service, or endpoint. A level applies to all of its children, but the two mechanisms combine levels differently:
 
-|                          | Authentication                          | Authorization                       |
-| ------------------------ | --------------------------------------- | ----------------------------------- |
-| Configured with          | `authenticate()`                        | `authorize()`                       |
-| When multiple levels     | Closest wins (endpoint > service > API) | All run (API → services → endpoint) |
-| Child level can override | Yes                                     | No                                  |
-| Failure                  | `AuthenticationException` (401)         | `AuthorizationException` (403)      |
+|                       | Authentication                          | Authorization                                   |
+| --------------------- | --------------------------------------- | ----------------------------------------------- |
+| Configured with       | `authenticate()`                        | `authorize()`                                   |
+| When multiple levels  | Closest wins (endpoint > service > API) | All run (API → services → endpoint)             |
+| Child level overrides | By setting its own authenticator        | With `skipAuthorization()` and its own callback |
+| Child level opts out  | `skipAuthentication()`                  | `skipAuthorization()`                           |
+| Failure               | `AuthenticationException` (401)         | `AuthorizationException` (403)                  |
 
 ## Authentication
 
@@ -72,15 +73,15 @@ $service->authorize(function (AuthorizeArgs $args) {
 
 ### Authorization is chained
 
-Unlike authentication, **all authorization callbacks in the chain are executed** in order: API → services → endpoint. If any callback returns `false`, the request is rejected. A child level cannot override the callbacks of the levels above it.
+Unlike authentication, **all authorization callbacks in the chain are executed** in order: API → services → endpoint. If any callback returns `false`, the request is rejected. Setting a callback on a child level does not replace the callbacks of the levels above it — to replace them, the child level must [opt out](#opting-out) of them first.
 
 ```php
-// API: must be logged in
+// API: must have member role
 $api->authorize(function (AuthorizeArgs $args) {
-  return $args->user->isLoggedin();
+  return $args->user->hasRole('member');
 });
 
-// Service: must have editor role
+// Service: must also have editor role
 $api->addService(new ContentService(), function ($service) {
   $service->authorize(function (AuthorizeArgs $args) {
     return $args->user->hasRole('editor');
@@ -106,7 +107,7 @@ Authenticators receive an `AuthenticateArgs` object and authorization callbacks 
 
 ## Public and protected endpoints
 
-There are three ways to combine public and protected endpoints in the same API. Start from the first one, and move on only if it does not fit your structure.
+There are two ways to combine public and protected endpoints in the same API. Start from the first one, and move on only if it does not fit your structure.
 
 ### Protect specific services
 
@@ -120,62 +121,86 @@ $api->addService(new MyProtectedService(), function ($service) {
 });
 ```
 
-### Opting out <Badge type="tip" text="^2.4" />
+### Opting out <Badge type="tip" text="^2.5" />
 
-If most of the API is protected, set the authenticator on the API and opt specific services or endpoints out with the built-in `PublicAuth` authenticator. It accepts every request, and because the closest authenticator wins, it replaces the inherited one:
+If most of the API is protected, set the rules on the API and opt specific services or endpoints out of them:
+
+- `skipAuthentication()` skips the authenticators inherited from parent levels.
+- `skipAuthorization()` skips the authorization callbacks inherited from parent levels.
 
 ```php
-use PwJsonApi\Auth\PublicAuth;
-```
+// This service is public despite the API authenticator
+$api->addService(new MyPublicService(), function ($service) {
+  $service->skipAuthentication();
+});
 
-```php
-// In service init(): this endpoint is public despite the API authenticator
+// In service init(): this endpoint ignores the parent authorization callbacks
 $this->addEndpoint('/status')
   ->get(function () {
     return new Response(['status' => 'ok']);
   })
-  ->authenticate(new PublicAuth());
+  ->skipAuthorization();
 ```
 
-`PublicAuth` can also be extended, for example to log or track requests to public endpoints.
+Opting out follows these rules:
 
-::: warning
-Opting out only affects authentication. Authorization callbacks are [chained](#authorization-is-chained) and always run, so a callback set on a parent level still applies to the opted-out endpoint. Use [conditional rules](#conditional-rules) to exempt it.
-:::
+- **Only inherited rules are skipped.** An authenticator or authorization callback set on the same level or below still applies.
+- **The two are independent.** Skipping authentication does not skip authorization, and vice versa.
+- **The whole subtree is affected.** All services and endpoints under the level inherit the opt-out. A child level cannot undo it, but it can set its own authenticator or authorization callback.
 
-### Conditional rules <Badge type="tip" text="^2.4" />
+For example, with nested services `/foo` → `/foo/bar` → `/foo/bar/baz`:
 
-Authenticators and authorization callbacks receive the requested endpoint and service in their [argument objects](#argument-objects), so a single parent level rule can let specific requests through. This is the only way to exempt requests from a parent level authorization callback:
+| Path           | Configuration         | Callbacks run for a request | Why                                           |
+| -------------- | --------------------- | --------------------------- | --------------------------------------------- |
+| `/foo`         | `authorize()`         | `/foo`                      | Own callback                                  |
+| `/foo/bar`     | `skipAuthorization()` | None                        | Skips `/foo`, has no own callback             |
+| `/foo/bar/baz` | `authorize()`         | `/foo/bar/baz` only         | Own callback, `/foo` is skipped by `/foo/bar` |
+
+Combining an opt-out with a rule on the same level replaces the parent level rules:
 
 ```php
-// API: must be logged in, except for PublicContentService
-$api->authorize(function (AuthorizeArgs $args) {
-  if ($args->service instanceof PublicContentService) {
-    return true;
-  }
-
-  return $args->user->isLoggedin();
+// Only editors, regardless of the parent level callbacks
+$api->addService(new EditorService(), function ($service) {
+  $service->skipAuthorization()->authorize(function (AuthorizeArgs $args) {
+    return $args->user->hasRole('editor');
+  });
 });
 ```
 
-`$service` is the service the endpoint belongs to. For nested services, use `$services` to inspect the parent services.
-
-Prefer `instanceof` checks over comparing paths or names as strings. A string comparison silently stops matching when a path or name changes.
-
-::: tip When to use which
-
-- **Protect specific services** when public and protected endpoints are already in separate services.
-- **Opting out** when a single service or endpoint should be public. The exception is visible where the service or endpoint is defined.
-- **Conditional rules** when a rule spans many services or endpoints, or when you need to bypass a parent level authorization callback.
-
+::: warning
+Skipping authorization also removes parent level restrictions such as role or IP checks from the whole subtree. Use it only when the endpoints are meant to be accessible without them.
 :::
+
+#### `PublicAuth` <Badge type="tip" text="^2.4" />
+
+Alternatively, you can set the built-in `PublicAuth` authenticator, which accepts every request. Because the closest authenticator wins, it replaces the inherited one. Unlike `skipAuthentication()`, it can be extended, for example to log or track requests to public endpoints.
+
+```php
+use PwJsonApi\Auth\PublicAuth;
+
+$api->addService(new MyPublicService(), function ($service) {
+  $service->authenticate(new PublicAuth());
+});
+```
+
+## Best practices
+
+**Keep authentication and authorization separate.** An authenticator verifies who the user is, for example a logged-in session or an API key. An authorization callback verifies what the user is allowed to do, for example a role. Do not check whether the user is logged in in an authorization callback.
+
+**Protect by default, open explicitly.** Set the rules on the highest level that fits, and make exceptions with [opting out](#opting-out). New services are then protected automatically, and every public service or endpoint is a deliberate choice.
+
+**Make exceptions where the service or endpoint is defined.** For a single service or endpoint, use an opt-out or an own rule (`skipAuthorization()->authorize(...)`) when adding the service or defining the endpoint. Do not add an `instanceof` branch for a single service to a parent level callback. The exception is then visible where the service is defined, and the parent level callback does not grow with every exception.
+
+**Consider whether a subtree needs its own rule.** `skipAuthorization()` alone removes all parent level restrictions from the subtree. Often the right choice is to replace them with a rule of its own instead.
+
+**Built-in services follow your rules.** The [ProcessWire authentication](/processwire-auth#authentication-on-the-api-level) service and the [CSRF plugin](/plugins/csrf#configuring-the-token-endpoint) token endpoint never opt out on their own. If the API instance has rules, opt them out explicitly where needed.
 
 ## Execution order
 
 Authentication and authorization run **before** request hooks and plugins:
 
-1. **Authenticate** — closest authenticator runs
-2. **Authorize** — all authorization callbacks in the chain run (API → services → endpoint)
+1. **Authenticate** — closest authenticator runs, unless skipped
+2. **Authorize** — all authorization callbacks in the chain run (API → services → endpoint), except the ones skipped
 3. Before hooks, including hooks registered by [plugins](/plugins/plugins-overview)
 4. Endpoint handler
 5. After hooks
