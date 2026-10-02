@@ -127,3 +127,48 @@ test('service authenticator overrides Api authenticator', function () {
 
   expect($res->getStatusCode())->toBe(200);
 });
+
+// --- Opt-out ---
+
+test('CSRF token endpoint follows Api authenticator by default', function () {
+  $client = getHttp('auth-gate-api');
+  $res = $client->get('csrf-token');
+
+  expect($res->getStatusCode())->toBe(403);
+});
+
+test('CSRF token endpoint can skip authentication', function () {
+  $client = getHttp('auth-skip-api');
+  $res = $client->get('csrf-token');
+  $json = resToJson($res);
+
+  expect($res->getStatusCode())->toBe(200);
+  expect($json['csrf_token']['value'])->toBeString();
+});
+
+test('ProcessWireAuthService can skip authentication', function () {
+  $client = getHttp('auth-skip-api');
+  $token = resToJson($client->get('csrf-token'))['csrf_token'];
+
+  $res = $client->post('auth/logout', [
+    'headers' => [
+      'X-' . $token['name'] => $token['value'],
+    ],
+  ]);
+
+  expect($res->getStatusCode())->toBe(200);
+});
+
+test('service can skip Api authorization', function () {
+  $client = getHttp('authz-skip-api');
+  $res = $client->get('auth-skip');
+
+  expect($res->getStatusCode())->toBe(200);
+});
+
+test('sibling service still follows Api authorization', function () {
+  $client = getHttp('authz-skip-api');
+  $res = $client->get('hello-world');
+
+  expect($res->getStatusCode())->toBe(403);
+});

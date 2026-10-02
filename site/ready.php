@@ -177,6 +177,39 @@ if ($page->template->name !== 'admin') {
     ->addService(new AuthContextService())
     ->run();
 
+  // Skip authentication for built-in services under an API gate
+  (new Api())
+    ->setBasePath('auth-skip-api')
+    ->authenticate(new GateAuth())
+    ->addPlugin(new CSRFPlugin(), function ($plugin) {
+      $plugin->setupService(function ($service) {
+        $service->skipAuthentication();
+      });
+    })
+    ->addService(new ProcessWireAuthService(), function ($service) {
+      $service->skipAuthentication();
+    })
+    ->run();
+
+  // Built-in services follow the API gate by default
+  (new Api())
+    ->setBasePath('auth-gate-api')
+    ->authenticate(new GateAuth())
+    ->addPlugin(new CSRFPlugin())
+    ->run();
+
+  // Skip authorization
+  (new Api())
+    ->setBasePath('authz-skip-api')
+    ->authorize(function ($args) {
+      return false;
+    })
+    ->addService(new AuthSkipService(), function ($service) {
+      $service->skipAuthorization();
+    })
+    ->addService(new HelloWorldService())
+    ->run();
+
   // ProcessWireAuth (mirrors docs/processwire-auth.md setup example)
   (new Api())
     ->setBasePath('pw-auth-api')

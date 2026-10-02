@@ -23,6 +23,24 @@ class CSRFPlugin extends ApiPlugin
   /** Endpoint path for retrieving the current token */
   public string $endpointPath = '/csrf-token';
 
+  /**
+   * Setup function for the token service
+   *
+   * @var (callable(CSRFPluginService): void)|null
+   */
+  private $serviceSetup = null;
+
+  /**
+   * Configure the service providing the token endpoint
+   *
+   * @param callable(CSRFPluginService): void $setup
+   */
+  public function setupService(callable $setup): static
+  {
+    $this->serviceSetup = $setup;
+    return $this;
+  }
+
   /** Initialize plugin */
   public function init(Api|Service|Endpoint $context): static
   {
@@ -36,7 +54,7 @@ class CSRFPlugin extends ApiPlugin
 
     $context
       // Add service for retrieving a token
-      ->addService(new CSRFPluginService($this))
+      ->addService(new CSRFPluginService($this), $this->serviceSetup)
 
       // Add hooks for validating the token
       ->hookBeforePost(function () {
