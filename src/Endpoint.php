@@ -14,6 +14,7 @@ class Endpoint
   use HasPluginList;
   use HasAuthentication;
   use HasAuthorization;
+  use HasAuthOptOut;
   use HasLock;
 
   /**

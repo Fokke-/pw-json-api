@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.5.0
+
+### New features
+
+- `skipAuthentication()` and `skipAuthorization()` methods for services and endpoints — opt out of authentication or authorization inherited from parent levels
+
 ## 2.4.0
 
 ### New features

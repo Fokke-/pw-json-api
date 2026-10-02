@@ -105,23 +105,32 @@ class ApiSearchEndpointResult
   }
 
   /**
+   * Get endpoint and services from the nearest level to the farthest
+   *
+   * @return array<Endpoint|Service>
+   */
+  private function getLevelsLeafToRoot(): array
+  {
+    return [$this->endpoint, ...array_reverse($this->serviceSequence)];
+  }
+
+  /**
    * Resolve authenticator from the nearest level
    *
-   * Order: Endpoint → Services (leaf → root) → Api
+   * Order: Endpoint → Services (leaf → root) → Api. A level that skips
+   * authentication stops the search, unless it has its own authenticator.
    */
   public function resolveAuthenticator(Api $api): Authenticator|null
   {
-    $authenticator = $this->endpoint->_getAuthenticator();
-
-    if ($authenticator !== null) {
-      return $authenticator;
-    }
-
-    foreach (array_reverse($this->serviceSequence) as $service) {
-      $authenticator = $service->_getAuthenticator();
+    foreach ($this->getLevelsLeafToRoot() as $level) {
+      $authenticator = $level->_getAuthenticator();
 
       if ($authenticator !== null) {
         return $authenticator;
+      }
+
+      if ($level->_skipsAuthentication()) {
+        return null;
       }
     }
 
@@ -131,7 +140,10 @@ class ApiSearchEndpointResult
   /**
    * Resolve authorizers from all levels
    *
-   * Order: Api → Services (root → leaf) → Endpoint
+   * Collected from Endpoint → Services (leaf → root) → Api. A level that
+   * skips authorization stops the collection after its own authorizer.
+   *
+   * Returned in execution order: Api → Services (root → leaf) → Endpoint
    *
    * @return array<callable(AuthorizeArgs): bool>
    */
@@ -139,27 +151,25 @@ class ApiSearchEndpointResult
   {
     $authorizers = [];
 
+    foreach ($this->getLevelsLeafToRoot() as $level) {
+      $authorizer = $level->_getAuthorizer();
+
+      if ($authorizer !== null) {
+        $authorizers[] = $authorizer;
+      }
+
+      if ($level->_skipsAuthorization()) {
+        return array_reverse($authorizers);
+      }
+    }
+
     $apiAuthorizer = $api->_getAuthorizer();
 
     if ($apiAuthorizer !== null) {
       $authorizers[] = $apiAuthorizer;
     }
 
-    foreach ($this->serviceSequence as $service) {
-      $serviceAuthorizer = $service->_getAuthorizer();
-
-      if ($serviceAuthorizer !== null) {
-        $authorizers[] = $serviceAuthorizer;
-      }
-    }
-
-    $endpointAuthorizer = $this->endpoint->_getAuthorizer();
-
-    if ($endpointAuthorizer !== null) {
-      $authorizers[] = $endpointAuthorizer;
-    }
-
-    return $authorizers;
+    return array_reverse($authorizers);
   }
 
   /**

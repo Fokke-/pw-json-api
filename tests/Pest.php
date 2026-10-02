@@ -1,6 +1,13 @@
 <?php
 
-use ProcessWire\{Page, PageArray};
+use ProcessWire\{FoodService, FruitService, Page, PageArray, VegetableService};
+use PwJsonApi\{
+  ApiSearchEndpointResult,
+  AuthenticateArgs,
+  Authenticator,
+  Endpoint,
+  Service,
+};
 use function ProcessWire\wire;
 
 // Bootstrap PW
@@ -109,4 +116,45 @@ function getPageStackKeys(array $pages, string $key): \Generator
 function getFile(string $filename)
 {
   return fopen("/var/www/html/tests/fixtures/files/{$filename}", 'r');
+}
+
+/**
+ * Service chain /foo → /foo/bar → /foo/bar/baz
+ *
+ * @return array{foo: Service, bar: Service, baz: Service}
+ */
+function authChain(): array
+{
+  $chain = [
+    'foo' => new FoodService(),
+    'bar' => new FruitService(),
+    'baz' => new VegetableService(),
+  ];
+
+  foreach ($chain as $service) {
+    $service->_prepare();
+  }
+
+  return $chain;
+}
+
+/**
+ * Result for a request to an endpoint of the last service in the sequence
+ *
+ * @param Service[] $services
+ */
+function authChainRequest(array $services): ApiSearchEndpointResult
+{
+  return new ApiSearchEndpointResult(
+    new Endpoint('/'),
+    $services[array_key_last($services)],
+    $services,
+  );
+}
+
+function authChainAuthenticator(): Authenticator
+{
+  return new class extends Authenticator {
+    public function authenticate(AuthenticateArgs $args): void {}
+  };
 }
