@@ -132,6 +132,11 @@ class Api
           ->_addHeaders($headers);
       }
 
+      // Reject malformed request body. Deferred until after on-request
+      // hooks and OPTIONS handling, so that their headers (e.g. CORS)
+      // are included in the error response.
+      $request->_assertValidBody();
+
       // Try to find handler matching the request method
       $handler = $request->methodEnum
         ? $result->endpoint->getHandler($request->methodEnum)

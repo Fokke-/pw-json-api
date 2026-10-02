@@ -37,7 +37,7 @@ Properties like `body`, `queryParams`, `routeParams`, `headers`, `cookies`, and 
 
 ### Body
 
-If the request `Content-Type` header is `application/json`, the request body will be parsed from `php://input`. In such cases, the body must be a valid JSON string. If the JSON is malformed, an `ApiException` will be thrown.
+If the request `Content-Type` header is `application/json`, the request body will be parsed from `php://input`. In such cases, the body must be a valid JSON string. If the JSON is malformed, an `ApiException` will be thrown, resulting in a `400` response. The exception is thrown after [on-request hooks](/request-hooks#hookonrequest), and `OPTIONS` requests ignore it.
 
 For all other cases, the body will contain the raw value of `$_POST` superglobal.
 

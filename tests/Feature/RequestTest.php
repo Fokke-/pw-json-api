@@ -327,4 +327,5 @@ test('toArray returns all properties', function () {
     'body',
     'files',
   ]);
+  expect($request)->not->toHaveKey('_bodyException');
 });

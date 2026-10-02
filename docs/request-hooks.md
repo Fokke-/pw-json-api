@@ -149,11 +149,10 @@ Like other hooks, on-request hooks can be defined on the API, service, or endpoi
 
 To reject a request, throw an `ApiException`. [Error hooks](/error-hooks) are executed, and the headers set so far are included in the error response.
 
-::: warning Limitations
+If the request body is malformed JSON, `$args->request->body` is `null`. The request is rejected with a `400` response after the on-request hooks, so their headers are included. `OPTIONS` requests ignore the body.
 
-- Requests to paths that do not match any endpoint are not handled by the API, so on-request hooks do not run for them.
-- If the request body is malformed JSON, the request is rejected before on-request hooks run, and the error response does not include their headers.
-
+::: warning
+Requests to paths that do not match any endpoint are not handled by the API, so on-request hooks do not run for them.
 :::
 
 ## Hook arguments

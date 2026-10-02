@@ -118,14 +118,15 @@ The request handling phase runs for each incoming HTTP request that matches a re
 1. **Request object** — A `Request` object is created containing the HTTP method, path, query parameters, headers, body, and files. [Read more about requests](#requests).
 2. **On-request hooks** — On-request hooks are executed in order: API → services → endpoint. Headers set by them are added to every response, including the `OPTIONS` and error responses. [Read more about on-request hooks](#hookonrequest).
 3. **OPTIONS shortcut** — If the request method is `OPTIONS`, a `200` response with an `Allow` header is returned immediately. No other hooks or handlers are executed. [Read more about endpoints](#endpoints).
-4. **Handler lookup** — The library looks up a handler for the request method. If no handler is registered, a `405` response with an `Allow` header is returned. [Read more about endpoints](#endpoints).
-5. **Authentication** — If an authenticator is configured, it runs now. The closest level to the endpoint wins (endpoint > service > API). A level that [opts out](#opting-out) with `skipAuthentication()` ignores the authenticators of the levels above it. [Read more about authentication](#authentication-authorization).
-6. **Authorization** — All authorization callbacks in the chain run in order: API → services → endpoint. A level that [opts out](#opting-out) with `skipAuthorization()` ignores the callbacks of the levels above it. [Read more about authorization](#authorization).
-7. **Before hooks** — Before hooks are executed in order: API → service → endpoint. [Read more about hook execution order](#hook-execution-order).
-8. **Handler execution** — The endpoint handler runs and returns a `Response`. [Read more about responses](#responses).
-9. **After hooks** — After hooks are executed in order: endpoint → service → API. [Read more about hook execution order](#hook-execution-order).
-10. **Error handling** — If an exception is thrown at any point, it is converted to a JSON response. For exceptions thrown after the request object is created, error hooks are executed first. [Read more about error handling](#error-handling). [Read more about error hooks](#error-hooks).
-11. **JSON response** — The final response is encoded as JSON and sent to the client.
+4. **Body validation** — If the request body is malformed JSON, a `400` response is returned. [Read more about requests](#body).
+5. **Handler lookup** — The library looks up a handler for the request method. If no handler is registered, a `405` response with an `Allow` header is returned. [Read more about endpoints](#endpoints).
+6. **Authentication** — If an authenticator is configured, it runs now. The closest level to the endpoint wins (endpoint > service > API). A level that [opts out](#opting-out) with `skipAuthentication()` ignores the authenticators of the levels above it. [Read more about authentication](#authentication-authorization).
+7. **Authorization** — All authorization callbacks in the chain run in order: API → services → endpoint. A level that [opts out](#opting-out) with `skipAuthorization()` ignores the callbacks of the levels above it. [Read more about authorization](#authorization).
+8. **Before hooks** — Before hooks are executed in order: API → service → endpoint. [Read more about hook execution order](#hook-execution-order).
+9. **Handler execution** — The endpoint handler runs and returns a `Response`. [Read more about responses](#responses).
+10. **After hooks** — After hooks are executed in order: endpoint → service → API. [Read more about hook execution order](#hook-execution-order).
+11. **Error handling** — If an exception is thrown at any point, error hooks are executed and the exception is converted to a JSON response. [Read more about error handling](#error-handling). [Read more about error hooks](#error-hooks).
+12. **JSON response** — The final response is encoded as JSON and sent to the client.
 
 ---
 
@@ -594,7 +595,7 @@ Properties like `body`, `queryParams`, `routeParams`, `headers`, `cookies`, and 
 
 ### Body
 
-If the request `Content-Type` header is `application/json`, the request body will be parsed from `php://input`. In such cases, the body must be a valid JSON string. If the JSON is malformed, an `ApiException` will be thrown.
+If the request `Content-Type` header is `application/json`, the request body will be parsed from `php://input`. In such cases, the body must be a valid JSON string. If the JSON is malformed, an `ApiException` will be thrown, resulting in a `400` response. The exception is thrown after [on-request hooks](#hookonrequest), and `OPTIONS` requests ignore it.
 
 For all other cases, the body will contain the raw value of `$_POST` superglobal.
 
@@ -1462,11 +1463,10 @@ Like other hooks, on-request hooks can be defined on the API, service, or endpoi
 
 To reject a request, throw an `ApiException`. [Error hooks](#error-hooks) are executed, and the headers set so far are included in the error response.
 
-::: warning Limitations
+If the request body is malformed JSON, `$args->request->body` is `null`. The request is rejected with a `400` response after the on-request hooks, so their headers are included. `OPTIONS` requests ignore the body.
 
-- Requests to paths that do not match any endpoint are not handled by the API, so on-request hooks do not run for them.
-- If the request body is malformed JSON, the request is rejected before on-request hooks run, and the error response does not include their headers.
-
+::: warning
+Requests to paths that do not match any endpoint are not handled by the API, so on-request hooks do not run for them.
 :::
 
 ## Hook arguments

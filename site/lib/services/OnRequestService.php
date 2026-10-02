@@ -22,6 +22,12 @@ class OnRequestService extends Service
         $args->headers['X-Order'] .= ',endpoint';
       });
 
+    $this->addEndpoint('/post')->post(function ($args) {
+      return new Response([
+        'handled' => true,
+      ]);
+    });
+
     $this->addEndpoint('/handler-header')->get(function ($args) {
       return (new Response([
         'handled' => true,

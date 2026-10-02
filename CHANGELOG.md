@@ -9,6 +9,10 @@
 - `isSafeMethod` property for `Request` and `isSafe()` method for `RequestMethod` — check whether the request method is safe (`GET`, `HEAD`, `OPTIONS`)
 - `hookOnRequest()` for API, services and endpoints — run code and set response headers before any other processing, including OPTIONS responses and authentication (e.g. CORS headers)
 
+### Bug fixes
+
+- Error hooks are now executed for requests with a malformed JSON body
+
 ## 2.4.0
 
 ### New features

@@ -242,3 +242,33 @@ test('response header overrides on-request hook header', function () {
 
   expect($res->getHeaderLine('X-On-Request'))->toBe('handler');
 });
+
+test('malformed JSON is rejected after on-request hooks', function () {
+  $client = getHttp('on-request-api');
+  $res = $client->post('on-request/post', [
+    'headers' => [
+      'Content-Type' => 'application/json',
+    ],
+    'body' => '{invalid json',
+  ]);
+  $json = resToJson($res);
+
+  expect($res->getStatusCode())->toBe(400);
+  expect($json['error'])->toBe('Malformed request payload');
+  expect($json['error_hook'])->toBeTrue();
+  expect($res->getHeaderLine('X-On-Request'))->toBe('api');
+});
+
+test('OPTIONS request ignores malformed JSON', function () {
+  $client = getHttp('on-request-api');
+  $res = $client->request('OPTIONS', 'on-request/post', [
+    'headers' => [
+      'Content-Type' => 'application/json',
+    ],
+    'body' => '{invalid json',
+  ]);
+
+  expect($res->getStatusCode())->toBe(200);
+  expect($res->getHeaderLine('Allow'))->toBe('OPTIONS, POST');
+  expect($res->getHeaderLine('X-On-Request'))->toBe('api');
+});

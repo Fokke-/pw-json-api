@@ -78,6 +78,13 @@ class Request
    */
   public readonly array $files;
 
+  /**
+   * Exception from parsing the request body, thrown by _assertValidBody()
+   *
+   * @internal
+   */
+  private ApiException|null $_bodyException = null;
+
   public function __construct(HookEvent $event)
   {
     $this->method = $this->getServerVar('REQUEST_METHOD') ?? '';
@@ -94,7 +101,29 @@ class Request
     $this->protocol = $this->getServerVar('SERVER_PROTOCOL');
     $this->files = $this->getFiles();
     $this->routeParams = $this->getRouteParams($event);
-    $this->body = $this->getBody($this->contentType);
+
+    try {
+      $this->body = $this->getBody($this->contentType);
+    } catch (ApiException $e) {
+      $this->body = null;
+      $this->_bodyException = $e;
+    }
+  }
+
+  /**
+   * Throw the exception from parsing the request body, if any
+   *
+   * Deferred from the constructor so that the request can be processed
+   * up to the point where the body is needed.
+   *
+   * @internal
+   * @throws ApiException If the request body is malformed
+   */
+  public function _assertValidBody(): void
+  {
+    if ($this->_bodyException !== null) {
+      throw $this->_bodyException;
+    }
   }
 
   protected function getServerVar(string $key): string|null
@@ -296,13 +325,23 @@ class Request
   }
 
   /**
-   * Return request data as an associative array
+   * Return public request properties as an associative array
    *
    * @return array<string, mixed>
    */
   public function toArray(): array
   {
-    $data = get_object_vars($this);
-    return $data;
+    $properties = (new \ReflectionObject($this))->getProperties(
+      \ReflectionProperty::IS_PUBLIC,
+    );
+
+    return array_reduce(
+      $properties,
+      function (array $data, \ReflectionProperty $property) {
+        $data[$property->getName()] = $property->getValue($this);
+        return $data;
+      },
+      [],
+    );
   }
 }
