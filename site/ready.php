@@ -371,6 +371,22 @@ if ($page->template->name !== 'admin') {
     )
     ->run();
 
+  // On-request hooks
+  (new Api())
+    ->setBasePath('on-request-api')
+    ->hookOnRequest(function ($args) {
+      $args->headers['X-On-Request'] = 'api';
+      $args->headers['X-Order'] = 'api';
+    })
+    ->hookOnError(function ($args) {
+      $args->response->with([
+        'error_hook' => true,
+      ]);
+    })
+    ->addService(new OnRequestService())
+    ->addService((new ChainService('gated'))->authenticate(new GateAuth()))
+    ->run();
+
   // ProcessWireAuth (mirrors docs/processwire-auth.md setup example)
   (new Api())
     ->setBasePath('pw-auth-api')

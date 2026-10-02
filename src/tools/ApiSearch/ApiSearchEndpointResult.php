@@ -173,6 +173,31 @@ class ApiSearchEndpointResult
   }
 
   /**
+   * Resolve onRequest hooks from result endpoint and all of its services
+   *
+   * Order: Services (root → leaf) → Endpoint
+   *
+   * @return callable[]
+   */
+  public function resolveOnRequestHooks(): array
+  {
+    $serviceHooks = array_merge(
+      ...array_map(
+        static fn($service) => $service->getRequestHooks(
+          RequestHookKey::OnRequest,
+        ),
+        $this->serviceSequence,
+      ),
+    );
+
+    $endpointHooks = [
+      ...$this->endpoint->getRequestHooks(RequestHookKey::OnRequest),
+    ];
+
+    return [...$serviceHooks, ...$endpointHooks];
+  }
+
+  /**
    * Resolve onError hooks from result endpoint and all of its services
    *
    * @return callable[]

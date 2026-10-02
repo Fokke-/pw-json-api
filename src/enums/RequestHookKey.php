@@ -51,4 +51,7 @@ enum RequestHookKey
 
   /** On error */
   case OnError;
+
+  /** On request, before any other processing */
+  case OnRequest;
 }

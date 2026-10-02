@@ -42,6 +42,7 @@ test('options method is always accepted', function () {
   $res = $client->request('OPTIONS', 'food');
   expect($res->getStatusCode())->toBe(200);
   expect($res->getHeaderLine('Allow'))->toBe('OPTIONS, GET');
+  expect((string) $res->getBody())->toBe('');
 });
 
 test('request method handlers', function () {

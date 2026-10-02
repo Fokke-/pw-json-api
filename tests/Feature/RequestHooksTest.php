@@ -183,3 +183,62 @@ test('hookBeforeGet does not fire on POST request', function () {
 
   expect($json)->not->toHaveKey('hook_before_get_fired');
 });
+
+// --- hookOnRequest ---
+
+test('on-request hook headers are added to a successful response', function () {
+  $client = getHttp('on-request-api');
+  $res = $client->get('on-request');
+
+  expect($res->getStatusCode())->toBe(200);
+  expect($res->getHeaderLine('X-On-Request'))->toBe('api');
+});
+
+test('on-request hooks run in order: api, service, endpoint', function () {
+  $client = getHttp('on-request-api');
+  $res = $client->get('on-request');
+
+  expect($res->getHeaderLine('X-Order'))->toBe('api,service,endpoint');
+});
+
+test('on-request hook headers are added to OPTIONS response', function () {
+  $client = getHttp('on-request-api');
+  $res = $client->request('OPTIONS', 'on-request');
+
+  expect($res->getStatusCode())->toBe(200);
+  expect($res->getHeaderLine('Allow'))->toBe('OPTIONS, GET');
+  expect($res->getHeaderLine('X-On-Request'))->toBe('api');
+});
+
+test('on-request hook headers are added to 405 response', function () {
+  $client = getHttp('on-request-api');
+  $res = $client->post('on-request');
+
+  expect($res->getStatusCode())->toBe(405);
+  expect($res->getHeaderLine('X-On-Request'))->toBe('api');
+});
+
+test('on-request hooks run before authentication', function () {
+  $client = getHttp('on-request-api');
+  $res = $client->get('gated');
+
+  expect($res->getStatusCode())->toBe(403);
+  expect($res->getHeaderLine('X-On-Request'))->toBe('api');
+});
+
+test('exception thrown in on-request hook runs error hooks', function () {
+  $client = getHttp('on-request-api');
+  $res = $client->get('on-request/throw');
+  $json = resToJson($res);
+
+  expect($res->getStatusCode())->toBe(418);
+  expect($json['error_hook'])->toBeTrue();
+  expect($res->getHeaderLine('X-On-Request'))->toBe('api');
+});
+
+test('response header overrides on-request hook header', function () {
+  $client = getHttp('on-request-api');
+  $res = $client->get('on-request/handler-header');
+
+  expect($res->getHeaderLine('X-On-Request'))->toBe('handler');
+});

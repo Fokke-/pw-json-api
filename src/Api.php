@@ -86,8 +86,52 @@ class Api
   ): Response {
     $request = new Request($event);
 
+    /** @var array<string, string> */
+    $headers = [];
+
     // Get response from endpoint
     try {
+      // On-request hooks
+      $onRequestHooks = [
+        // API
+        ...$this->getRequestHooks(RequestHookKey::OnRequest),
+
+        // Services and endpoint
+        ...$result->resolveOnRequestHooks(),
+      ];
+
+      if (!empty($onRequestHooks)) {
+        $hookReturnOnRequest = new OnRequestHookReturn();
+        $hookReturnOnRequest->request = $request;
+        $hookReturnOnRequest->user = $this->wire->user;
+        $hookReturnOnRequest->event = $event;
+        $hookReturnOnRequest->endpoint = $result->endpoint;
+        $hookReturnOnRequest->service = $result->service;
+        $hookReturnOnRequest->services = $result->endpoint->services;
+        $hookReturnOnRequest->api = $this;
+
+        try {
+          foreach ($onRequestHooks as $hookFn) {
+            call_user_func($hookFn, $hookReturnOnRequest);
+          }
+        } finally {
+          $headers = $hookReturnOnRequest->headers;
+        }
+      }
+
+      // Handle OPTIONS requests with Allow header
+      if ($request->methodEnum === RequestMethod::Options) {
+        return (new Response(null))
+          ->header(
+            'Allow',
+            implode(', ', [
+              'OPTIONS',
+              ...$result->endpoint->getAllowedMethods(),
+            ]),
+          )
+          ->_addHeaders($headers);
+      }
+
       // Try to find handler matching the request method
       $handler = $request->methodEnum
         ? $result->endpoint->getHandler($request->methodEnum)
@@ -220,6 +264,8 @@ class Api
         }
       }
 
+      $response->_addHeaders($headers);
+
       // After hooks
       $afterHooks = [
         // Endpoint with services
@@ -248,6 +294,8 @@ class Api
         }
       }
     } catch (ApiException $e) {
+      $e->response->_addHeaders($headers);
+
       // Error hooks
       $errorHooks = [
         // Endpoint with services
@@ -290,8 +338,6 @@ class Api
   {
     $this->_initPlugins();
     $this->_lock();
-
-    $isOptions = ($_SERVER['REQUEST_METHOD'] ?? null) == 'OPTIONS';
 
     /** @var string[] */
     $serviceNames = [];
@@ -346,27 +392,7 @@ class Api
       $result->endpoint->_lock();
 
       // Add listener for the endpoint path
-      $this->wire->addHook($path, function (HookEvent $event) use (
-        $result,
-        $isOptions,
-      ) {
-        // Handle OPTIONS requests with Allow header
-        if ($isOptions) {
-          $methods = $result->endpoint->getAllowedMethods();
-
-          $response = (new Response())->header(
-            'Allow',
-            implode(', ', ['OPTIONS', ...$methods]),
-          );
-
-          header('Content-Type: application/json');
-          foreach ($response->getHeaders() as $name => $value) {
-            header("{$name}: {$value}");
-          }
-          http_response_code($response->code);
-          die($response->toJson($this->config->jsonFlags, false));
-        }
-
+      $this->wire->addHook($path, function (HookEvent $event) use ($result) {
         try {
           $response = $this->handleRequest($result, $event);
 

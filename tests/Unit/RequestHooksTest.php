@@ -1,5 +1,7 @@
 <?php
 
+use ProcessWire\{FoodService, FruitService};
+use PwJsonApi\{ApiSearchEndpointResult, Endpoint};
 use PwJsonApi\RequestHooks;
 use PwJsonApi\RequestHookKey;
 use PwJsonApi\HookTiming;
@@ -45,3 +47,38 @@ test('find()', function () {
   expect($hooks->find(HookTiming::Before, RequestMethod::Post))->toBeArray();
   expect($hooks->find(HookTiming::After, RequestMethod::Get))->toBeArray();
 });
+
+test('hookOnRequest() adds hook with OnRequest key', function () {
+  $endpoint = new Endpoint('/test');
+  $fn = function () {};
+
+  expect($endpoint->hookOnRequest($fn))->toBe($endpoint);
+  expect($endpoint->getRequestHooks(RequestHookKey::OnRequest))->toBe([$fn]);
+});
+
+test(
+  'resolveOnRequestHooks() orders services root to leaf, then endpoint',
+  function () {
+    $parent = new FoodService();
+    $parent->_prepare();
+    $parentFn = function () {};
+    $parent->hookOnRequest($parentFn);
+
+    $child = new FruitService();
+    $child->_prepare();
+    $childFn = function () {};
+    $child->hookOnRequest($childFn);
+
+    $endpoint = $child->findEndpoint('/');
+    $endpointFn = function () {};
+    $endpoint->hookOnRequest($endpointFn);
+
+    $result = new ApiSearchEndpointResult($endpoint, $child, [$parent, $child]);
+
+    expect($result->resolveOnRequestHooks())->toBe([
+      $parentFn,
+      $childFn,
+      $endpointFn,
+    ]);
+  },
+);

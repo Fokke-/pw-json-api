@@ -7,6 +7,7 @@
 - `skipAuthentication()` and `skipAuthorization()` methods for services and endpoints — opt out of authentication or authorization inherited from parent levels
 - `setupService()` method for `CSRFPlugin` — configure the service providing the token endpoint (e.g. to skip authentication)
 - `isSafeMethod` property for `Request` and `isSafe()` method for `RequestMethod` — check whether the request method is safe (`GET`, `HEAD`, `OPTIONS`)
+- `hookOnRequest()` for API, services and endpoints — run code and set response headers before any other processing, including OPTIONS responses and authentication (e.g. CORS headers)
 
 ## 2.4.0
 

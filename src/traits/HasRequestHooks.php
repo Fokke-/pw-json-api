@@ -47,6 +47,21 @@ trait HasRequestHooks
   }
 
   /**
+   * Hook on request, before any other processing
+   *
+   * Runs before OPTIONS responses, authentication, authorization and
+   * other hooks. Headers set in $headers are added to the response.
+   *
+   * @param callable(OnRequestHookReturn): void $handler
+   */
+  public function hookOnRequest(callable $handler): static
+  {
+    $this->_assertNotLocked('add hook');
+    $this->initRequestHooks()->add(RequestHookKey::OnRequest, $handler);
+    return $this;
+  }
+
+  /**
    * Hook before any request
    *
    * @param callable(RequestHookReturnBefore): void $handler
