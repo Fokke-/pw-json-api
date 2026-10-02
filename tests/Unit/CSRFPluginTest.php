@@ -1,5 +1,6 @@
 <?php
 
+use ProcessWire\WireException;
 use PwJsonApi\Api;
 use PwJsonApi\Plugins\CSRFPlugin;
 
@@ -33,3 +34,11 @@ test('token service does not skip authentication by default', function () {
   expect($service->_skipsAuthentication())->toBeFalse();
   expect($service->_skipsAuthorization())->toBeFalse();
 });
+
+test('initialized plugin rejects setupService()', function () {
+  $api = new Api();
+  $api->addPlugin(new CSRFPlugin());
+  $api->run();
+
+  $api->getPlugin(CSRFPlugin::class)->setupService(function ($service) {});
+})->throws(WireException::class, 'Cannot set up service');

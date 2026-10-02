@@ -33,10 +33,20 @@ class CSRFPlugin extends ApiPlugin
   /**
    * Configure the service providing the token endpoint
    *
+   * Must be called before the plugin is initialized, e.g. in the setup
+   * function of addPlugin().
+   *
    * @param callable(CSRFPluginService): void $setup
+   * @throws WireException If the plugin is already initialized
    */
   public function setupService(callable $setup): static
   {
+    if ($this->context !== null) {
+      throw new WireException(
+        'Cannot set up service: CSRFPlugin is already initialized.',
+      );
+    }
+
     $this->serviceSetup = $setup;
     return $this;
   }
