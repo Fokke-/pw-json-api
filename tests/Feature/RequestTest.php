@@ -68,6 +68,20 @@ test('request method handlers', function () {
   expect($json['request']['method'])->toBe('PATCH');
 });
 
+test('isSafeMethod', function (string $method, bool $expected) {
+  $client = getHttp();
+  $res = $client->request($method, 'request');
+  $json = resToJson($res);
+
+  expect($json['request']['isSafeMethod'])->toBe($expected);
+})->with([
+  'GET' => ['GET', true],
+  'PUT' => ['PUT', false],
+  'DELETE' => ['DELETE', false],
+  'POST' => ['POST', false],
+  'PATCH' => ['PATCH', false],
+]);
+
 test('dynamic path with one named argument', function () {
   $client = getHttp();
 
@@ -298,6 +312,7 @@ test('toArray returns all properties', function () {
   expect($request)->toHaveKeys([
     'method',
     'methodEnum',
+    'isSafeMethod',
     'path',
     'routeParams',
     'queryParams',

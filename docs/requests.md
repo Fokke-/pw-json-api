@@ -17,22 +17,23 @@ Request object can be accessed in callback functions of:
 Properties like `body`, `queryParams`, `routeParams`, `headers`, `cookies`, and `files` contain **raw, unsanitized input from the client**. Always sanitize values before using them — for example with ProcessWire's [$sanitizer API](https://processwire.com/api/ref/sanitizer/).
 :::
 
-| Property      | Type                  | Description                                                        |
-| ------------- | --------------------- | ------------------------------------------------------------------ |
-| `method`      | `string`              | Request method                                                     |
-| `methodEnum`  | `RequestMethod\|null` | Method as enum                                                     |
-| `path`        | `string\|null`        | Requested path                                                     |
-| `routeParams` | `array`               | Route parameters of [dynamic paths](/endpoints.html#dynamic-paths) |
-| `queryParams` | `array`               | Query parameters                                                   |
-| `headers`     | `array`               | Request headers                                                    |
-| `contentType` | `string\|null`        | `Content-Type` header                                              |
-| `accept`      | `string\|null`        | `Accept` header                                                    |
-| `cookies`     | `array`               | Shorthand for `$_COOKIE`                                           |
-| `ip`          | `string\|null`        | Shorthand for `$_SERVER['REMOTE_ADDR']`                            |
-| `userAgent`   | `string\|null`        | Shorthand for `$_SERVER['HTTP_USER_AGENT']`                        |
-| `protocol`    | `string\|null`        | Shorthand for `$_SERVER['SERVER_PROTOCOL']`                        |
-| `body`        | `mixed`               | Request body                                                       |
-| `files`       | `array`               | Normalized value of `$_FILES`                                      |
+| Property       | Type                  | Description                                                                                                                                    |
+| -------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `method`       | `string`              | Request method                                                                                                                                 |
+| `methodEnum`   | `RequestMethod\|null` | Method as enum                                                                                                                                 |
+| `isSafeMethod` | `bool`                | Whether the method is [safe](https://www.rfc-editor.org/rfc/rfc9110#section-9.2.1) (`GET`, `HEAD`, `OPTIONS`) <Badge type="tip" text="^2.5" /> |
+| `path`         | `string\|null`        | Requested path                                                                                                                                 |
+| `routeParams`  | `array`               | Route parameters of [dynamic paths](/endpoints.html#dynamic-paths)                                                                             |
+| `queryParams`  | `array`               | Query parameters                                                                                                                               |
+| `headers`      | `array`               | Request headers                                                                                                                                |
+| `contentType`  | `string\|null`        | `Content-Type` header                                                                                                                          |
+| `accept`       | `string\|null`        | `Accept` header                                                                                                                                |
+| `cookies`      | `array`               | Shorthand for `$_COOKIE`                                                                                                                       |
+| `ip`           | `string\|null`        | Shorthand for `$_SERVER['REMOTE_ADDR']`                                                                                                        |
+| `userAgent`    | `string\|null`        | Shorthand for `$_SERVER['HTTP_USER_AGENT']`                                                                                                    |
+| `protocol`     | `string\|null`        | Shorthand for `$_SERVER['SERVER_PROTOCOL']`                                                                                                    |
+| `body`         | `mixed`               | Request body                                                                                                                                   |
+| `files`        | `array`               | Normalized value of `$_FILES`                                                                                                                  |
 
 ### Body
 

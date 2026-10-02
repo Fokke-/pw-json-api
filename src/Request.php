@@ -18,6 +18,9 @@ class Request
   /** Method as enum */
   public readonly RequestMethod|null $methodEnum;
 
+  /** Whether the request method is safe (GET, HEAD, OPTIONS) */
+  public readonly bool $isSafeMethod;
+
   /** Requested path */
   public readonly string|null $path;
 
@@ -79,6 +82,7 @@ class Request
   {
     $this->method = $this->getServerVar('REQUEST_METHOD') ?? '';
     $this->methodEnum = RequestMethod::tryFrom($this->method);
+    $this->isSafeMethod = $this->methodEnum?->isSafe() ?? false;
     $this->path = $this->getPath($this->getServerVar('REQUEST_URI'));
     $this->queryParams = $this->getQueryParams();
     $this->headers = $this->getHeaders();

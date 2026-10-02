@@ -67,7 +67,13 @@ Authorization is configured by passing a callback to the `authorize()` method. T
 use PwJsonApi\AuthorizeArgs;
 
 $service->authorize(function (AuthorizeArgs $args) {
-  return $args->user->hasRole('editor');
+  // Modifying requests require the editor role
+  if (!$args->request->isSafeMethod) {
+    return $args->user->hasRole('editor');
+  }
+
+  // Other requests require the member role
+  return $args->user->hasRole('member');
 });
 ```
 
