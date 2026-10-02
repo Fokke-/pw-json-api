@@ -313,6 +313,64 @@ if ($page->template->name !== 'admin') {
     )
     ->run();
 
+  // Override: opt-out combined with a rule on the same level
+
+  // Authentication: parent authenticator is replaced
+  (new Api())
+    ->setBasePath('authn-override-a-api')
+    ->addService(
+      (new ChainService('foo', [
+        (new ChainService('bar'))
+          ->skipAuthentication()
+          ->authenticate(new PublicAuth()),
+      ]))->authenticate(new GateAuth()),
+    )
+    ->run();
+
+  // Authentication: own authenticator still runs
+  (new Api())
+    ->setBasePath('authn-override-b-api')
+    ->addService(
+      new ChainService('foo', [
+        (new ChainService('bar'))
+          ->skipAuthentication()
+          ->authenticate(new GateAuth()),
+      ]),
+    )
+    ->run();
+
+  // Authorization: parent authorizer is replaced
+  (new Api())
+    ->setBasePath('authz-override-a-api')
+    ->addService(
+      (new ChainService('foo', [
+        (new ChainService('bar'))
+          ->skipAuthorization()
+          ->authorize(function ($args) {
+            return true;
+          }),
+      ]))->authorize(function ($args) {
+        return false;
+      }),
+    )
+    ->run();
+
+  // Authorization: own authorizer still runs
+  (new Api())
+    ->setBasePath('authz-override-b-api')
+    ->addService(
+      (new ChainService('foo', [
+        (new ChainService('bar'))
+          ->skipAuthorization()
+          ->authorize(function ($args) {
+            return false;
+          }),
+      ]))->authorize(function ($args) {
+        return true;
+      }),
+    )
+    ->run();
+
   // ProcessWireAuth (mirrors docs/processwire-auth.md setup example)
   (new Api())
     ->setBasePath('pw-auth-api')

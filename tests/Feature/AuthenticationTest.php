@@ -198,6 +198,22 @@ test('opt-out chain', function (string $api, string $path, int $status) {
   'authn scenario 3: /foo/bar/baz' => ['authn-s3-api', 'foo/bar/baz', 200],
   'authn endpoint: /foo' => ['authn-endpoint-api', 'foo', 200],
   'authn endpoint: /foo/sibling' => ['authn-endpoint-api', 'foo/sibling', 403],
+  'authn override, parent replaced: /foo' => [
+    'authn-override-a-api',
+    'foo',
+    403,
+  ],
+  'authn override, parent replaced: /foo/bar' => [
+    'authn-override-a-api',
+    'foo/bar',
+    200,
+  ],
+  'authn override, own runs: /foo' => ['authn-override-b-api', 'foo', 200],
+  'authn override, own runs: /foo/bar' => [
+    'authn-override-b-api',
+    'foo/bar',
+    403,
+  ],
 
   // Authorization
   'authz scenario 1: /foo' => ['authz-s1-api', 'foo', 403],
@@ -209,4 +225,20 @@ test('opt-out chain', function (string $api, string $path, int $status) {
   'authz scenario 3: /foo/bar/baz' => ['authz-s3-api', 'foo/bar/baz', 200],
   'authz endpoint: /foo' => ['authz-endpoint-api', 'foo', 200],
   'authz endpoint: /foo/sibling' => ['authz-endpoint-api', 'foo/sibling', 403],
+  'authz override, parent replaced: /foo' => [
+    'authz-override-a-api',
+    'foo',
+    403,
+  ],
+  'authz override, parent replaced: /foo/bar' => [
+    'authz-override-a-api',
+    'foo/bar',
+    200,
+  ],
+  'authz override, own runs: /foo' => ['authz-override-b-api', 'foo', 200],
+  'authz override, own runs: /foo/bar' => [
+    'authz-override-b-api',
+    'foo/bar',
+    403,
+  ],
 ]);
