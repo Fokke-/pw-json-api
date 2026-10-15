@@ -49,3 +49,13 @@ test('plugin can only be installed on Api instance', function () {
   $plugin = new \PwJsonApi\Plugins\RateLimitPlugin();
   $plugin->init($service);
 })->throws(\ProcessWire\WireException::class);
+
+test('deprecation notice is not included in the response', function () {
+  $client = getHttp('rate-limit-api');
+  $res = $client->get('');
+  $body = (string) $res->getBody();
+
+  expect($res->getStatusCode())->toBe(200);
+  expect(json_decode($body, true))->toBeArray();
+  expect($body)->not->toContain('Deprecated');
+});

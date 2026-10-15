@@ -18,6 +18,10 @@
 - Exception handler now also handles exceptions thrown in hooks, authenticators, authorization callbacks and plugins, not only in the endpoint handler
 - CSRF token is no longer replaced after every request by default, which caused concurrent requests to fail. Set `rotateToken` to `true` to restore the previous behavior.
 
+### Deprecations
+
+- `RateLimitPlugin` is deprecated and will be removed in 3.0 — rate limiting belongs to the web server or a proxy
+
 ## 2.4.0
 
 ### New features
