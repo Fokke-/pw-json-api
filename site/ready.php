@@ -458,6 +458,21 @@ if ($page->template->name !== 'admin') {
     ->addService(new HandlerContextService())
     ->run();
 
+  // Path case: default (patterns lowercased)
+  (new Api())
+    ->setBasePath('path-case-api')
+    ->addService(new PathCaseService())
+    ->run();
+
+  // Path case: preserved in patterns
+  (new Api())
+    ->configure(function ($config) {
+      $config->preservePathCase = true;
+    })
+    ->setBasePath('path-case-preserve-api')
+    ->addService(new PathCaseService())
+    ->run();
+
   // Response encoding
   (new Api())
     ->setBasePath('encoding-api')

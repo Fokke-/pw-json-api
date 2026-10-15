@@ -175,3 +175,62 @@ function authChainAuthenticator(): Authenticator
     public function authenticate(AuthenticateArgs $args): void {}
   };
 }
+
+/**
+ * Exposes the private Utils::formatPath() method
+ */
+function formatPathForTest(string $path, bool $preservePatternCase): ?string
+{
+  $formatter = new class {
+    use \PwJsonApi\Utils;
+
+    public function format(string $path, bool $preserve): ?string
+    {
+      return $this->formatPath($path, $preserve);
+    }
+  };
+
+  return $formatter->format($path, $preservePatternCase);
+}
+
+/**
+ * Run an API with a single endpoint and collect deprecation notices
+ *
+ * @return string[]
+ */
+function collectPathDeprecations(string $path, bool $preserve): array
+{
+  $notices = [];
+
+  set_error_handler(function (int $level, string $message) use (&$notices) {
+    if ($level === E_USER_DEPRECATED) {
+      $notices[] = $message;
+    }
+    return true;
+  });
+
+  try {
+    $service = new class extends Service {
+      protected function init()
+      {
+        $this->setBasePath('/path-case-unit');
+      }
+    };
+
+    (new \PwJsonApi\Api())
+      ->configure(function ($config) use ($preserve) {
+        $config->preservePathCase = $preserve;
+      })
+      ->setBasePath('/unit')
+      ->addService($service, function ($service) use ($path) {
+        $service->addEndpoint($path)->get(function () {
+          return new \PwJsonApi\Response();
+        });
+      })
+      ->run();
+  } finally {
+    restore_error_handler();
+  }
+
+  return $notices;
+}

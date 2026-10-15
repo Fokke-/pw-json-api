@@ -10,6 +10,8 @@
 - `hookOnRequest()` for API, services and endpoints — run code and set response headers before any other processing, including OPTIONS responses and authentication (e.g. CORS headers)
 - `$endpoint`, `$service`, `$services` and `$api` properties added to `EndpointHandlerArgs`
 - `rotateToken` option for `CSRFPlugin` — replace the token after every successful state-changing request
+- `preservePathCase` configuration option — use endpoint paths exactly as defined, without lowercasing
+- `routeParam()` argument names are now case-insensitive
 
 ### Bug fixes
 
@@ -21,6 +23,7 @@
 ### Deprecations
 
 - `RateLimitPlugin` is deprecated and will be removed in 3.0 — rate limiting belongs to the web server or a proxy
+- Lowercasing endpoint paths is deprecated — `preservePathCase` will default to `true` in 3.0
 
 ## 2.4.0
 

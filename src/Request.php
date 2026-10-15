@@ -185,7 +185,18 @@ class Request
    */
   public function routeParam(string $key): string|null
   {
-    return $this->routeParams[$key] ?? null;
+    if (isset($this->routeParams[$key])) {
+      return $this->routeParams[$key];
+    }
+
+    // Argument names are case-insensitive
+    foreach ($this->routeParams as $name => $value) {
+      if (strtolower((string) $name) === strtolower($key)) {
+        return $value;
+      }
+    }
+
+    return null;
   }
 
   /**

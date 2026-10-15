@@ -28,6 +28,10 @@ $api->configure(function ($config) {
   // if (wire()->config->debug) {
   //   $config->jsonFlags |= JSON_PRETTY_PRINT;
   // }
+
+  // Use paths exactly as defined, without lowercasing
+  // (default: false, will be true in 3.0)
+  $config->preservePathCase = false;
 });
 ```
 

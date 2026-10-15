@@ -41,9 +41,14 @@ class ApiSearchEndpointResult
 
   /**
    * Resolve path for the endpoint
+   *
+   * When $preserveCase is true, the paths of the services and the endpoint
+   * are not lowercased.
    */
-  public function resolvePath(?string $basePath = null): string
-  {
+  public function resolvePath(
+    ?string $basePath = null,
+    bool $preserveCase = false,
+  ): string {
     return implode(
       '/',
       array_filter(
@@ -56,12 +61,14 @@ class ApiSearchEndpointResult
 
           // Service tree base paths
           ...array_map(
-            static fn(Service $service) => $service->getBasePath(),
+            static fn(Service $service) => $service->_getBasePath(
+              $preserveCase,
+            ),
             $this->serviceSequence,
           ),
 
           // Endpoint path
-          $this->endpoint->getPath(),
+          $this->endpoint->_getPath($preserveCase),
         ],
         static fn($segment) => !is_null($segment),
       ),

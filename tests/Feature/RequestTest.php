@@ -346,3 +346,49 @@ test('endpoint handler arguments', function () {
     'api' => 'PwJsonApi\\Api',
   ]);
 });
+
+// --- Path case ---
+
+test('route parameter can be read with original case', function (string $api) {
+  $client = getHttp($api);
+  $res = $client->get('path-case/products/123');
+  $json = resToJson($res);
+
+  expect($res->getStatusCode())->toBe(200);
+  expect($json['data']['camel'])->toBe('123');
+  expect($json['data']['lower'])->toBe('123');
+})->with(['path-case-api', 'path-case-preserve-api']);
+
+test('regex pattern keeps its case with preservePathCase', function () {
+  $client = getHttp('path-case-preserve-api');
+
+  // \D+ matches non-digits only
+  $res = $client->get('path-case/codes/abc');
+  expect($res->getStatusCode())->toBe(200);
+  expect(resToJson($res)['data']['code'])->toBe('abc');
+
+  expect($client->get('path-case/codes/123')->getStatusCode())->toBe(404);
+});
+
+test('literal path is lowercased by default', function () {
+  $client = getHttp('path-case-api');
+
+  expect($client->get('path-case/latest')->getStatusCode())->toBe(200);
+  expect($client->get('path-case/Latest')->getStatusCode())->toBe(404);
+});
+
+test('literal path is used as defined with preservePathCase', function () {
+  $client = getHttp('path-case-preserve-api');
+
+  expect($client->get('path-case/Latest')->getStatusCode())->toBe(200);
+  expect($client->get('path-case/latest')->getStatusCode())->toBe(404);
+});
+
+test('path deprecation notice is not included in the response', function () {
+  $client = getHttp('path-case-api');
+  $res = $client->get('path-case/products/123');
+  $body = (string) $res->getBody();
+
+  expect(json_decode($body, true))->toBeArray();
+  expect($body)->not->toContain('Deprecated');
+});

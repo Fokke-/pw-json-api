@@ -114,3 +114,11 @@ Querying `/animals/bunny-rabbit` results in a following JSON:
   }
 }
 ```
+
+Argument names are case-insensitive in `routeParam()`. <Badge type="tip" text="^2.5" />
+
+::: warning Path case
+By default, endpoint paths are lowercased. Since ProcessWire matches URLs case-sensitively, a path defined as `/Products` only responds to `/products`. Lowercasing also changes the meaning of regex patterns — for example, `\D` (non-digit) becomes `\d` (digit).
+
+Enable the `preservePathCase` [configuration option](/api-instance#configuration) to use paths exactly as defined. This will be the default in 3.0. <Badge type="tip" text="^2.5" />
+:::

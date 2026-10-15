@@ -428,7 +428,21 @@ class Api
       }
 
       $path = (function () use ($result) {
-        $out = $result->resolvePath($this->getBasePath());
+        $preserve = $this->config->preservePathCase;
+        $out = $result->resolvePath($this->_getBasePath($preserve), $preserve);
+
+        // Lowercasing changes the path
+        if (
+          !$preserve &&
+          $out !== $result->resolvePath($this->_getBasePath(true), true)
+        ) {
+          // Suppressed with @ so the notice never ends up in the response
+          // output. Error handlers and deprecation tooling still receive it.
+          @trigger_error(
+            "Endpoint path '{$out}' contains uppercase characters, which are lowercased. Set the preservePathCase option to true to use paths as defined. This will be the default in 3.0.",
+            E_USER_DEPRECATED,
+          );
+        }
 
         if ($this->config->trailingSlashes === null) {
           return $out . '/?';
