@@ -13,6 +13,7 @@
 
 - Error hooks are now executed for requests with a malformed JSON body
 - Responses that cannot be encoded as JSON now return a `500` error instead of an empty `200` response
+- Exception handler now also handles exceptions thrown in hooks, authenticators, authorization callbacks and plugins, not only in the endpoint handler
 
 ## 2.4.0
 

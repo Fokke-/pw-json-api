@@ -29,7 +29,10 @@ class Api
   /**
    * Exception handler
    *
-   * @var callable(ExceptionHandlerArgs): (Response|ApiException)|null $exceptionHandler
+   * Should return a Response or an ApiException, but as user code it may
+   * return anything, so the result is checked at runtime.
+   *
+   * @var callable(ExceptionHandlerArgs): mixed|null $exceptionHandler
    */
   private $exceptionHandler = null;
 
@@ -88,6 +91,9 @@ class Api
 
     /** @var array<string, string> */
     $headers = [];
+
+    // Exception already passed to the exception handler without a result
+    $unhandledException = null;
 
     // Get response from endpoint
     try {
@@ -241,30 +247,15 @@ class Api
 
         // For other exception types, try to get response
         // from custom exception handler function.
-        if (is_callable($this->exceptionHandler)) {
-          $exceptionHandlerArgs = new ExceptionHandlerArgs();
-          $exceptionHandlerArgs->exception = $e;
-          $exceptionHandlerArgs->request = $request;
-          $exceptionHandlerArgs->user = $this->wire->user;
-          $exceptionHandlerArgs->event = $event;
-          $exceptionHandlerArgs->endpoint = $result->endpoint;
-          $exceptionHandlerArgs->service = $result->service;
-          $exceptionHandlerArgs->services = $result->endpoint->services;
-          $exceptionHandlerArgs->api = $this;
+        // A Response from the handler continues to after hooks.
+        $handled = $this->callExceptionHandler($e, $request, $event, $result);
 
-          $exceptionHandlerResult = call_user_func(
-            $this->exceptionHandler,
-            $exceptionHandlerArgs,
-          );
-
-          if ($exceptionHandlerResult instanceof Response) {
-            $response = $exceptionHandlerResult;
-          } elseif ($exceptionHandlerResult instanceof ApiException) {
-            throw $exceptionHandlerResult;
-          } else {
-            throw $e;
-          }
+        if ($handled instanceof Response) {
+          $response = $handled;
+        } elseif ($handled instanceof ApiException) {
+          throw $handled;
         } else {
+          $unhandledException = $e;
           throw $e;
         }
       }
@@ -299,38 +290,106 @@ class Api
         }
       }
     } catch (ApiException $e) {
-      $e->response->_addHeaders($headers);
+      $this->runErrorHooks($e, $headers, $request, $event, $result);
+      throw $e;
+    } catch (\Throwable $e) {
+      // Exceptions thrown outside the endpoint handler (hooks,
+      // authenticators, authorizers and plugins). A Response from the
+      // exception handler is returned as is, without after hooks.
+      if ($e === $unhandledException) {
+        throw $e;
+      }
 
-      // Error hooks
-      $errorHooks = [
-        // Endpoint with services
-        ...$result->resolveErrorHooks(),
+      $handled = $this->callExceptionHandler($e, $request, $event, $result);
 
-        // API
-        ...$this->getRequestHooks(RequestHookKey::OnError),
-      ];
+      if ($handled instanceof Response) {
+        return $handled->_addHeaders($headers);
+      }
 
-      if (!empty($errorHooks)) {
-        $hookReturnError = new ErrorHookReturn();
-        $hookReturnError->request = $request;
-        $hookReturnError->user = $this->wire->user;
-        $hookReturnError->event = $event;
-        $hookReturnError->endpoint = $result->endpoint;
-        $hookReturnError->service = $result->service;
-        $hookReturnError->services = $result->endpoint->services;
-        $hookReturnError->api = $this;
-        $hookReturnError->exception = $e;
-        $hookReturnError->response = $e->response;
-
-        foreach ($errorHooks as $hookFn) {
-          call_user_func($hookFn, $hookReturnError);
-        }
+      if ($handled instanceof ApiException) {
+        $this->runErrorHooks($handled, $headers, $request, $event, $result);
+        throw $handled;
       }
 
       throw $e;
     }
 
     return $response;
+  }
+
+  /**
+   * Pass an exception to the custom exception handler, if defined
+   *
+   * Returns null if there is no handler, or it did not return
+   * a Response or an ApiException.
+   */
+  private function callExceptionHandler(
+    \Throwable $exception,
+    Request $request,
+    HookEvent $event,
+    ApiSearchEndpointResult $result,
+  ): Response|ApiException|null {
+    if (!is_callable($this->exceptionHandler)) {
+      return null;
+    }
+
+    $exceptionHandlerArgs = new ExceptionHandlerArgs();
+    $exceptionHandlerArgs->exception = $exception;
+    $exceptionHandlerArgs->request = $request;
+    $exceptionHandlerArgs->user = $this->wire->user;
+    $exceptionHandlerArgs->event = $event;
+    $exceptionHandlerArgs->endpoint = $result->endpoint;
+    $exceptionHandlerArgs->service = $result->service;
+    $exceptionHandlerArgs->services = $result->endpoint->services;
+    $exceptionHandlerArgs->api = $this;
+
+    $handled = call_user_func($this->exceptionHandler, $exceptionHandlerArgs);
+
+    return $handled instanceof Response || $handled instanceof ApiException
+      ? $handled
+      : null;
+  }
+
+  /**
+   * Add on-request headers to the error response and run error hooks
+   *
+   * @param array<string, string> $headers
+   */
+  private function runErrorHooks(
+    ApiException $exception,
+    array $headers,
+    Request $request,
+    HookEvent $event,
+    ApiSearchEndpointResult $result,
+  ): void {
+    $exception->response->_addHeaders($headers);
+
+    $errorHooks = [
+      // Endpoint with services
+      ...$result->resolveErrorHooks(),
+
+      // API
+      ...$this->getRequestHooks(RequestHookKey::OnError),
+    ];
+
+    if (empty($errorHooks)) {
+      return;
+    }
+
+    $hookReturnError = new ErrorHookReturn();
+    $hookReturnError->request = $request;
+    $hookReturnError->user = $this->wire->user;
+    $hookReturnError->event = $event;
+    $hookReturnError->endpoint = $result->endpoint;
+    $hookReturnError->service = $result->service;
+    $hookReturnError->services = $result->endpoint->services;
+    $hookReturnError->api = $this;
+    $hookReturnError->exception = $exception;
+    $hookReturnError->response = $exception->response;
+
+    foreach ($errorHooks as $hookFn) {
+      call_user_func($hookFn, $hookReturnError);
+    }
   }
 
   /**

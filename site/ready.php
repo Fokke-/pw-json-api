@@ -387,6 +387,54 @@ if ($page->template->name !== 'admin') {
     ->addService((new ChainService('gated'))->authenticate(new GateAuth()))
     ->run();
 
+  // Exception handler in all phases: returns Response
+  (new Api())
+    ->setBasePath('exception-phase-api')
+    ->hookOnRequest(function ($args) {
+      $args->headers['X-On-Request'] = 'api';
+    })
+    ->handleException(function ($args) {
+      return (new Response([
+        'handled' => true,
+        'message' => $args->exception->getMessage(),
+      ]))->code(500);
+    })
+    ->addService(new ExceptionPhaseService())
+    ->run();
+
+  // Exception handler in all phases: returns ApiException
+  (new Api())
+    ->setBasePath('exception-phase-api-exception')
+    ->handleException(function ($args) {
+      return (new ApiException($args->exception->getMessage()))->code(418);
+    })
+    ->hookOnError(function ($args) {
+      $args->response->with([
+        'error_hook' => true,
+      ]);
+    })
+    ->addService(new ExceptionPhaseService())
+    ->run();
+
+  // Exception handler returns nothing on the first call
+  (new Api())
+    ->setBasePath('exception-phase-api-unhandled')
+    ->handleException(function ($args) {
+      static $calls = 0;
+      $calls++;
+
+      // A second call would mean the exception was handled twice
+      return $calls > 1 ? new Response(['called_twice' => true]) : null;
+    })
+    ->addService(new ExceptionPhaseService())
+    ->run();
+
+  // No exception handler
+  (new Api())
+    ->setBasePath('exception-phase-api-none')
+    ->addService(new ExceptionPhaseService())
+    ->run();
+
   // Response encoding
   (new Api())
     ->setBasePath('encoding-api')

@@ -7,7 +7,7 @@ description: 'Throw ApiException to return structured error responses with custo
 The library catches any exception derived from the `ApiException` class and converts it to a response. You can throw an `ApiException` at any time to halt the process.
 
 ::: tip
-To handle other exceptions, such as `WireException`, you need to specify custom handling function by calling `handleException()` method of the API instance. [Read more about exception handling](api-instance.html#exception-handling).
+To handle other exceptions, such as `WireException`, you need to specify custom handling function by calling `handleException()` method of the API instance. It receives exceptions thrown at any point of the request handling, including hooks, authenticators, and plugins. Without it, other exceptions are passed to ProcessWire, which renders its own error page. [Read more about exception handling](api-instance.html#exception-handling).
 :::
 
 ## Example exception

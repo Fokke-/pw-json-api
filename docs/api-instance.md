@@ -112,6 +112,12 @@ You can access the following properties via the `$args` parameter of the handler
 
 You need to return either a `Response` or an `ApiException` from the handler.
 
+The handler receives exceptions thrown at any point of the request handling: in the endpoint handler, in request hooks, in authenticators and authorization callbacks, and in plugins. <Badge type="tip" text="^2.5" />
+
+- **`ApiException`** — handled like any other `ApiException`: [error hooks](/error-hooks) are executed and an error response is returned.
+- **`Response`** — returned to the client. If the exception was thrown in the endpoint handler, after hooks are executed as usual. Otherwise the response is returned as is.
+- **Anything else** — the original exception is passed to ProcessWire. The same happens if no exception handler is defined.
+
 ```php
 $api->handleException(function ($args) {
   // Handle WireExceptions

@@ -125,7 +125,7 @@ The request handling phase runs for each incoming HTTP request that matches a re
 8. **Before hooks** — Before hooks are executed in order: API → service → endpoint. [Read more about hook execution order](#hook-execution-order).
 9. **Handler execution** — The endpoint handler runs and returns a `Response`. [Read more about responses](#responses).
 10. **After hooks** — After hooks are executed in order: endpoint → service → API. [Read more about hook execution order](#hook-execution-order).
-11. **Error handling** — If an exception is thrown at any point, error hooks are executed and the exception is converted to a JSON response. [Read more about error handling](#error-handling). [Read more about error hooks](#error-hooks).
+11. **Error handling** — If an `ApiException` is thrown at any point, error hooks are executed and the exception is converted to a JSON response. Other exceptions are passed to the [exception handler](#exception-handling), if defined. [Read more about error handling](#error-handling). [Read more about error hooks](#error-hooks).
 12. **JSON response** — The final response is encoded as JSON and sent to the client.
 
 ---
@@ -239,6 +239,12 @@ You can access the following properties via the `$args` parameter of the handler
 | `api`       | `Api`                    | API instance                 |
 
 You need to return either a `Response` or an `ApiException` from the handler.
+
+The handler receives exceptions thrown at any point of the request handling: in the endpoint handler, in request hooks, in authenticators and authorization callbacks, and in plugins. <Badge type="tip" text="^2.5" />
+
+- **`ApiException`** — handled like any other `ApiException`: [error hooks](#error-hooks) are executed and an error response is returned.
+- **`Response`** — returned to the client. If the exception was thrown in the endpoint handler, after hooks are executed as usual. Otherwise the response is returned as is.
+- **Anything else** — the original exception is passed to ProcessWire. The same happens if no exception handler is defined.
 
 ```php
 $api->handleException(function ($args) {
@@ -837,7 +843,7 @@ $response->toArray();
 The library catches any exception derived from the `ApiException` class and converts it to a response. You can throw an `ApiException` at any time to halt the process.
 
 ::: tip
-To handle other exceptions, such as `WireException`, you need to specify custom handling function by calling `handleException()` method of the API instance. [Read more about exception handling](#exception-handling).
+To handle other exceptions, such as `WireException`, you need to specify custom handling function by calling `handleException()` method of the API instance. It receives exceptions thrown at any point of the request handling, including hooks, authenticators, and plugins. Without it, other exceptions are passed to ProcessWire, which renders its own error page. [Read more about exception handling](#exception-handling).
 :::
 
 ## Example exception

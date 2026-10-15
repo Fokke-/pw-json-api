@@ -31,5 +31,5 @@ The request handling phase runs for each incoming HTTP request that matches a re
 8. **Before hooks** — Before hooks are executed in order: API → service → endpoint. [Read more about hook execution order](/request-hooks#hook-execution-order).
 9. **Handler execution** — The endpoint handler runs and returns a `Response`. [Read more about responses](/responses).
 10. **After hooks** — After hooks are executed in order: endpoint → service → API. [Read more about hook execution order](/request-hooks#hook-execution-order).
-11. **Error handling** — If an exception is thrown at any point, error hooks are executed and the exception is converted to a JSON response. [Read more about error handling](/error-handling). [Read more about error hooks](/error-hooks).
+11. **Error handling** — If an `ApiException` is thrown at any point, error hooks are executed and the exception is converted to a JSON response. Other exceptions are passed to the [exception handler](/api-instance#exception-handling), if defined. [Read more about error handling](/error-handling). [Read more about error hooks](/error-hooks).
 12. **JSON response** — The final response is encoded as JSON and sent to the client.
