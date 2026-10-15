@@ -387,6 +387,12 @@ if ($page->template->name !== 'admin') {
     ->addService((new ChainService('gated'))->authenticate(new GateAuth()))
     ->run();
 
+  // Response encoding
+  (new Api())
+    ->setBasePath('encoding-api')
+    ->addService(new EncodingService())
+    ->run();
+
   // ProcessWireAuth (mirrors docs/processwire-auth.md setup example)
   (new Api())
     ->setBasePath('pw-auth-api')

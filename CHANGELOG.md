@@ -12,6 +12,7 @@
 ### Bug fixes
 
 - Error hooks are now executed for requests with a malformed JSON body
+- Responses that cannot be encoded as JSON now return a `500` error instead of an empty `200` response
 
 ## 2.4.0
 

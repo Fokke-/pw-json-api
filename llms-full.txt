@@ -159,6 +159,10 @@ $api->configure(function ($config) {
 });
 ```
 
+:::tip <Badge type="tip" text="^2.5" />
+If a response cannot be encoded as JSON — for example, it contains invalid UTF-8 or a `NAN` value — a `500` response with the error `Failed to encode response` is returned instead. To replace invalid UTF-8 characters instead of failing, add `JSON_INVALID_UTF8_SUBSTITUTE` to `jsonFlags`.
+:::
+
 ## Base path
 
 All endpoint paths will be prefixed with the base path. You can set a custom base path with `setBasePath()`. The default value is `/`.

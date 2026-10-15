@@ -21,6 +21,12 @@ class ResponseHeaderService extends Service
         ->header('X-Second', 'two');
     });
 
+    $this->addEndpoint('/content-type')->get(function () {
+      return (new Response([
+        'message' => 'Success!',
+      ]))->header('Content-Type', 'application/vnd.api+json');
+    });
+
     $this->addEndpoint('/error')->get(function () {
       throw (new ApiException('Test error'))->header(
         'X-Error-Header',

@@ -35,3 +35,24 @@ test('headers set in after hooks are included in the response', function () {
   expect($res->getStatusCode())->toBe(200);
   expect($res->getHeaderLine('X-After-Hook-Header'))->toBe('after-hook-value');
 });
+
+test('response has JSON content type by default', function () {
+  $client = getHttp('response-headers');
+  $res = $client->get('');
+
+  expect($res->getHeaderLine('Content-Type'))->toBe('application/json');
+});
+
+test('error response has JSON content type', function () {
+  $client = getHttp('response-headers');
+  $res = $client->get('error');
+
+  expect($res->getHeaderLine('Content-Type'))->toBe('application/json');
+});
+
+test('content type set by handler is kept', function () {
+  $client = getHttp('response-headers');
+  $res = $client->get('content-type');
+
+  expect($res->getHeaderLine('Content-Type'))->toBe('application/vnd.api+json');
+});

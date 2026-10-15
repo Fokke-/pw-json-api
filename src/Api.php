@@ -399,26 +399,43 @@ class Api
       // Add listener for the endpoint path
       $this->wire->addHook($path, function (HookEvent $event) use ($result) {
         try {
-          $response = $this->handleRequest($result, $event);
-
-          header('Content-Type: application/json');
-          foreach ($response->getHeaders() as $name => $value) {
-            header("{$name}: {$value}");
-          }
-          http_response_code($response->code);
-          echo $response->toJson($this->config->jsonFlags);
-          die();
+          $this->send($this->handleRequest($result, $event), true);
         } catch (ApiException $e) {
-          // Output error
-          header('Content-Type: application/json');
-          foreach ($e->response->getHeaders() as $name => $value) {
-            header("{$name}: {$value}");
-          }
-          http_response_code($e->response->code);
-          echo $e->response->toJson($this->config->jsonFlags, false);
-          die();
+          $this->send($e->response, false);
         }
       });
     }
+  }
+
+  /**
+   * Output response as JSON and end the request
+   *
+   * If the response cannot be encoded as JSON, a 500 error is sent instead.
+   */
+  private function send(Response $response, bool $withData): never
+  {
+    $code = $response->code;
+
+    try {
+      $body = (string) $response->toJson(
+        $this->config->jsonFlags | JSON_THROW_ON_ERROR,
+        $withData,
+      );
+    } catch (\JsonException) {
+      $code = 500;
+      $body = (string) json_encode(
+        ['error' => 'Failed to encode response'],
+        $this->config->jsonFlags,
+      );
+    }
+
+    $response->_addHeaders(['Content-Type' => 'application/json']);
+
+    foreach ($response->getHeaders() as $name => $value) {
+      header("{$name}: {$value}");
+    }
+    http_response_code($code);
+    echo $body;
+    die();
   }
 }
