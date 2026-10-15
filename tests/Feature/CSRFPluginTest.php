@@ -50,21 +50,61 @@ test('unsuccessful post does not rotate the token', function () {
   expect($firstToken)->toBe($secondToken);
 });
 
-test('successful post rotates the token', function () {
+test('successful post returns the current token by default', function () {
   $client = getHttp('csrf');
-  $tokenRes = $client->get('csrf-token');
-  $token = resToJson($tokenRes)['csrf_token'];
+  $token = resToJson($client->get('csrf-token'))['csrf_token'];
 
-  $res = $client->post('', [
-    'headers' => [
-      'X-' . $token['name'] => $token['value'],
-    ],
-  ]);
+  $res = postWithCsrfToken($client, '', $token);
   $json = resToJson($res);
 
   expect($res->getStatusCode())->toBe(200);
-  expect($json['csrf_token']['name'])->toBeString();
-  expect($json['csrf_token']['value'])->toBeString();
-  expect($json['csrf_token']['time'])->toBeInt();
-  expect($json['csrf_token'])->not()->toBe($token);
+  expect($json['csrf_token'])->toBe($token);
+});
+
+test('same token can be used for multiple requests by default', function () {
+  $client = getHttp('csrf');
+  $token = resToJson($client->get('csrf-token'))['csrf_token'];
+
+  $first = postWithCsrfToken($client, '', $token);
+  $second = postWithCsrfToken($client, '', $token);
+
+  expect($first->getStatusCode())->toBe(200);
+  expect($second->getStatusCode())->toBe(200);
+});
+
+test(
+  'successful post rotates the token when rotateToken is enabled',
+  function () {
+    $client = getHttp('csrf-rotate');
+    $token = resToJson($client->get('csrf-token'))['csrf_token'];
+
+    $res = postWithCsrfToken($client, '', $token);
+    $json = resToJson($res);
+
+    expect($res->getStatusCode())->toBe(200);
+    expect($json['csrf_token']['name'])->toBeString();
+    expect($json['csrf_token']['value'])->toBeString();
+    expect($json['csrf_token']['time'])->toBeInt();
+    expect($json['csrf_token'])->not()->toBe($token);
+
+    // The previous token is no longer valid
+    expect(postWithCsrfToken($client, '', $token)->getStatusCode())->toBe(400);
+  },
+);
+
+// Login also replaces the token: ProcessWire's Session::login() resets
+// all CSRF tokens. Not tested here to avoid login throttling.
+test('logout replaces the token', function () {
+  $client = getHttp('csrf-auth');
+  $token = resToJson($client->get('csrf-token'))['csrf_token'];
+
+  $res = postWithCsrfToken($client, 'auth/logout', $token);
+  $newToken = resToJson($res)['csrf_token'];
+
+  expect($res->getStatusCode())->toBe(200);
+  expect($newToken)->not()->toBe($token);
+
+  // The previous token is no longer valid, the new one is
+  expect(postWithCsrfToken($client, '', $token)->getStatusCode())->toBe(400);
+  expect(postWithCsrfToken($client, '', $newToken)->getStatusCode())->toBe(200);
 });

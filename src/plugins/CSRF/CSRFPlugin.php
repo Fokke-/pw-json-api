@@ -23,6 +23,9 @@ class CSRFPlugin extends ApiPlugin
   /** Endpoint path for retrieving the current token */
   public string $endpointPath = '/csrf-token';
 
+  /** Replace the token after every successful state-changing request */
+  public bool $rotateToken = false;
+
   /**
    * Setup function for the token service
    *
@@ -80,18 +83,18 @@ class CSRFPlugin extends ApiPlugin
         $this->checkToken();
       })
 
-      // Add hooks for rotating the token
+      // Add hooks for returning the token, rotated if enabled
       ->hookAfterPost(function ($args) {
-        $args->response->with($this->getToken(true));
+        $args->response->with($this->getToken($this->rotateToken));
       })
       ->hookAfterPut(function ($args) {
-        $args->response->with($this->getToken(true));
+        $args->response->with($this->getToken($this->rotateToken));
       })
       ->hookAfterPatch(function ($args) {
-        $args->response->with($this->getToken(true));
+        $args->response->with($this->getToken($this->rotateToken));
       })
       ->hookAfterDelete(function ($args) {
-        $args->response->with($this->getToken(true));
+        $args->response->with($this->getToken($this->rotateToken));
       });
 
     return $this;

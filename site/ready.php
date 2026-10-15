@@ -135,6 +135,23 @@ if ($page->template->name !== 'admin') {
     ->addService(new CSRFService())
     ->run();
 
+  // CSRF token rotation enabled
+  (new Api())
+    ->setBasePath('csrf-rotate')
+    ->addPlugin(new CSRFPlugin(), function ($plugin) {
+      $plugin->rotateToken = true;
+    })
+    ->addService(new CSRFService())
+    ->run();
+
+  // CSRF with ProcessWire authentication
+  (new Api())
+    ->setBasePath('csrf-auth')
+    ->addPlugin(new CSRFPlugin())
+    ->addService(new ProcessWireAuthService())
+    ->addService(new CSRFService())
+    ->run();
+
   (new DocumentedApi())
     ->setBasePath('documented-api')
     ->addService(new DocumentedService())

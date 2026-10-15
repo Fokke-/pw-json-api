@@ -149,7 +149,7 @@ use PwJsonApi\Plugins\CSRFPlugin;
 $api->addPlugin(new CSRFPlugin());
 ```
 
-In ProcessWire, every user has a session (including guests), so the CSRF token is always available. When the CSRF plugin is installed, it automatically protects all POST endpoints — including login and logout. If the authenticator is set on the API instance, opt the token endpoint out so that guests can retrieve a token before logging in (see [Authentication on the API level](#authentication-on-the-api-level)).
+In ProcessWire, every user has a session (including guests), so the CSRF token is always available. When the CSRF plugin is installed, it automatically protects all POST endpoints — including login and logout. Logging in or out replaces the token, and the new token is included in the response. If the authenticator is set on the API instance, opt the token endpoint out so that guests can retrieve a token before logging in (see [Authentication on the API level](#authentication-on-the-api-level)).
 
 ## Login throttling
 

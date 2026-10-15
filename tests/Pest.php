@@ -69,6 +69,23 @@ function resToJson(\Psr\Http\Message\ResponseInterface $res): array
   return json_decode(!empty($body) ? $body : '[]', true);
 }
 
+/**
+ * Send a POST request with the given CSRF token
+ *
+ * @param array{name: string, value: string} $token
+ */
+function postWithCsrfToken(
+  GuzzleHttp\Client $client,
+  string $path,
+  array $token,
+): \Psr\Http\Message\ResponseInterface {
+  return $client->post($path, [
+    'headers' => [
+      'X-' . $token['name'] => $token['value'],
+    ],
+  ]);
+}
+
 function getMultiplePages(): PageArray
 {
   $pages = new PageArray();
