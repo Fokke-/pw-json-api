@@ -37,6 +37,10 @@ Requires PHP 8.2+, developed in a DDEV environment.
 - **Service:** abstract class that groups endpoints; extends `Service`. Constructor sets base path and class properties. `init()` registers endpoints, hooks, and child services. This separation allows extending classes to override `init()` without inheriting parent endpoints.
 - **Api:** top-level container that holds services, runs them via `run()`, and registers ProcessWire URL hooks.
 
+## API design
+
+- **Provide mechanisms, not hand-holding.** The library provides mechanisms (hooks, opt-outs, configuration) that let developers handle their own needs. It does not work around environment or server configuration issues, compensate for edge cases on the developer's behalf, or add convenience features that belong to another layer (e.g. rate limiting belongs to the web server). If a problem is properly solved by server configuration or the developer's own code using existing mechanisms, the library does nothing — and the documentation does not mention it either, to keep it free of noise.
+
 ## Testing
 
 - Pest PHP framework
