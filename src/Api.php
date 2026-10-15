@@ -231,6 +231,10 @@ class Api
         $handlerArgs->request = $request;
         $handlerArgs->user = $this->wire->user;
         $handlerArgs->event = $event;
+        $handlerArgs->endpoint = $result->endpoint;
+        $handlerArgs->service = $result->service;
+        $handlerArgs->services = $result->endpoint->services;
+        $handlerArgs->api = $this;
 
         $response = call_user_func($handler, $handlerArgs);
         if (!($response instanceof Response)) {

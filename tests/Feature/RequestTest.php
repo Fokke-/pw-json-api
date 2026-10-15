@@ -329,3 +329,20 @@ test('toArray returns all properties', function () {
   ]);
   expect($request)->not->toHaveKey('_bodyException');
 });
+
+test('endpoint handler arguments', function () {
+  $client = getHttp('handler-context-api');
+  $res = $client->get('handler-context/child');
+  $json = resToJson($res);
+
+  expect($json['data']['handler_args'])->toBe([
+    'type' => 'PwJsonApi\\EndpointHandlerArgs',
+    'request' => 'PwJsonApi\\Request',
+    'user' => 'ProcessWire\\User',
+    'event' => 'ProcessWire\\HookEvent',
+    'endpoint' => 'PwJsonApi\\Endpoint',
+    'service' => 'ProcessWire\\HandlerContextChildService',
+    'services' => 'PwJsonApi\\ServiceList',
+    'api' => 'PwJsonApi\\Api',
+  ]);
+});

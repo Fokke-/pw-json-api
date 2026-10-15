@@ -8,6 +8,7 @@
 - `setupService()` method for `CSRFPlugin` — configure the service providing the token endpoint (e.g. to skip authentication)
 - `isSafeMethod` property for `Request` and `isSafe()` method for `RequestMethod` — check whether the request method is safe (`GET`, `HEAD`, `OPTIONS`)
 - `hookOnRequest()` for API, services and endpoints — run code and set response headers before any other processing, including OPTIONS responses and authentication (e.g. CORS headers)
+- `$endpoint`, `$service`, `$services` and `$api` properties added to `EndpointHandlerArgs`
 
 ### Bug fixes
 

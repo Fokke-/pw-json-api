@@ -74,11 +74,15 @@ $this->addEndpoint('/user')
 
 You can access the following properties via the `$args` parameter of the handler function.
 
-| Property  | Type                     | Description                  |
-| --------- | ------------------------ | ---------------------------- |
-| `request` | `Request`                | [Request object](/requests)  |
-| `user`    | `\ProcessWire\User`      | The current ProcessWire user |
-| `event`   | `\ProcessWire\HookEvent` | ProcessWire URL hook event   |
+| Property   | Type                     | Description                                                  |
+| ---------- | ------------------------ | ------------------------------------------------------------ |
+| `request`  | `Request`                | [Request object](/requests)                                  |
+| `user`     | `\ProcessWire\User`      | The current ProcessWire user                                 |
+| `event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event                                   |
+| `endpoint` | `Endpoint`               | Requested endpoint <Badge type="tip" text="^2.5" />          |
+| `service`  | `Service`                | Requested service <Badge type="tip" text="^2.5" />           |
+| `services` | `ServiceList`            | List of all parent services <Badge type="tip" text="^2.5" /> |
+| `api`      | `Api`                    | API instance <Badge type="tip" text="^2.5" />                |
 
 ```php{1}
 $this->addEndpoint('/test-request')->get(function ($args) {

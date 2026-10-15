@@ -435,6 +435,12 @@ if ($page->template->name !== 'admin') {
     ->addService(new ExceptionPhaseService())
     ->run();
 
+  // Endpoint handler arguments
+  (new Api())
+    ->setBasePath('handler-context-api')
+    ->addService(new HandlerContextService())
+    ->run();
+
   // Response encoding
   (new Api())
     ->setBasePath('encoding-api')
