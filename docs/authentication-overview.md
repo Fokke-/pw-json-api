@@ -177,17 +177,11 @@ $api->addService(new EditorService(), function ($service) {
 Skipping authorization also removes parent level restrictions such as role or IP checks from the whole subtree. Use it only when the endpoints are meant to be accessible without them.
 :::
 
-#### `PublicAuth` <Badge type="tip" text="^2.4" />
+#### `PublicAuth` <Badge type="tip" text="^2.4" /> <Badge type="danger" text="deprecated" />
 
-Alternatively, you can set the built-in `PublicAuth` authenticator, which accepts every request. Because the closest authenticator wins, it replaces the inherited one. Unlike `skipAuthentication()`, it can be extended, for example to log or track requests to public endpoints.
-
-```php
-use PwJsonApi\Auth\PublicAuth;
-
-$api->addService(new MyPublicService(), function ($service) {
-  $service->authenticate(new PublicAuth());
-});
-```
+::: danger Deprecated
+`PublicAuth` is deprecated since 2.5 and will be removed in 3.0. Use `skipAuthentication()` instead. To log or track requests to public endpoints, use [request hooks](/request-hooks).
+:::
 
 ## Best practices
 

@@ -128,6 +128,18 @@ test('service authenticator overrides Api authenticator', function () {
   expect($res->getStatusCode())->toBe(200);
 });
 
+test(
+  'PublicAuth deprecation notice is not included in the response',
+  function () {
+    $client = getHttp('auth-override-api');
+    $res = $client->get('auth-override-public');
+    $body = (string) $res->getBody();
+
+    expect(json_decode($body, true))->toBeArray();
+    expect($body)->not->toContain('Deprecated');
+  },
+);
+
 // --- Opt-out ---
 
 test('CSRF token endpoint follows Api authenticator by default', function () {

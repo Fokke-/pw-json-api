@@ -40,6 +40,7 @@ Requires PHP 8.2+, developed in a DDEV environment.
 ## API design
 
 - **Provide mechanisms, not hand-holding.** The library provides mechanisms (hooks, opt-outs, configuration) that let developers handle their own needs. It does not work around environment or server configuration issues, compensate for edge cases on the developer's behalf, or add convenience features that belong to another layer (e.g. rate limiting belongs to the web server). If a problem is properly solved by server configuration or the developer's own code using existing mechanisms, the library does nothing — and the documentation does not mention it either, to keep it free of noise.
+- **Public API is a long-term commitment.** Before adding a public class, method or option, identify the general mechanism behind the request instead of solving the single symptom. Check whether the same need will appear elsewhere (e.g. for both authentication and authorization) and design for that. Prefer extending existing concepts over adding parallel ways to do the same thing. A stopgap public API that is deprecated in the next version is a design failure, not a fix.
 
 ## Testing
 

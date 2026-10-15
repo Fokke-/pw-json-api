@@ -23,6 +23,7 @@
 ### Deprecations
 
 - `RateLimitPlugin` is deprecated and will be removed in 3.0 — rate limiting belongs to the web server or a proxy
+- `PublicAuth` is deprecated and will be removed in 3.0 — use `skipAuthentication()` instead
 - Lowercasing endpoint paths is deprecated — `preservePathCase` will default to `true` in 3.0
 
 ## 2.4.0

@@ -234,3 +234,21 @@ function collectPathDeprecations(string $path, bool $preserve): array
 
   return $notices;
 }
+
+/**
+ * Run a function without reporting expected deprecation notices,
+ * e.g. when testing a deprecated class
+ */
+function withoutDeprecations(callable $fn): mixed
+{
+  set_error_handler(
+    static fn(int $level) => $level === E_USER_DEPRECATED,
+    E_USER_DEPRECATED,
+  );
+
+  try {
+    return $fn();
+  } finally {
+    restore_error_handler();
+  }
+}
