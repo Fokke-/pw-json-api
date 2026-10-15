@@ -80,6 +80,26 @@ test('integer', function () {
   expect($result['integer'])->toBeNull();
 });
 
+test('files missing from the disk are parsed', function () {
+  // ProcessWire suppresses the filesize() warnings of missing files
+  $result = withoutErrors(
+    E_WARNING,
+    static fn() => (new PageParser())
+      ->input(getPageWithMissingFiles())
+      ->toArray(),
+  );
+
+  expect($result['single_file']['basename'])->toBe('file1-1.txt');
+  expect($result['single_file']['filesize'])->toBe(0);
+  expect($result['multiple_files'])->toHaveCount(2);
+  expect($result['multiple_files'][0]['filesize'])->toBe(0);
+
+  expect($result['single_image']['basename'])->toBe(
+    'file_example_jpg_tiny.jpg',
+  );
+  expect($result['multiple_images'])->toHaveCount(2);
+});
+
 test('Pagefile', function () {
   $result = (new PageParser())->input(getPage())->toArray();
   expect($result['single_file'])->toBeArray();

@@ -111,6 +111,17 @@ function getEmptyPage(): Page
   return $page;
 }
 
+/**
+ * Page whose files and images have been deleted from the disk
+ */
+function getPageWithMissingFiles(): Page
+{
+  $page = clone wire()->pages->get(1079);
+  $page->of(true);
+
+  return $page;
+}
+
 function getPageWithChildren(): Page
 {
   $page = clone wire()->pages->get(1029);
@@ -236,19 +247,25 @@ function collectPathDeprecations(string $path, bool $preserve): array
 }
 
 /**
- * Run a function without reporting expected deprecation notices,
- * e.g. when testing a deprecated class
+ * Run a function without reporting expected errors of the given levels,
+ * e.g. warnings suppressed by ProcessWire
  */
-function withoutDeprecations(callable $fn): mixed
+function withoutErrors(int $levels, callable $fn): mixed
 {
-  set_error_handler(
-    static fn(int $level) => $level === E_USER_DEPRECATED,
-    E_USER_DEPRECATED,
-  );
+  set_error_handler(static fn() => true, $levels);
 
   try {
     return $fn();
   } finally {
     restore_error_handler();
   }
+}
+
+/**
+ * Run a function without reporting expected deprecation notices,
+ * e.g. when testing a deprecated class
+ */
+function withoutDeprecations(callable $fn): mixed
+{
+  return withoutErrors(E_USER_DEPRECATED, $fn);
 }
