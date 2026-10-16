@@ -14,12 +14,18 @@ class Endpoint
   use HasPluginList;
   use HasAuthentication;
   use HasAuthorization;
+  use HasAuthOptOut;
   use HasLock;
 
   /**
    * Endpoint path
    */
   private string|null $path;
+
+  /**
+   * Endpoint path as given, before formatting
+   */
+  private string $rawPath;
 
   /**
    * Endpoint handlers
@@ -59,10 +65,23 @@ class Endpoint
   }
 
   /**
+   * Get endpoint path, optionally without lowercasing
+   *
+   * @internal
+   */
+  public function _getPath(bool $preserveCase): string|null
+  {
+    return $preserveCase
+      ? $this->formatPath($this->rawPath, true)
+      : $this->path;
+  }
+
+  /**
    * Set endpoint path
    */
   public function setPath(string $path): static
   {
+    $this->rawPath = $path;
     $this->path = $this->formatPath($path);
     return $this;
   }

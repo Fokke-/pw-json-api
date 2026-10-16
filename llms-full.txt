@@ -115,16 +115,18 @@ The bootstrap phase runs once when the module file is loaded. It sets up the API
 
 The request handling phase runs for each incoming HTTP request that matches a registered endpoint path.
 
-1. **OPTIONS shortcut** — If the request method is `OPTIONS`, a `200` response with an `Allow` header is returned immediately. No hooks or handlers are executed. [Read more about endpoints](#endpoints).
-2. **Request object** — A `Request` object is created containing the HTTP method, path, query parameters, headers, body, and files. [Read more about requests](#requests).
-3. **Handler lookup** — The library looks up a handler for the request method. If no handler is registered, a `405` response with an `Allow` header is returned. [Read more about endpoints](#endpoints).
-4. **Authentication** — If an authenticator is configured, it runs now. The closest level to the endpoint wins (endpoint > service > API). [Read more about authentication](#authentication-authorization).
-5. **Authorization** — All authorization callbacks in the chain run in order: API → services → endpoint. [Read more about authorization](#authorization).
-6. **Before hooks** — Before hooks are executed in order: API → service → endpoint. [Read more about hook execution order](#hook-execution-order).
-7. **Handler execution** — The endpoint handler runs and returns a `Response`. [Read more about responses](#responses).
-8. **After hooks** — After hooks are executed in order: endpoint → service → API. [Read more about hook execution order](#hook-execution-order).
-9. **Error handling** — If an exception is thrown at any point, error hooks are executed and the exception is converted to a JSON response. [Read more about error handling](#error-handling). [Read more about error hooks](#error-hooks).
-10. **JSON response** — The final response is encoded as JSON and sent to the client.
+1. **Request object** — A `Request` object is created containing the HTTP method, path, query parameters, headers, body, and files. [Read more about requests](#requests).
+2. **On-request hooks** — On-request hooks are executed in order: API → services → endpoint. Headers set by them are added to every response, including the `OPTIONS` and error responses. [Read more about on-request hooks](#hookonrequest).
+3. **OPTIONS shortcut** — If the request method is `OPTIONS`, a `200` response with an `Allow` header is returned immediately. No other hooks or handlers are executed. [Read more about endpoints](#endpoints).
+4. **Body validation** — If the request body is malformed JSON, a `400` response is returned. [Read more about requests](#body).
+5. **Handler lookup** — The library looks up a handler for the request method. If no handler is registered, a `405` response with an `Allow` header is returned. [Read more about endpoints](#endpoints).
+6. **Authentication** — If an authenticator is configured, it runs now. The closest level to the endpoint wins (endpoint > service > API). A level that [opts out](#opting-out) with `skipAuthentication()` ignores the authenticators of the levels above it. [Read more about authentication](#authentication-authorization).
+7. **Authorization** — All authorization callbacks in the chain run in order: API → services → endpoint. A level that [opts out](#opting-out) with `skipAuthorization()` ignores the callbacks of the levels above it. [Read more about authorization](#authorization).
+8. **Before hooks** — Before hooks are executed in order: API → service → endpoint. [Read more about hook execution order](#hook-execution-order).
+9. **Handler execution** — The endpoint handler runs and returns a `Response`. [Read more about responses](#responses).
+10. **After hooks** — After hooks are executed in order: endpoint → service → API. [Read more about hook execution order](#hook-execution-order).
+11. **Error handling** — If an `ApiException` is thrown at any point, error hooks are executed and the exception is converted to a JSON response. Other exceptions are passed to the [exception handler](#exception-handling), if defined. [Read more about error handling](#error-handling). [Read more about error hooks](#error-hooks).
+12. **JSON response** — The final response is encoded as JSON and sent to the client.
 
 ---
 
@@ -154,8 +156,16 @@ $api->configure(function ($config) {
   // if (wire()->config->debug) {
   //   $config->jsonFlags |= JSON_PRETTY_PRINT;
   // }
+
+  // Use paths exactly as defined, without lowercasing
+  // (default: false, will be true in 3.0)
+  $config->preservePathCase = false;
 });
 ```
+
+:::tip <Badge type="tip" text="^2.5" />
+If a response cannot be encoded as JSON — for example, it contains invalid UTF-8 or a `NAN` value — a `500` response with the error `Failed to encode response` is returned instead. To replace invalid UTF-8 characters instead of failing, add `JSON_INVALID_UTF8_SUBSTITUTE` to `jsonFlags`.
+:::
 
 ## Base path
 
@@ -233,6 +243,12 @@ You can access the following properties via the `$args` parameter of the handler
 | `api`       | `Api`                    | API instance                 |
 
 You need to return either a `Response` or an `ApiException` from the handler.
+
+The handler receives exceptions thrown at any point of the request handling: in the endpoint handler, in request hooks, in authenticators and authorization callbacks, and in plugins. <Badge type="tip" text="^2.5" />
+
+- **`ApiException`** — handled like any other `ApiException`: [error hooks](#error-hooks) are executed and an error response is returned.
+- **`Response`** — returned to the client. If the exception was thrown in the endpoint handler, after hooks are executed as usual. Otherwise the response is returned as is.
+- **Anything else** — the original exception is passed to ProcessWire. The same happens if no exception handler is defined.
 
 ```php
 $api->handleException(function ($args) {
@@ -330,6 +346,27 @@ public function __construct()
   parent::__construct();
   $this->setBasePath('/greet');
 }
+```
+
+## Service name
+
+The name of a service is its short class name, for example `HelloWorldService`. It is used to find the service with `findService()` and `getService()`.
+
+Service names must be unique within the API instance — a `WireException` is thrown on `run()` if the same name occurs twice. To use the same service class more than once, set a unique name in the constructor:
+
+```php
+class TemplateService extends Service
+{
+  public function __construct(protected string $template)
+  {
+    parent::__construct();
+    $this->name = "TemplateService_{$template}";
+    $this->setBasePath("/{$template}");
+  }
+}
+
+$api->addService(new TemplateService('article'));
+$api->addService(new TemplateService('product'));
 ```
 
 ## Child services
@@ -519,11 +556,15 @@ $this->addEndpoint('/user')
 
 You can access the following properties via the `$args` parameter of the handler function.
 
-| Property  | Type                     | Description                  |
-| --------- | ------------------------ | ---------------------------- |
-| `request` | `Request`                | [Request object](#requests)  |
-| `user`    | `\ProcessWire\User`      | The current ProcessWire user |
-| `event`   | `\ProcessWire\HookEvent` | ProcessWire URL hook event   |
+| Property   | Type                     | Description                                                  |
+| ---------- | ------------------------ | ------------------------------------------------------------ |
+| `request`  | `Request`                | [Request object](#requests)                                  |
+| `user`     | `\ProcessWire\User`      | The current ProcessWire user                                 |
+| `event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event                                   |
+| `endpoint` | `Endpoint`               | Requested endpoint <Badge type="tip" text="^2.5" />          |
+| `service`  | `Service`                | Requested service <Badge type="tip" text="^2.5" />           |
+| `services` | `ServiceList`            | List of all parent services <Badge type="tip" text="^2.5" /> |
+| `api`      | `Api`                    | API instance <Badge type="tip" text="^2.5" />                |
 
 ```php{1}
 $this->addEndpoint('/test-request')->get(function ($args) {
@@ -556,6 +597,14 @@ Querying `/animals/bunny-rabbit` results in a following JSON:
 }
 ```
 
+Argument names are case-insensitive in `routeParam()`. <Badge type="tip" text="^2.5" />
+
+::: warning Path case
+By default, endpoint paths are lowercased. Since ProcessWire matches URLs case-sensitively, a path defined as `/Products` only responds to `/products`. Lowercasing also changes the meaning of regex patterns — for example, `\D` (non-digit) becomes `\d` (digit).
+
+Enable the `preservePathCase` [configuration option](#configuration) to use paths exactly as defined. This will be the default in 3.0. <Badge type="tip" text="^2.5" />
+:::
+
 ---
 
 # Requests
@@ -573,26 +622,27 @@ Request object can be accessed in callback functions of:
 Properties like `body`, `queryParams`, `routeParams`, `headers`, `cookies`, and `files` contain **raw, unsanitized input from the client**. Always sanitize values before using them — for example with ProcessWire's [$sanitizer API](https://processwire.com/api/ref/sanitizer/).
 :::
 
-| Property      | Type                  | Description                                                        |
-| ------------- | --------------------- | ------------------------------------------------------------------ |
-| `method`      | `string`              | Request method                                                     |
-| `methodEnum`  | `RequestMethod\|null` | Method as enum                                                     |
-| `path`        | `string\|null`        | Requested path                                                     |
-| `routeParams` | `array`               | Route parameters of [dynamic paths](#dynamic-paths) |
-| `queryParams` | `array`               | Query parameters                                                   |
-| `headers`     | `array`               | Request headers                                                    |
-| `contentType` | `string\|null`        | `Content-Type` header                                              |
-| `accept`      | `string\|null`        | `Accept` header                                                    |
-| `cookies`     | `array`               | Shorthand for `$_COOKIE`                                           |
-| `ip`          | `string\|null`        | Shorthand for `$_SERVER['REMOTE_ADDR']`                            |
-| `userAgent`   | `string\|null`        | Shorthand for `$_SERVER['HTTP_USER_AGENT']`                        |
-| `protocol`    | `string\|null`        | Shorthand for `$_SERVER['SERVER_PROTOCOL']`                        |
-| `body`        | `mixed`               | Request body                                                       |
-| `files`       | `array`               | Normalized value of `$_FILES`                                      |
+| Property       | Type                  | Description                                                                                                                                    |
+| -------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `method`       | `string`              | Request method                                                                                                                                 |
+| `methodEnum`   | `RequestMethod\|null` | Method as enum                                                                                                                                 |
+| `isSafeMethod` | `bool`                | Whether the method is [safe](https://www.rfc-editor.org/rfc/rfc9110#section-9.2.1) (`GET`, `HEAD`, `OPTIONS`) <Badge type="tip" text="^2.5" /> |
+| `path`         | `string\|null`        | Requested path                                                                                                                                 |
+| `routeParams`  | `array`               | Route parameters of [dynamic paths](#dynamic-paths)                                                                             |
+| `queryParams`  | `array`               | Query parameters                                                                                                                               |
+| `headers`      | `array`               | Request headers                                                                                                                                |
+| `contentType`  | `string\|null`        | `Content-Type` header                                                                                                                          |
+| `accept`       | `string\|null`        | `Accept` header                                                                                                                                |
+| `cookies`      | `array`               | Shorthand for `$_COOKIE`                                                                                                                       |
+| `ip`           | `string\|null`        | Shorthand for `$_SERVER['REMOTE_ADDR']`                                                                                                        |
+| `userAgent`    | `string\|null`        | Shorthand for `$_SERVER['HTTP_USER_AGENT']`                                                                                                    |
+| `protocol`     | `string\|null`        | Shorthand for `$_SERVER['SERVER_PROTOCOL']`                                                                                                    |
+| `body`         | `mixed`               | Request body                                                                                                                                   |
+| `files`        | `array`               | Normalized value of `$_FILES`                                                                                                                  |
 
 ### Body
 
-If the request `Content-Type` header is `application/json`, the request body will be parsed from `php://input`. In such cases, the body must be a valid JSON string. If the JSON is malformed, an `ApiException` will be thrown.
+If the request `Content-Type` header is `application/json`, the request body will be parsed from `php://input`. In such cases, the body must be a valid JSON string. If the JSON is malformed, an `ApiException` will be thrown, resulting in a `400` response. The exception is thrown after [on-request hooks](#hookonrequest), and `OPTIONS` requests ignore it.
 
 For all other cases, the body will contain the raw value of `$_POST` superglobal.
 
@@ -830,7 +880,7 @@ $response->toArray();
 The library catches any exception derived from the `ApiException` class and converts it to a response. You can throw an `ApiException` at any time to halt the process.
 
 ::: tip
-To handle other exceptions, such as `WireException`, you need to specify custom handling function by calling `handleException()` method of the API instance. [Read more about exception handling](#exception-handling).
+To handle other exceptions, such as `WireException`, you need to specify custom handling function by calling `handleException()` method of the API instance. It receives exceptions thrown at any point of the request handling, including hooks, authenticators, and plugins. Without it, other exceptions are passed to ProcessWire, which renders its own error page. [Read more about exception handling](#exception-handling).
 :::
 
 ## Example exception
@@ -905,12 +955,13 @@ See [ProcessWire authentication](#processwire-authentication) for a built-in aut
 
 Both mechanisms can be configured on three levels: API, service, or endpoint. A level applies to all of its children, but the two mechanisms combine levels differently:
 
-|                          | Authentication                          | Authorization                       |
-| ------------------------ | --------------------------------------- | ----------------------------------- |
-| Configured with          | `authenticate()`                        | `authorize()`                       |
-| When multiple levels     | Closest wins (endpoint > service > API) | All run (API → services → endpoint) |
-| Child level can override | Yes                                     | No                                  |
-| Failure                  | `AuthenticationException` (401)         | `AuthorizationException` (403)      |
+|                       | Authentication                          | Authorization                                   |
+| --------------------- | --------------------------------------- | ----------------------------------------------- |
+| Configured with       | `authenticate()`                        | `authorize()`                                   |
+| When multiple levels  | Closest wins (endpoint > service > API) | All run (API → services → endpoint)             |
+| Child level overrides | By setting its own authenticator        | With `skipAuthorization()` and its own callback |
+| Child level opts out  | `skipAuthentication()`                  | `skipAuthorization()`                           |
+| Failure               | `AuthenticationException` (401)         | `AuthorizationException` (403)                  |
 
 ## Authentication
 
@@ -957,21 +1008,27 @@ Authorization is configured by passing a callback to the `authorize()` method. T
 use PwJsonApi\AuthorizeArgs;
 
 $service->authorize(function (AuthorizeArgs $args) {
-  return $args->user->hasRole('editor');
+  // Modifying requests require the editor role
+  if (!$args->request->isSafeMethod) {
+    return $args->user->hasRole('editor');
+  }
+
+  // Other requests require the member role
+  return $args->user->hasRole('member');
 });
 ```
 
 ### Authorization is chained
 
-Unlike authentication, **all authorization callbacks in the chain are executed** in order: API → services → endpoint. If any callback returns `false`, the request is rejected. A child level cannot override the callbacks of the levels above it.
+Unlike authentication, **all authorization callbacks in the chain are executed** in order: API → services → endpoint. If any callback returns `false`, the request is rejected. Setting a callback on a child level does not replace the callbacks of the levels above it — to replace them, the child level must [opt out](#opting-out) of them first.
 
 ```php
-// API: must be logged in
+// API: must have member role
 $api->authorize(function (AuthorizeArgs $args) {
-  return $args->user->isLoggedin();
+  return $args->user->hasRole('member');
 });
 
-// Service: must have editor role
+// Service: must also have editor role
 $api->addService(new ContentService(), function ($service) {
   $service->authorize(function (AuthorizeArgs $args) {
     return $args->user->hasRole('editor');
@@ -997,7 +1054,7 @@ Authenticators receive an `AuthenticateArgs` object and authorization callbacks 
 
 ## Public and protected endpoints
 
-There are three ways to combine public and protected endpoints in the same API. Start from the first one, and move on only if it does not fit your structure.
+There are two ways to combine public and protected endpoints in the same API. Start from the first one, and move on only if it does not fit your structure.
 
 ### Protect specific services
 
@@ -1011,65 +1068,84 @@ $api->addService(new MyProtectedService(), function ($service) {
 });
 ```
 
-### Opting out <Badge type="tip" text="^2.4" />
+### Opting out <Badge type="tip" text="^2.5" />
 
-If most of the API is protected, set the authenticator on the API and opt specific services or endpoints out with the built-in `PublicAuth` authenticator. It accepts every request, and because the closest authenticator wins, it replaces the inherited one:
+If most of the API is protected, set the rules on the API and opt specific services or endpoints out of them:
+
+- `skipAuthentication()` skips the authenticators inherited from parent levels.
+- `skipAuthorization()` skips the authorization callbacks inherited from parent levels.
 
 ```php
-use PwJsonApi\Auth\PublicAuth;
-```
+// This service is public despite the API authenticator
+$api->addService(new MyPublicService(), function ($service) {
+  $service->skipAuthentication();
+});
 
-```php
-// In service init(): this endpoint is public despite the API authenticator
+// In service init(): this endpoint ignores the parent authorization callbacks
 $this->addEndpoint('/status')
   ->get(function () {
     return new Response(['status' => 'ok']);
   })
-  ->authenticate(new PublicAuth());
+  ->skipAuthorization();
 ```
 
-`PublicAuth` can also be extended, for example to log or track requests to public endpoints.
+Opting out follows these rules:
 
-::: warning
-Opting out only affects authentication. Authorization callbacks are [chained](#authorization-is-chained) and always run, so a callback set on a parent level still applies to the opted-out endpoint. Use [conditional rules](#conditional-rules) to exempt it.
-:::
+- **Only inherited rules are skipped.** An authenticator or authorization callback set on the same level or below still applies.
+- **The two are independent.** Skipping authentication does not skip authorization, and vice versa.
+- **The whole subtree is affected.** All services and endpoints under the level inherit the opt-out. A child level cannot undo it, but it can set its own authenticator or authorization callback.
 
-### Conditional rules <Badge type="tip" text="^2.4" />
+For example, with nested services `/foo` → `/foo/bar` → `/foo/bar/baz`:
 
-Authenticators and authorization callbacks receive the requested endpoint and service in their [argument objects](#argument-objects), so a single parent level rule can let specific requests through. This is the only way to exempt requests from a parent level authorization callback:
+| Path           | Configuration         | Callbacks run for a request | Why                                           |
+| -------------- | --------------------- | --------------------------- | --------------------------------------------- |
+| `/foo`         | `authorize()`         | `/foo`                      | Own callback                                  |
+| `/foo/bar`     | `skipAuthorization()` | None                        | Skips `/foo`, has no own callback             |
+| `/foo/bar/baz` | `authorize()`         | `/foo/bar/baz` only         | Own callback, `/foo` is skipped by `/foo/bar` |
+
+Combining an opt-out with a rule on the same level replaces the parent level rules:
 
 ```php
-// API: must be logged in, except for PublicContentService
-$api->authorize(function (AuthorizeArgs $args) {
-  if ($args->service instanceof PublicContentService) {
-    return true;
-  }
-
-  return $args->user->isLoggedin();
+// Only editors, regardless of the parent level callbacks
+$api->addService(new EditorService(), function ($service) {
+  $service->skipAuthorization()->authorize(function (AuthorizeArgs $args) {
+    return $args->user->hasRole('editor');
+  });
 });
 ```
 
-`$service` is the service the endpoint belongs to. For nested services, use `$services` to inspect the parent services.
-
-Prefer `instanceof` checks over comparing paths or names as strings. A string comparison silently stops matching when a path or name changes.
-
-::: tip When to use which
-
-- **Protect specific services** when public and protected endpoints are already in separate services.
-- **Opting out** when a single service or endpoint should be public. The exception is visible where the service or endpoint is defined.
-- **Conditional rules** when a rule spans many services or endpoints, or when you need to bypass a parent level authorization callback.
-
+::: warning
+Skipping authorization also removes parent level restrictions such as role or IP checks from the whole subtree. Use it only when the endpoints are meant to be accessible without them.
 :::
+
+#### `PublicAuth` <Badge type="tip" text="^2.4" /> <Badge type="danger" text="deprecated" />
+
+::: danger Deprecated
+`PublicAuth` is deprecated since 2.5 and will be removed in 3.0. Use `skipAuthentication()` instead. To log or track requests to public endpoints, use [request hooks](#request-hooks).
+:::
+
+## Best practices
+
+**Keep authentication and authorization separate.** An authenticator verifies who the user is, for example a logged-in session or an API key. An authorization callback verifies what the user is allowed to do, for example a role. Do not check whether the user is logged in in an authorization callback.
+
+**Protect by default, open explicitly.** Set the rules on the highest level that fits, and make exceptions with [opting out](#opting-out). New services are then protected automatically, and every public service or endpoint is a deliberate choice.
+
+**Make exceptions where the service or endpoint is defined.** For a single service or endpoint, use an opt-out or an own rule (`skipAuthorization()->authorize(...)`) when adding the service or defining the endpoint. Do not add an `instanceof` branch for a single service to a parent level callback. The exception is then visible where the service is defined, and the parent level callback does not grow with every exception.
+
+**Consider whether a subtree needs its own rule.** `skipAuthorization()` alone removes all parent level restrictions from the subtree. Often the right choice is to replace them with a rule of its own instead.
+
+**Built-in services follow your rules.** The [ProcessWire authentication](#authentication-on-the-api-level) service and the [CSRF plugin](#configuring-the-token-endpoint) token endpoint never opt out on their own. If the API instance has rules, opt them out explicitly where needed.
 
 ## Execution order
 
-Authentication and authorization run **before** request hooks and plugins:
+Authentication and authorization run **after** [on-request hooks](#hookonrequest), but **before** other request hooks and plugins:
 
-1. **Authenticate** — closest authenticator runs
-2. **Authorize** — all authorization callbacks in the chain run (API → services → endpoint)
-3. Before hooks, including hooks registered by [plugins](#plugins)
-4. Endpoint handler
-5. After hooks
+1. On-request hooks
+2. **Authenticate** — closest authenticator runs, unless skipped
+3. **Authorize** — all authorization callbacks in the chain run (API → services → endpoint), except the ones skipped
+4. Before hooks, including hooks registered by [plugins](#plugins)
+5. Endpoint handler
+6. After hooks
 
 See [Application lifecycle](#request-handling) for the full sequence.
 
@@ -1100,7 +1176,7 @@ A built-in authenticator that uses ProcessWire's session-based authentication. I
 When using session-based authentication with a browser frontend, it is recommended to also install the [CSRF plugin](#csrf-protection) on the API instance to protect against cross-site request forgery.
 
 ::: tip Authentication level
-Set the authenticator on individual services, not on the API instance. The login and logout endpoints must remain publicly accessible — they cannot be behind authentication.
+The login and logout endpoints must be reachable without a ProcessWire session. Set the authenticator on individual services as shown below, or [set it on the API instance](#authentication-on-the-api-level) and opt the login and logout endpoints out explicitly.
 :::
 
 ```php
@@ -1152,6 +1228,41 @@ class MyProtectedService extends Service
 }
 ```
 
+## Authentication on the API level <Badge type="tip" text="^2.5" />
+
+To protect the whole API, set the authenticator on the API instance and opt out the endpoints that must be reachable without a session: the login and logout endpoints, and the [CSRF token endpoint](#configuring-the-token-endpoint) if the CSRF plugin is installed.
+
+```php
+use PwJsonApi\Api;
+use PwJsonApi\Auth\{ProcessWireAuth, ProcessWireAuthService};
+use PwJsonApi\Plugins\CSRFPlugin;
+
+$api = new Api();
+
+// Every service requires authentication...
+$api->authenticate(new ProcessWireAuth());
+
+// ...except the CSRF token endpoint
+$api->addPlugin(new CSRFPlugin(), function ($plugin) {
+  $plugin->setupService(function ($service) {
+    $service->skipAuthentication();
+  });
+});
+
+// ...and the login and logout endpoints
+$api->addService(new ProcessWireAuthService(), function ($service) {
+  $service->skipAuthentication();
+});
+
+$api->addService(new MyProtectedService());
+
+$api->run();
+```
+
+`ProcessWireAuthService` never opts out on its own — it always follows the rules you set. If the API authenticator is a different kind of gate, such as an API key check, the login endpoint should normally stay behind it. In that case, keep the gate on the API and set `ProcessWireAuth` on the protected services instead.
+
+Opting out of authentication does not affect [authorization](#authorization). If the API instance has authorization callbacks, they still apply to the login and logout endpoints. Use `skipAuthorization()` to opt out of them as well. See [Opting out](#opting-out) for details.
+
 ## Endpoints
 
 `ProcessWireAuthService` registers endpoints under the `/auth` base path.
@@ -1201,7 +1312,7 @@ use PwJsonApi\Plugins\CSRFPlugin;
 $api->addPlugin(new CSRFPlugin());
 ```
 
-In ProcessWire, every user has a session (including guests), so the CSRF token is always available. When the CSRF plugin is installed, it automatically protects all POST endpoints — including login and logout.
+In ProcessWire, every user has a session (including guests), so the CSRF token is always available. When the CSRF plugin is installed, it automatically protects all POST endpoints — including login and logout. Logging in or out replaces the token, and the new token is included in the response. If the authenticator is set on the API instance, opt the token endpoint out so that guests can retrieve a token before logging in (see [Authentication on the API level](#authentication-on-the-api-level)).
 
 ## Login throttling
 
@@ -1364,6 +1475,41 @@ $api->findEndpoint('/api/hello-world')?->hookAfter(function ($args) {
 });
 ```
 
+## hookOnRequest() <Badge type="tip" text="^2.5" />
+
+`hookOnRequest()` runs as soon as the request is matched to an endpoint — before the `OPTIONS` response, the request method check (`405`), [authentication](#authentication-authorization), authorization, and other hooks. Use it for anything that must apply to every response of the API, such as CORS headers.
+
+Headers added to `$args->headers` are added to every response: successful responses, error responses, and `OPTIONS` responses. If the response already has a header with the same name — set by the endpoint handler, an after hook, or an error hook — the response header wins.
+
+```php
+// Allow requests from the frontend, including CORS preflight requests
+$api->hookOnRequest(function ($args) {
+  $args->headers['Access-Control-Allow-Origin'] = 'https://example.com';
+  $args->headers['Access-Control-Allow-Credentials'] = 'true';
+
+  if ($args->request->method === 'OPTIONS') {
+    // Same methods as in the Allow header of the endpoint
+    $args->headers['Access-Control-Allow-Methods'] = implode(', ', [
+      'OPTIONS',
+      ...$args->endpoint->getAllowedMethods(),
+    ]);
+    $args->headers['Access-Control-Allow-Headers'] = 'Content-Type';
+  }
+});
+```
+
+The library adds the `Allow` header to `OPTIONS` responses automatically, but browsers only use the `Access-Control-Allow-*` headers for CORS. These headers are a security policy, so the library never adds them on its own.
+
+Like other hooks, on-request hooks can be defined on the API, service, or endpoint level. They run in order API → services → endpoint, and they all share the same `$args->headers`.
+
+To reject a request, throw an `ApiException`. [Error hooks](#error-hooks) are executed, and the headers set so far are included in the error response.
+
+If the request body is malformed JSON, `$args->request->body` is `null`. The request is rejected with a `400` response after the on-request hooks, so their headers are included. `OPTIONS` requests ignore the body.
+
+::: warning
+Requests to paths that do not match any endpoint are not handled by the API, so on-request hooks do not run for them.
+:::
+
 ## Hook arguments
 
 You can access the following properties via the `$args` parameter of the handler function. The following properties are always included:
@@ -1378,6 +1524,12 @@ You can access the following properties via the `$args` parameter of the handler
 | `services` | `ServiceList`            | List of all parent services  |
 | `api`      | `Api`                    | API instance                 |
 
+### hookOnRequest arguments
+
+| Property  | Type    | Description                    |
+| --------- | ------- | ------------------------------ |
+| `headers` | `array` | Headers to add to the response |
+
 ### hookBefore\* arguments
 
 | Property  | Type       | Description              |
@@ -1391,6 +1543,12 @@ You can access the following properties via the `$args` parameter of the handler
 | `response` | Response | Response from endpoint request handler |
 
 ## Hook methods reference
+
+### On request
+
+| Method            | Description                                  |
+| ----------------- | -------------------------------------------- |
+| `hookOnRequest()` | Hook on request, before any other processing |
 
 ### Before request
 
@@ -1418,13 +1576,18 @@ You can access the following properties via the `$args` parameter of the handler
 
 ## Hook execution order
 
-1. API before hooks
-2. Service before hooks
-3. Endpoint before hooks
-4. **Request handler**
-5. Endpoint after hooks
-6. Service after hooks
-7. API after hooks
+1. API on-request hooks
+2. Service on-request hooks
+3. Endpoint on-request hooks
+4. API before hooks
+5. Service before hooks
+6. Endpoint before hooks
+7. **Request handler**
+8. Endpoint after hooks
+9. Service after hooks
+10. API after hooks
+
+Authentication and authorization run between the on-request hooks and the before hooks. See [Application lifecycle](#request-handling) for the full sequence.
 
 ---
 
@@ -1624,7 +1787,7 @@ $service->findEndpoint('/')?->addPlugin(new MyPlugin());
 
 This plugin adds [cross-site request forgery (CSRF)](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF) protection for your endpoints, utilising ProcessWire’s built-in token validation.
 
-The plugin hooks into every `POST`, `PUT`, `PATCH`, or `DELETE` request and expects a valid token to be included in the request payload. Any successful request of those types triggers token rotation, and the new token is included in the response. If validation fails, an `ApiException` is thrown with the current token included.
+The plugin hooks into every `POST`, `PUT`, `PATCH`, or `DELETE` request and expects a valid token to be included in the request payload. The response of any successful request of those types includes the current token. If validation fails, an `ApiException` is thrown with the current token included.
 
 The plugin also exposes a `/csrf-token` endpoint, which can be used to retrieve the current token.
 
@@ -1652,8 +1815,41 @@ $api->addPlugin(new CSRFPlugin(), function ($plugin) {
 
   // Endpoint path for retrieving the current token
   $plugin->endpointPath = '/csrf-token';
+
+  // Replace the token after every successful POST, PUT, PATCH, or DELETE
+  // request (default: false)
+  $plugin->rotateToken = false;
 });
 ```
+
+## Token rotation <Badge type="tip" text="^2.5" />
+
+By default, the token stays the same for the whole session. ProcessWire replaces it when the user logs in or out, and the new token is included in the login and logout responses.
+
+When `rotateToken` is enabled, the token is replaced after every successful `POST`, `PUT`, `PATCH`, or `DELETE` request. The previous token stops working immediately, so concurrent requests sent with the same token fail. Enable rotation if responses that include the token are compressed and also reflect user-provided input, and your session cookie is not protected by `SameSite`. This combination exposes a constant token to [BREACH](https://en.wikipedia.org/wiki/BREACH) attacks.
+
+## Configuring the token endpoint <Badge type="tip" text="^2.5" />
+
+The token endpoint follows the [authentication and authorization](#authentication-authorization) rules of the API instance, like any other endpoint. If the API instance has an authenticator, guests cannot retrieve a token — for example, before logging in.
+
+Use `setupService()` to configure the service that provides the token endpoint. The setup function receives the service, so you can [opt it out](#opting-out) of the API rules:
+
+```php
+$api->authenticate(new ExampleAuth());
+
+$api->addPlugin(new CSRFPlugin(), function ($plugin) {
+  $plugin->setupService(function ($service) {
+    // Guests can retrieve a token
+    $service->skipAuthentication();
+  });
+});
+```
+
+If the API instance also has authorization callbacks, call `skipAuthorization()` as well.
+
+::: tip
+If a request fails the token validation, the error response also includes the current token.
+:::
 
 ## Front-end implementation
 
@@ -1662,7 +1858,7 @@ Front-end implementation is outside the scope of this guide, but here is a basic
 1. Implement a way to store the current token (e.g. in memory, or a state manager).
 2. Before any `POST`, `PUT`, `PATCH`, or `DELETE` request, check whether a current token is available. If not, query the `/csrf-token` endpoint to retrieve and store it.
 3. Pass the token as a header
-4. If the response is successful, read the new token from the response data using the `csrf_token` key and update your store.
+4. If the response is successful, read the token from the response using the `csrf_token` key and update your store. The token changes when the user logs in or out, and after every request if [rotation](#token-rotation) is enabled.
 
 ```js
 let token = null;
@@ -1672,12 +1868,12 @@ async function fetchToken() {
   const res = await fetch('/api/csrf-token');
   const json = await res.json();
 
-  if (json.data.csrf_token) {
-    token = json.data.csrf_token;
+  if (json.csrf_token) {
+    token = json.csrf_token;
   }
 }
 
-// Make a POST request with the token, then store the rotated token
+// Make a POST request with the token, then store the returned token
 async function post(url, body) {
   if (!token) {
     await fetchToken();
@@ -1694,9 +1890,9 @@ async function post(url, body) {
 
   const json = await res.json();
 
-  // Store the rotated token
-  if (json.data.csrf_token) {
-    token = json.data.csrf_token;
+  // Store the returned token
+  if (json.csrf_token) {
+    token = json.csrf_token;
   }
 
   return json;
@@ -1707,7 +1903,11 @@ const result = await post('/api/my-endpoint', { foo: 'bar' });
 
 ---
 
-# Rate limiting <Badge type="tip" text="^2.0" />
+# Rate limiting <Badge type="tip" text="^2.0" /> <Badge type="danger" text="deprecated" />
+
+::: danger Deprecated
+`RateLimitPlugin` is deprecated since 2.5 and will be removed in 3.0. Rate limiting belongs to the web server or a proxy in front of it, where requests are rejected before ProcessWire is loaded.
+:::
 
 This plugin adds rate limiting for your API endpoints using a fixed-window algorithm. It uses ProcessWire's WireCache for storage, which means request counts are persisted in the database and survive across requests.
 
@@ -1874,6 +2074,10 @@ $parser->excludeProperties('name');
 ### Include fields
 
 By default, all fields of the input pages will be included. Use `fields()` to include only specific fields.
+
+::: warning
+Including all fields means that a field added to the template later is also included in the API response. To avoid exposing data unintentionally, specify the fields explicitly in public endpoints.
+:::
 
 ::: tip
 If your input contains pages with different templates, you can still specify all fields here. If the parsed template does not have the given field, it will be ignored.

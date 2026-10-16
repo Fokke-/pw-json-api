@@ -18,6 +18,7 @@ package.json export-ignore
 phpunit.xml export-ignore
 phpstan.neon export-ignore
 pnpm-lock.yaml export-ignore
+pnpm-workspace.yaml export-ignore
 scripts export-ignore
 site export-ignore
 tests export-ignore

@@ -9,6 +9,7 @@ use ProcessWire\WireException;
  * Rate limiting plugin using a fixed-window algorithm with
  * ProcessWire's WireCache for storage.
  *
+ * @deprecated 2.5.0 Use server-level rate limiting instead. Will be removed in 3.0.
  * @see https://pwjsonapi.fokke.fi/plugins/rate-limit.html
  */
 class RateLimitPlugin extends ApiPlugin
@@ -41,6 +42,13 @@ class RateLimitPlugin extends ApiPlugin
     }
 
     parent::init($context);
+
+    // Suppressed with @ so the notice never ends up in the response output.
+    // Error handlers and deprecation tooling still receive it.
+    @trigger_error(
+      'RateLimitPlugin is deprecated since 2.5.0 and will be removed in 3.0. Use server-level rate limiting instead.',
+      E_USER_DEPRECATED,
+    );
 
     $context->hookBefore(function ($args) {
       $request = $args->request;

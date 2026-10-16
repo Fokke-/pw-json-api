@@ -184,3 +184,44 @@ test('locked endpoint rejects authorize()', function () {
   $endpoint = $api->findEndpoint('/fruits');
   $endpoint->authorize(static fn(AuthorizeArgs $args) => true);
 })->throws(WireException::class, 'Cannot set authorizer');
+
+// --- HasAuthOptOut ---
+
+test('skip flags are false by default', function () {
+  $endpoint = new Endpoint('/test');
+  expect($endpoint->_skipsAuthentication())->toBeFalse();
+  expect($endpoint->_skipsAuthorization())->toBeFalse();
+});
+
+test('skipAuthentication() sets flag on Service', function () {
+  $service = new FoodService();
+  $service->_prepare();
+
+  expect($service->skipAuthentication())->toBe($service);
+  expect($service->_skipsAuthentication())->toBeTrue();
+  expect($service->_skipsAuthorization())->toBeFalse();
+});
+
+test('skipAuthorization() sets flag on Endpoint', function () {
+  $endpoint = new Endpoint('/test');
+
+  expect($endpoint->skipAuthorization())->toBe($endpoint);
+  expect($endpoint->_skipsAuthorization())->toBeTrue();
+  expect($endpoint->_skipsAuthentication())->toBeFalse();
+});
+
+test('locked service rejects skipAuthentication()', function () {
+  $api = new Api();
+  $api->addService(new FoodService());
+  $api->run();
+
+  $api->getService('FoodService')->skipAuthentication();
+})->throws(WireException::class, 'Cannot skip authentication');
+
+test('locked endpoint rejects skipAuthorization()', function () {
+  $api = new Api();
+  $api->addService(new FruitService());
+  $api->run();
+
+  $api->findEndpoint('/fruits')->skipAuthorization();
+})->throws(WireException::class, 'Cannot skip authorization');

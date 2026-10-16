@@ -14,4 +14,17 @@ enum RequestMethod: string
   case Delete = 'DELETE';
   case Post = 'POST';
   case Patch = 'PATCH';
+
+  /**
+   * Whether the method is safe (read-only) as defined in RFC 9110
+   *
+   * @see https://www.rfc-editor.org/rfc/rfc9110#section-9.2.1
+   */
+  public function isSafe(): bool
+  {
+    return match ($this) {
+      self::Get, self::Head, self::Options => true,
+      default => false,
+    };
+  }
 }

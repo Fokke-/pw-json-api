@@ -1,5 +1,31 @@
 # CHANGELOG
 
+## 2.5.0
+
+### New features
+
+- `skipAuthentication()` and `skipAuthorization()` methods for services and endpoints — opt out of authentication or authorization inherited from parent levels
+- `setupService()` method for `CSRFPlugin` — configure the service providing the token endpoint (e.g. to skip authentication)
+- `isSafeMethod` property for `Request` and `isSafe()` method for `RequestMethod` — check whether the request method is safe (`GET`, `HEAD`, `OPTIONS`)
+- `hookOnRequest()` for API, services and endpoints — run code and set response headers before any other processing, including OPTIONS responses and authentication (e.g. CORS headers)
+- `$endpoint`, `$service`, `$services` and `$api` properties added to `EndpointHandlerArgs`
+- `rotateToken` option for `CSRFPlugin` — replace the token after every successful state-changing request
+- `preservePathCase` configuration option — use endpoint paths exactly as defined, without lowercasing
+- `routeParam()` argument names are now case-insensitive
+
+### Bug fixes
+
+- Error hooks are now executed for requests with a malformed JSON body
+- Responses that cannot be encoded as JSON now return a `500` error instead of an empty `200` response
+- Exception handler now also handles exceptions thrown in hooks, authenticators, authorization callbacks and plugins, not only in the endpoint handler
+- CSRF token is no longer replaced after every request by default, which caused concurrent requests to fail. Set `rotateToken` to `true` to restore the previous behavior.
+
+### Deprecations
+
+- `RateLimitPlugin` is deprecated and will be removed in 3.0 — rate limiting belongs to the web server or a proxy
+- `PublicAuth` is deprecated and will be removed in 3.0 — use `skipAuthentication()` instead
+- Lowercasing endpoint paths is deprecated — `preservePathCase` will default to `true` in 3.0
+
 ## 2.4.0
 
 ### New features

@@ -119,6 +119,94 @@ test(
   },
 );
 
+test(
+  'resolveAuthenticator() returns null when service skips authentication',
+  function () {
+    $api = new Api();
+    $api->authenticate(
+      new class extends Authenticator {
+        public function authenticate(AuthenticateArgs $args): void {}
+      },
+    );
+
+    $service = new FoodService();
+    $service->_prepare();
+    $service->skipAuthentication();
+    $endpoint = $service->findEndpoint('/');
+
+    $result = new ApiSearchEndpointResult($endpoint, $service, [$service]);
+
+    expect($result->resolveAuthenticator($api))->toBeNull();
+  },
+);
+
+test(
+  'resolveAuthenticator() returns null when endpoint skips authentication',
+  function () {
+    $service = new FoodService();
+    $service->_prepare();
+    $service->authenticate(
+      new class extends Authenticator {
+        public function authenticate(AuthenticateArgs $args): void {}
+      },
+    );
+    $endpoint = $service->findEndpoint('/');
+    $endpoint->skipAuthentication();
+
+    $result = new ApiSearchEndpointResult($endpoint, $service, [$service]);
+
+    expect($result->resolveAuthenticator(new Api()))->toBeNull();
+  },
+);
+
+test(
+  'resolveAuthenticator() returns own authenticator of a skipping level',
+  function () {
+    $api = new Api();
+    $api->authenticate(
+      new class extends Authenticator {
+        public function authenticate(AuthenticateArgs $args): void {}
+      },
+    );
+
+    $serviceAuth = new class extends Authenticator {
+      public function authenticate(AuthenticateArgs $args): void {}
+    };
+
+    $service = new FoodService();
+    $service->_prepare();
+    $service->skipAuthentication()->authenticate($serviceAuth);
+    $endpoint = $service->findEndpoint('/');
+
+    $result = new ApiSearchEndpointResult($endpoint, $service, [$service]);
+
+    expect($result->resolveAuthenticator($api))->toBe($serviceAuth);
+  },
+);
+
+test(
+  'resolveAuthenticator() returns endpoint authenticator below a skipping service',
+  function () {
+    $endpointAuth = new class extends Authenticator {
+      public function authenticate(AuthenticateArgs $args): void {}
+    };
+
+    $parent = new FoodService();
+    $parent->_prepare();
+    $parent->skipAuthentication();
+
+    $child = new FruitService();
+    $child->_prepare();
+
+    $endpoint = $child->findEndpoint('/');
+    $endpoint->authenticate($endpointAuth);
+
+    $result = new ApiSearchEndpointResult($endpoint, $child, [$parent, $child]);
+
+    expect($result->resolveAuthenticator(new Api()))->toBe($endpointAuth);
+  },
+);
+
 // --- resolveAuthorizers ---
 
 test(
@@ -218,3 +306,74 @@ test('resolveAuthorizers() skips levels without authorizer', function () {
 
   expect($result->resolveAuthorizers($api))->toBe([$serviceFn]);
 });
+
+test(
+  'resolveAuthorizers() stops at a service that skips authorization',
+  function () {
+    $api = new Api();
+    $api->authorize(static fn(AuthorizeArgs $args) => true);
+
+    // /foo
+    $parent = new FoodService();
+    $parent->_prepare();
+    $parent->authorize(static fn(AuthorizeArgs $args) => true);
+
+    // /foo/bar
+    $child = new FruitService();
+    $child->_prepare();
+    $child->skipAuthorization();
+
+    // /foo/bar/baz
+    $endpoint = $child->findEndpoint('/');
+    $endpointFn = static fn(AuthorizeArgs $args) => true;
+    $endpoint->authorize($endpointFn);
+
+    $result = new ApiSearchEndpointResult($endpoint, $child, [$parent, $child]);
+
+    expect($result->resolveAuthorizers($api))->toBe([$endpointFn]);
+  },
+);
+
+test(
+  'resolveAuthorizers() includes own authorizer of a skipping service in order',
+  function () {
+    $api = new Api();
+    $api->authorize(static fn(AuthorizeArgs $args) => true);
+
+    $parent = new FoodService();
+    $parent->_prepare();
+    $parent->authorize(static fn(AuthorizeArgs $args) => true);
+
+    $child = new FruitService();
+    $child->_prepare();
+    $childFn = static fn(AuthorizeArgs $args) => true;
+    $child->skipAuthorization()->authorize($childFn);
+
+    $endpoint = $child->findEndpoint('/');
+    $endpointFn = static fn(AuthorizeArgs $args) => true;
+    $endpoint->authorize($endpointFn);
+
+    $result = new ApiSearchEndpointResult($endpoint, $child, [$parent, $child]);
+
+    expect($result->resolveAuthorizers($api))->toBe([$childFn, $endpointFn]);
+  },
+);
+
+test(
+  'resolveAuthorizers() stops at an endpoint that skips authorization',
+  function () {
+    $api = new Api();
+    $api->authorize(static fn(AuthorizeArgs $args) => true);
+
+    $service = new FoodService();
+    $service->_prepare();
+    $service->authorize(static fn(AuthorizeArgs $args) => true);
+
+    $endpoint = $service->findEndpoint('/');
+    $endpoint->skipAuthorization();
+
+    $result = new ApiSearchEndpointResult($endpoint, $service, [$service]);
+
+    expect($result->resolveAuthorizers($api))->toBe([]);
+  },
+);

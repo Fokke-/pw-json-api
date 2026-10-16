@@ -37,6 +37,11 @@ Requires PHP 8.2+, developed in a DDEV environment.
 - **Service:** abstract class that groups endpoints; extends `Service`. Constructor sets base path and class properties. `init()` registers endpoints, hooks, and child services. This separation allows extending classes to override `init()` without inheriting parent endpoints.
 - **Api:** top-level container that holds services, runs them via `run()`, and registers ProcessWire URL hooks.
 
+## API design
+
+- **Provide mechanisms, not hand-holding.** The library provides mechanisms (hooks, opt-outs, configuration) that let developers handle their own needs. It does not work around environment or server configuration issues, compensate for edge cases on the developer's behalf, or add convenience features that belong to another layer (e.g. rate limiting belongs to the web server). If a problem is properly solved by server configuration or the developer's own code using existing mechanisms, the library does nothing — and the documentation does not mention it either, to keep it free of noise.
+- **Public API is a long-term commitment.** Before adding a public class, method or option, identify the general mechanism behind the request instead of solving the single symptom. Check whether the same need will appear elsewhere (e.g. for both authentication and authorization) and design for that. Prefer extending existing concepts over adding parallel ways to do the same thing. A stopgap public API that is deprecated in the next version is a design failure, not a fix.
+
 ## Testing
 
 - Pest PHP framework
@@ -58,7 +63,7 @@ When modifying code, always verify:
 - When renaming a documentation file (which changes its URL), check all `docs/` files and `src/` `@see` links for references to the old path
 - If the feature is not documented at all, ask the developer whether to add it
 - After code changes, check modified files for unused variables and imports — remove them
-- Document new features, bug fixes, and breaking changes in `CHANGELOG.md` under the next version number (determine from git tags — use `git ls-remote --tags origin` and treat existing CHANGELOG entries as unreleased). Use subsections matching existing entries: `### Breaking changes`, `### New features`, `### Bug fixes`. Do not document beta versions in the changelog.
+- Document new features, bug fixes, deprecations, and breaking changes in `CHANGELOG.md` under the next version number (determine from git tags — use `git ls-remote --tags origin` and treat existing CHANGELOG entries as unreleased). Use subsections matching existing entries: `### Breaking changes`, `### New features`, `### Bug fixes`, `### Deprecations`. Do not document beta versions in the changelog.
 
 ## Communication
 

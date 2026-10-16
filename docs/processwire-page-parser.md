@@ -92,6 +92,10 @@ $parser->excludeProperties('name');
 
 By default, all fields of the input pages will be included. Use `fields()` to include only specific fields.
 
+::: warning
+Including all fields means that a field added to the template later is also included in the API response. To avoid exposing data unintentionally, specify the fields explicitly in public endpoints.
+:::
+
 ::: tip
 If your input contains pages with different templates, you can still specify all fields here. If the parsed template does not have the given field, it will be ignored.
 :::

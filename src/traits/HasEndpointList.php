@@ -35,6 +35,16 @@ trait HasEndpointList
   }
 
   /**
+   * Get base path, optionally without lowercasing
+   *
+   * @internal
+   */
+  public function _getBasePath(bool $preserveCase): string|null
+  {
+    return $this->initEndpointList()->_getBasePath($preserveCase);
+  }
+
+  /**
    * Set base path
    */
   public function setBasePath(string|null $path): static

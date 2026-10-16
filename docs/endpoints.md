@@ -74,11 +74,15 @@ $this->addEndpoint('/user')
 
 You can access the following properties via the `$args` parameter of the handler function.
 
-| Property  | Type                     | Description                  |
-| --------- | ------------------------ | ---------------------------- |
-| `request` | `Request`                | [Request object](/requests)  |
-| `user`    | `\ProcessWire\User`      | The current ProcessWire user |
-| `event`   | `\ProcessWire\HookEvent` | ProcessWire URL hook event   |
+| Property   | Type                     | Description                                                  |
+| ---------- | ------------------------ | ------------------------------------------------------------ |
+| `request`  | `Request`                | [Request object](/requests)                                  |
+| `user`     | `\ProcessWire\User`      | The current ProcessWire user                                 |
+| `event`    | `\ProcessWire\HookEvent` | ProcessWire URL hook event                                   |
+| `endpoint` | `Endpoint`               | Requested endpoint <Badge type="tip" text="^2.5" />          |
+| `service`  | `Service`                | Requested service <Badge type="tip" text="^2.5" />           |
+| `services` | `ServiceList`            | List of all parent services <Badge type="tip" text="^2.5" /> |
+| `api`      | `Api`                    | API instance <Badge type="tip" text="^2.5" />                |
 
 ```php{1}
 $this->addEndpoint('/test-request')->get(function ($args) {
@@ -110,3 +114,11 @@ Querying `/animals/bunny-rabbit` results in a following JSON:
   }
 }
 ```
+
+Argument names are case-insensitive in `routeParam()`. <Badge type="tip" text="^2.5" />
+
+::: warning Path case
+By default, endpoint paths are lowercased. Since ProcessWire matches URLs case-sensitively, a path defined as `/Products` only responds to `/products`. Lowercasing also changes the meaning of regex patterns — for example, `\D` (non-digit) becomes `\d` (digit).
+
+Enable the `preservePathCase` [configuration option](/api-instance#configuration) to use paths exactly as defined. This will be the default in 3.0. <Badge type="tip" text="^2.5" />
+:::

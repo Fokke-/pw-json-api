@@ -65,6 +65,27 @@ public function __construct()
 }
 ```
 
+## Service name
+
+The name of a service is its short class name, for example `HelloWorldService`. It is used to find the service with `findService()` and `getService()`.
+
+Service names must be unique within the API instance — a `WireException` is thrown on `run()` if the same name occurs twice. To use the same service class more than once, set a unique name in the constructor:
+
+```php
+class TemplateService extends Service
+{
+  public function __construct(protected string $template)
+  {
+    parent::__construct();
+    $this->name = "TemplateService_{$template}";
+    $this->setBasePath("/{$template}");
+  }
+}
+
+$api->addService(new TemplateService('article'));
+$api->addService(new TemplateService('product'));
+```
+
 ## Child services
 
 In many cases, a flat service tree is enough, but for larger APIs you can define child services to further categorize the endpoints. Child services will inherit all hooks from parent service(s), and the base paths of the parent services will apply.

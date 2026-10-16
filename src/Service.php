@@ -22,6 +22,7 @@ abstract class Service
   use HasPluginList;
   use HasAuthentication;
   use HasAuthorization;
+  use HasAuthOptOut;
   use HasWire;
   use HasLock;
 

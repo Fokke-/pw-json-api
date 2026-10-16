@@ -6,7 +6,7 @@ description: "Protect state-changing requests with CSRF token validation using P
 
 This plugin adds [cross-site request forgery (CSRF)](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF) protection for your endpoints, utilising ProcessWire’s built-in token validation.
 
-The plugin hooks into every `POST`, `PUT`, `PATCH`, or `DELETE` request and expects a valid token to be included in the request payload. Any successful request of those types triggers token rotation, and the new token is included in the response. If validation fails, an `ApiException` is thrown with the current token included.
+The plugin hooks into every `POST`, `PUT`, `PATCH`, or `DELETE` request and expects a valid token to be included in the request payload. The response of any successful request of those types includes the current token. If validation fails, an `ApiException` is thrown with the current token included.
 
 The plugin also exposes a `/csrf-token` endpoint, which can be used to retrieve the current token.
 
@@ -34,8 +34,41 @@ $api->addPlugin(new CSRFPlugin(), function ($plugin) {
 
   // Endpoint path for retrieving the current token
   $plugin->endpointPath = '/csrf-token';
+
+  // Replace the token after every successful POST, PUT, PATCH, or DELETE
+  // request (default: false)
+  $plugin->rotateToken = false;
 });
 ```
+
+## Token rotation <Badge type="tip" text="^2.5" />
+
+By default, the token stays the same for the whole session. ProcessWire replaces it when the user logs in or out, and the new token is included in the login and logout responses.
+
+When `rotateToken` is enabled, the token is replaced after every successful `POST`, `PUT`, `PATCH`, or `DELETE` request. The previous token stops working immediately, so concurrent requests sent with the same token fail. Enable rotation if responses that include the token are compressed and also reflect user-provided input, and your session cookie is not protected by `SameSite`. This combination exposes a constant token to [BREACH](https://en.wikipedia.org/wiki/BREACH) attacks.
+
+## Configuring the token endpoint <Badge type="tip" text="^2.5" />
+
+The token endpoint follows the [authentication and authorization](/authentication-overview) rules of the API instance, like any other endpoint. If the API instance has an authenticator, guests cannot retrieve a token — for example, before logging in.
+
+Use `setupService()` to configure the service that provides the token endpoint. The setup function receives the service, so you can [opt it out](/authentication-overview#opting-out) of the API rules:
+
+```php
+$api->authenticate(new ExampleAuth());
+
+$api->addPlugin(new CSRFPlugin(), function ($plugin) {
+  $plugin->setupService(function ($service) {
+    // Guests can retrieve a token
+    $service->skipAuthentication();
+  });
+});
+```
+
+If the API instance also has authorization callbacks, call `skipAuthorization()` as well.
+
+::: tip
+If a request fails the token validation, the error response also includes the current token.
+:::
 
 ## Front-end implementation
 
@@ -44,7 +77,7 @@ Front-end implementation is outside the scope of this guide, but here is a basic
 1. Implement a way to store the current token (e.g. in memory, or a state manager).
 2. Before any `POST`, `PUT`, `PATCH`, or `DELETE` request, check whether a current token is available. If not, query the `/csrf-token` endpoint to retrieve and store it.
 3. Pass the token as a header
-4. If the response is successful, read the new token from the response data using the `csrf_token` key and update your store.
+4. If the response is successful, read the token from the response using the `csrf_token` key and update your store. The token changes when the user logs in or out, and after every request if [rotation](#token-rotation) is enabled.
 
 ```js
 let token = null;
@@ -54,12 +87,12 @@ async function fetchToken() {
   const res = await fetch('/api/csrf-token');
   const json = await res.json();
 
-  if (json.data.csrf_token) {
-    token = json.data.csrf_token;
+  if (json.csrf_token) {
+    token = json.csrf_token;
   }
 }
 
-// Make a POST request with the token, then store the rotated token
+// Make a POST request with the token, then store the returned token
 async function post(url, body) {
   if (!token) {
     await fetchToken();
@@ -76,9 +109,9 @@ async function post(url, body) {
 
   const json = await res.json();
 
-  // Store the rotated token
-  if (json.data.csrf_token) {
-    token = json.data.csrf_token;
+  // Store the returned token
+  if (json.csrf_token) {
+    token = json.csrf_token;
   }
 
   return json;

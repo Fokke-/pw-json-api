@@ -39,9 +39,10 @@ test('method not allowed', function () {
 
 test('options method is always accepted', function () {
   $client = getHttp();
-  $res = $client->request('options', 'food');
+  $res = $client->request('OPTIONS', 'food');
   expect($res->getStatusCode())->toBe(200);
   expect($res->getHeaderLine('Allow'))->toBe('OPTIONS, GET');
+  expect((string) $res->getBody())->toBe('');
 });
 
 test('request method handlers', function () {
@@ -67,6 +68,20 @@ test('request method handlers', function () {
   $json = resToJson($res);
   expect($json['request']['method'])->toBe('PATCH');
 });
+
+test('isSafeMethod', function (string $method, bool $expected) {
+  $client = getHttp();
+  $res = $client->request($method, 'request');
+  $json = resToJson($res);
+
+  expect($json['request']['isSafeMethod'])->toBe($expected);
+})->with([
+  'GET' => ['GET', true],
+  'PUT' => ['PUT', false],
+  'DELETE' => ['DELETE', false],
+  'POST' => ['POST', false],
+  'PATCH' => ['PATCH', false],
+]);
 
 test('dynamic path with one named argument', function () {
   $client = getHttp();
@@ -298,6 +313,7 @@ test('toArray returns all properties', function () {
   expect($request)->toHaveKeys([
     'method',
     'methodEnum',
+    'isSafeMethod',
     'path',
     'routeParams',
     'queryParams',
@@ -311,4 +327,68 @@ test('toArray returns all properties', function () {
     'body',
     'files',
   ]);
+  expect($request)->not->toHaveKey('_bodyException');
+});
+
+test('endpoint handler arguments', function () {
+  $client = getHttp('handler-context-api');
+  $res = $client->get('handler-context/child');
+  $json = resToJson($res);
+
+  expect($json['data']['handler_args'])->toBe([
+    'type' => 'PwJsonApi\\EndpointHandlerArgs',
+    'request' => 'PwJsonApi\\Request',
+    'user' => 'ProcessWire\\User',
+    'event' => 'ProcessWire\\HookEvent',
+    'endpoint' => 'PwJsonApi\\Endpoint',
+    'service' => 'ProcessWire\\HandlerContextChildService',
+    'services' => 'PwJsonApi\\ServiceList',
+    'api' => 'PwJsonApi\\Api',
+  ]);
+});
+
+// --- Path case ---
+
+test('route parameter can be read with original case', function (string $api) {
+  $client = getHttp($api);
+  $res = $client->get('path-case/products/123');
+  $json = resToJson($res);
+
+  expect($res->getStatusCode())->toBe(200);
+  expect($json['data']['camel'])->toBe('123');
+  expect($json['data']['lower'])->toBe('123');
+})->with(['path-case-api', 'path-case-preserve-api']);
+
+test('regex pattern keeps its case with preservePathCase', function () {
+  $client = getHttp('path-case-preserve-api');
+
+  // \D+ matches non-digits only
+  $res = $client->get('path-case/codes/abc');
+  expect($res->getStatusCode())->toBe(200);
+  expect(resToJson($res)['data']['code'])->toBe('abc');
+
+  expect($client->get('path-case/codes/123')->getStatusCode())->toBe(404);
+});
+
+test('literal path is lowercased by default', function () {
+  $client = getHttp('path-case-api');
+
+  expect($client->get('path-case/latest')->getStatusCode())->toBe(200);
+  expect($client->get('path-case/Latest')->getStatusCode())->toBe(404);
+});
+
+test('literal path is used as defined with preservePathCase', function () {
+  $client = getHttp('path-case-preserve-api');
+
+  expect($client->get('path-case/Latest')->getStatusCode())->toBe(200);
+  expect($client->get('path-case/latest')->getStatusCode())->toBe(404);
+});
+
+test('path deprecation notice is not included in the response', function () {
+  $client = getHttp('path-case-api');
+  $res = $client->get('path-case/products/123');
+  $body = (string) $res->getBody();
+
+  expect(json_decode($body, true))->toBeArray();
+  expect($body)->not->toContain('Deprecated');
 });

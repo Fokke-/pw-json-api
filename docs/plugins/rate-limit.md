@@ -1,8 +1,12 @@
 ---
-description: "Limit API request rates per client using a fixed-window algorithm backed by ProcessWire's WireCache."
+description: "Deprecated plugin for limiting API request rates per client using a fixed-window algorithm backed by ProcessWire's WireCache."
 ---
 
-# Rate limiting <Badge type="tip" text="^2.0" />
+# Rate limiting <Badge type="tip" text="^2.0" /> <Badge type="danger" text="deprecated" />
+
+::: danger Deprecated
+`RateLimitPlugin` is deprecated since 2.5 and will be removed in 3.0. Rate limiting belongs to the web server or a proxy in front of it, where requests are rejected before ProcessWire is loaded.
+:::
 
 This plugin adds rate limiting for your API endpoints using a fixed-window algorithm. It uses ProcessWire's WireCache for storage, which means request counts are persisted in the database and survive across requests.
 

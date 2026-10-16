@@ -62,6 +62,18 @@ class Response
   }
 
   /**
+   * Add HTTP headers that are not already set
+   *
+   * @internal
+   * @param array<string, string> $headers
+   */
+  public function _addHeaders(array $headers): static
+  {
+    $this->headers = [...$headers, ...$this->headers];
+    return $this;
+  }
+
+  /**
    * Get all HTTP headers
    *
    * @return array<string, string>

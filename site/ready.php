@@ -135,6 +135,23 @@ if ($page->template->name !== 'admin') {
     ->addService(new CSRFService())
     ->run();
 
+  // CSRF token rotation enabled
+  (new Api())
+    ->setBasePath('csrf-rotate')
+    ->addPlugin(new CSRFPlugin(), function ($plugin) {
+      $plugin->rotateToken = true;
+    })
+    ->addService(new CSRFService())
+    ->run();
+
+  // CSRF with ProcessWire authentication
+  (new Api())
+    ->setBasePath('csrf-auth')
+    ->addPlugin(new CSRFPlugin())
+    ->addService(new ProcessWireAuthService())
+    ->addService(new CSRFService())
+    ->run();
+
   (new DocumentedApi())
     ->setBasePath('documented-api')
     ->addService(new DocumentedService())
@@ -175,6 +192,291 @@ if ($page->template->name !== 'admin') {
       return true;
     })
     ->addService(new AuthContextService())
+    ->run();
+
+  // Skip authentication for built-in services under an API gate
+  (new Api())
+    ->setBasePath('auth-skip-api')
+    ->authenticate(new GateAuth())
+    ->addPlugin(new CSRFPlugin(), function ($plugin) {
+      $plugin->setupService(function ($service) {
+        $service->skipAuthentication();
+      });
+    })
+    ->addService(new ProcessWireAuthService(), function ($service) {
+      $service->skipAuthentication();
+    })
+    ->run();
+
+  // Built-in services follow the API gate by default
+  (new Api())
+    ->setBasePath('auth-gate-api')
+    ->authenticate(new GateAuth())
+    ->addPlugin(new CSRFPlugin())
+    ->run();
+
+  // Skip authorization
+  (new Api())
+    ->setBasePath('authz-skip-api')
+    ->authorize(function ($args) {
+      return false;
+    })
+    ->addPlugin(new CSRFPlugin(), function ($plugin) {
+      $plugin->setupService(function ($service) {
+        $service->skipAuthorization();
+      });
+    })
+    ->addService(new AuthSkipService(), function ($service) {
+      $service->skipAuthorization();
+    })
+    ->addService(new HelloWorldService())
+    ->run();
+
+  // Authentication opt-out chains (/foo → /foo/bar → /foo/bar/baz)
+
+  // Scenario 1: authenticator on foo, bar skips
+  (new Api())
+    ->setBasePath('authn-s1-api')
+    ->addService(
+      (new ChainService('foo', [
+        (new ChainService('bar'))->skipAuthentication(),
+      ]))->authenticate(new GateAuth()),
+    )
+    ->run();
+
+  // Scenario 2: authenticator on bar only
+  (new Api())
+    ->setBasePath('authn-s2-api')
+    ->addService(
+      new ChainService('foo', [
+        (new ChainService('bar'))->authenticate(new GateAuth()),
+      ]),
+    )
+    ->run();
+
+  // Scenario 3: authenticator on bar, baz skips
+  (new Api())
+    ->setBasePath('authn-s3-api')
+    ->addService(
+      new ChainService('foo', [
+        (new ChainService('bar', [
+          (new ChainService('baz'))->skipAuthentication(),
+        ]))->authenticate(new GateAuth()),
+      ]),
+    )
+    ->run();
+
+  // Endpoint level: authenticator on foo, its root endpoint skips
+  (new Api())
+    ->setBasePath('authn-endpoint-api')
+    ->addService(
+      (new ChainService('foo'))->authenticate(new GateAuth()),
+      function ($service) {
+        $service->findEndpoint('/')->skipAuthentication();
+      },
+    )
+    ->run();
+
+  // Authorization opt-out chains (/foo → /foo/bar → /foo/bar/baz)
+
+  // Scenario 1: authorizer on foo, bar skips
+  (new Api())
+    ->setBasePath('authz-s1-api')
+    ->addService(
+      (new ChainService('foo', [
+        (new ChainService('bar'))->skipAuthorization(),
+      ]))->authorize(function ($args) {
+        return false;
+      }),
+    )
+    ->run();
+
+  // Scenario 2: authorizer on bar only
+  (new Api())
+    ->setBasePath('authz-s2-api')
+    ->addService(
+      new ChainService('foo', [
+        (new ChainService('bar'))->authorize(function ($args) {
+          return false;
+        }),
+      ]),
+    )
+    ->run();
+
+  // Scenario 3: authorizer on bar, baz skips
+  (new Api())
+    ->setBasePath('authz-s3-api')
+    ->addService(
+      new ChainService('foo', [
+        (new ChainService('bar', [
+          (new ChainService('baz'))->skipAuthorization(),
+        ]))->authorize(function ($args) {
+          return false;
+        }),
+      ]),
+    )
+    ->run();
+
+  // Endpoint level: authorizer on foo, its root endpoint skips
+  (new Api())
+    ->setBasePath('authz-endpoint-api')
+    ->addService(
+      (new ChainService('foo'))->authorize(function ($args) {
+        return false;
+      }),
+      function ($service) {
+        $service->findEndpoint('/')->skipAuthorization();
+      },
+    )
+    ->run();
+
+  // Override: opt-out combined with a rule on the same level
+
+  // Authentication: parent authenticator is replaced
+  (new Api())
+    ->setBasePath('authn-override-a-api')
+    ->addService(
+      (new ChainService('foo', [
+        (new ChainService('bar'))
+          ->skipAuthentication()
+          ->authenticate(new PublicAuth()),
+      ]))->authenticate(new GateAuth()),
+    )
+    ->run();
+
+  // Authentication: own authenticator still runs
+  (new Api())
+    ->setBasePath('authn-override-b-api')
+    ->addService(
+      new ChainService('foo', [
+        (new ChainService('bar'))
+          ->skipAuthentication()
+          ->authenticate(new GateAuth()),
+      ]),
+    )
+    ->run();
+
+  // Authorization: parent authorizer is replaced
+  (new Api())
+    ->setBasePath('authz-override-a-api')
+    ->addService(
+      (new ChainService('foo', [
+        (new ChainService('bar'))
+          ->skipAuthorization()
+          ->authorize(function ($args) {
+            return true;
+          }),
+      ]))->authorize(function ($args) {
+        return false;
+      }),
+    )
+    ->run();
+
+  // Authorization: own authorizer still runs
+  (new Api())
+    ->setBasePath('authz-override-b-api')
+    ->addService(
+      (new ChainService('foo', [
+        (new ChainService('bar'))
+          ->skipAuthorization()
+          ->authorize(function ($args) {
+            return false;
+          }),
+      ]))->authorize(function ($args) {
+        return true;
+      }),
+    )
+    ->run();
+
+  // On-request hooks
+  (new Api())
+    ->setBasePath('on-request-api')
+    ->hookOnRequest(function ($args) {
+      $args->headers['X-On-Request'] = 'api';
+      $args->headers['X-Order'] = 'api';
+    })
+    ->hookOnError(function ($args) {
+      $args->response->with([
+        'error_hook' => true,
+      ]);
+    })
+    ->addService(new OnRequestService())
+    ->addService((new ChainService('gated'))->authenticate(new GateAuth()))
+    ->run();
+
+  // Exception handler in all phases: returns Response
+  (new Api())
+    ->setBasePath('exception-phase-api')
+    ->hookOnRequest(function ($args) {
+      $args->headers['X-On-Request'] = 'api';
+    })
+    ->handleException(function ($args) {
+      return (new Response([
+        'handled' => true,
+        'message' => $args->exception->getMessage(),
+      ]))->code(500);
+    })
+    ->addService(new ExceptionPhaseService())
+    ->run();
+
+  // Exception handler in all phases: returns ApiException
+  (new Api())
+    ->setBasePath('exception-phase-api-exception')
+    ->handleException(function ($args) {
+      return (new ApiException($args->exception->getMessage()))->code(418);
+    })
+    ->hookOnError(function ($args) {
+      $args->response->with([
+        'error_hook' => true,
+      ]);
+    })
+    ->addService(new ExceptionPhaseService())
+    ->run();
+
+  // Exception handler returns nothing on the first call
+  (new Api())
+    ->setBasePath('exception-phase-api-unhandled')
+    ->handleException(function ($args) {
+      static $calls = 0;
+      $calls++;
+
+      // A second call would mean the exception was handled twice
+      return $calls > 1 ? new Response(['called_twice' => true]) : null;
+    })
+    ->addService(new ExceptionPhaseService())
+    ->run();
+
+  // No exception handler
+  (new Api())
+    ->setBasePath('exception-phase-api-none')
+    ->addService(new ExceptionPhaseService())
+    ->run();
+
+  // Endpoint handler arguments
+  (new Api())
+    ->setBasePath('handler-context-api')
+    ->addService(new HandlerContextService())
+    ->run();
+
+  // Path case: default (patterns lowercased)
+  (new Api())
+    ->setBasePath('path-case-api')
+    ->addService(new PathCaseService())
+    ->run();
+
+  // Path case: preserved in patterns
+  (new Api())
+    ->configure(function ($config) {
+      $config->preservePathCase = true;
+    })
+    ->setBasePath('path-case-preserve-api')
+    ->addService(new PathCaseService())
+    ->run();
+
+  // Response encoding
+  (new Api())
+    ->setBasePath('encoding-api')
+    ->addService(new EncodingService())
     ->run();
 
   // ProcessWireAuth (mirrors docs/processwire-auth.md setup example)

@@ -127,3 +127,130 @@ test('service authenticator overrides Api authenticator', function () {
 
   expect($res->getStatusCode())->toBe(200);
 });
+
+test(
+  'PublicAuth deprecation notice is not included in the response',
+  function () {
+    $client = getHttp('auth-override-api');
+    $res = $client->get('auth-override-public');
+    $body = (string) $res->getBody();
+
+    expect(json_decode($body, true))->toBeArray();
+    expect($body)->not->toContain('Deprecated');
+  },
+);
+
+// --- Opt-out ---
+
+test('CSRF token endpoint follows Api authenticator by default', function () {
+  $client = getHttp('auth-gate-api');
+  $res = $client->get('csrf-token');
+
+  expect($res->getStatusCode())->toBe(403);
+});
+
+test('CSRF token endpoint can skip authentication', function () {
+  $client = getHttp('auth-skip-api');
+  $res = $client->get('csrf-token');
+  $json = resToJson($res);
+
+  expect($res->getStatusCode())->toBe(200);
+  expect($json['csrf_token']['value'])->toBeString();
+});
+
+test('ProcessWireAuthService can skip authentication', function () {
+  $client = getHttp('auth-skip-api');
+  $token = resToJson($client->get('csrf-token'))['csrf_token'];
+
+  $res = $client->post('auth/logout', [
+    'headers' => [
+      'X-' . $token['name'] => $token['value'],
+    ],
+  ]);
+
+  expect($res->getStatusCode())->toBe(200);
+});
+
+test('service can skip Api authorization', function () {
+  $client = getHttp('authz-skip-api');
+  $res = $client->get('auth-skip');
+
+  expect($res->getStatusCode())->toBe(200);
+});
+
+test('sibling service still follows Api authorization', function () {
+  $client = getHttp('authz-skip-api');
+  $res = $client->get('hello-world');
+
+  expect($res->getStatusCode())->toBe(403);
+});
+
+test('CSRF token endpoint can skip Api authorization', function () {
+  $client = getHttp('authz-skip-api');
+  $res = $client->get('csrf-token');
+
+  expect($res->getStatusCode())->toBe(200);
+});
+
+// --- Opt-out chains (/foo → /foo/bar → /foo/bar/baz) ---
+
+test('opt-out chain', function (string $api, string $path, int $status) {
+  $client = getHttp($api);
+  $res = $client->get($path);
+
+  expect($res->getStatusCode())->toBe($status);
+})->with([
+  // Authentication
+  'authn scenario 1: /foo' => ['authn-s1-api', 'foo', 403],
+  'authn scenario 1: /foo/bar' => ['authn-s1-api', 'foo/bar', 200],
+  'authn scenario 2: /foo' => ['authn-s2-api', 'foo', 200],
+  'authn scenario 2: /foo/bar' => ['authn-s2-api', 'foo/bar', 403],
+  'authn scenario 3: /foo' => ['authn-s3-api', 'foo', 200],
+  'authn scenario 3: /foo/bar' => ['authn-s3-api', 'foo/bar', 403],
+  'authn scenario 3: /foo/bar/baz' => ['authn-s3-api', 'foo/bar/baz', 200],
+  'authn endpoint: /foo' => ['authn-endpoint-api', 'foo', 200],
+  'authn endpoint: /foo/sibling' => ['authn-endpoint-api', 'foo/sibling', 403],
+  'authn override, parent replaced: /foo' => [
+    'authn-override-a-api',
+    'foo',
+    403,
+  ],
+  'authn override, parent replaced: /foo/bar' => [
+    'authn-override-a-api',
+    'foo/bar',
+    200,
+  ],
+  'authn override, own runs: /foo' => ['authn-override-b-api', 'foo', 200],
+  'authn override, own runs: /foo/bar' => [
+    'authn-override-b-api',
+    'foo/bar',
+    403,
+  ],
+
+  // Authorization
+  'authz scenario 1: /foo' => ['authz-s1-api', 'foo', 403],
+  'authz scenario 1: /foo/bar' => ['authz-s1-api', 'foo/bar', 200],
+  'authz scenario 2: /foo' => ['authz-s2-api', 'foo', 200],
+  'authz scenario 2: /foo/bar' => ['authz-s2-api', 'foo/bar', 403],
+  'authz scenario 3: /foo' => ['authz-s3-api', 'foo', 200],
+  'authz scenario 3: /foo/bar' => ['authz-s3-api', 'foo/bar', 403],
+  'authz scenario 3: /foo/bar/baz' => ['authz-s3-api', 'foo/bar/baz', 200],
+  'authz endpoint: /foo' => ['authz-endpoint-api', 'foo', 200],
+  'authz endpoint: /foo/sibling' => ['authz-endpoint-api', 'foo/sibling', 403],
+  'authz override, parent replaced: /foo' => [
+    'authz-override-a-api',
+    'foo',
+    403,
+  ],
+  'authz override, parent replaced: /foo/bar' => [
+    'authz-override-a-api',
+    'foo/bar',
+    200,
+  ],
+  'authz override, own runs: /foo' => ['authz-override-b-api', 'foo', 200],
+  'authz override, own runs: /foo/bar' => [
+    'authz-override-b-api',
+    'foo/bar',
+    403,
+  ],
+]);

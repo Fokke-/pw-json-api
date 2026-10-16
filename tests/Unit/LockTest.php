@@ -246,6 +246,15 @@ test('locked service rejects hookOnError()', function () {
   $service->hookOnError(function () {});
 })->throws(WireException::class, 'Cannot add hook');
 
+test('locked service rejects hookOnRequest()', function () {
+  $api = new Api();
+  $api->addService(new FoodService());
+  $api->run();
+
+  $service = $api->getService('FoodService');
+  $service->hookOnRequest(function () {});
+})->throws(WireException::class, 'Cannot add hook');
+
 test('locked api rejects hookBefore()', function () {
   $api = new Api();
   $api->run();

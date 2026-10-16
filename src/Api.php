@@ -29,7 +29,10 @@ class Api
   /**
    * Exception handler
    *
-   * @var callable(ExceptionHandlerArgs): (Response|ApiException)|null $exceptionHandler
+   * Should return a Response or an ApiException, but as user code it may
+   * return anything, so the result is checked at runtime.
+   *
+   * @var callable(ExceptionHandlerArgs): mixed|null $exceptionHandler
    */
   private $exceptionHandler = null;
 
@@ -86,8 +89,60 @@ class Api
   ): Response {
     $request = new Request($event);
 
+    /** @var array<string, string> */
+    $headers = [];
+
+    // Exception already passed to the exception handler without a result
+    $unhandledException = null;
+
     // Get response from endpoint
     try {
+      // On-request hooks
+      $onRequestHooks = [
+        // API
+        ...$this->getRequestHooks(RequestHookKey::OnRequest),
+
+        // Services and endpoint
+        ...$result->resolveOnRequestHooks(),
+      ];
+
+      if (!empty($onRequestHooks)) {
+        $hookReturnOnRequest = new OnRequestHookReturn();
+        $hookReturnOnRequest->request = $request;
+        $hookReturnOnRequest->user = $this->wire->user;
+        $hookReturnOnRequest->event = $event;
+        $hookReturnOnRequest->endpoint = $result->endpoint;
+        $hookReturnOnRequest->service = $result->service;
+        $hookReturnOnRequest->services = $result->endpoint->services;
+        $hookReturnOnRequest->api = $this;
+
+        try {
+          foreach ($onRequestHooks as $hookFn) {
+            call_user_func($hookFn, $hookReturnOnRequest);
+          }
+        } finally {
+          $headers = $hookReturnOnRequest->headers;
+        }
+      }
+
+      // Handle OPTIONS requests with Allow header
+      if ($request->methodEnum === RequestMethod::Options) {
+        return (new Response(null))
+          ->header(
+            'Allow',
+            implode(', ', [
+              'OPTIONS',
+              ...$result->endpoint->getAllowedMethods(),
+            ]),
+          )
+          ->_addHeaders($headers);
+      }
+
+      // Reject malformed request body. Deferred until after on-request
+      // hooks and OPTIONS handling, so that their headers (e.g. CORS)
+      // are included in the error response.
+      $request->_assertValidBody();
+
       // Try to find handler matching the request method
       $handler = $request->methodEnum
         ? $result->endpoint->getHandler($request->methodEnum)
@@ -176,6 +231,10 @@ class Api
         $handlerArgs->request = $request;
         $handlerArgs->user = $this->wire->user;
         $handlerArgs->event = $event;
+        $handlerArgs->endpoint = $result->endpoint;
+        $handlerArgs->service = $result->service;
+        $handlerArgs->services = $result->endpoint->services;
+        $handlerArgs->api = $this;
 
         $response = call_user_func($handler, $handlerArgs);
         if (!($response instanceof Response)) {
@@ -192,33 +251,20 @@ class Api
 
         // For other exception types, try to get response
         // from custom exception handler function.
-        if (is_callable($this->exceptionHandler)) {
-          $exceptionHandlerArgs = new ExceptionHandlerArgs();
-          $exceptionHandlerArgs->exception = $e;
-          $exceptionHandlerArgs->request = $request;
-          $exceptionHandlerArgs->user = $this->wire->user;
-          $exceptionHandlerArgs->event = $event;
-          $exceptionHandlerArgs->endpoint = $result->endpoint;
-          $exceptionHandlerArgs->service = $result->service;
-          $exceptionHandlerArgs->services = $result->endpoint->services;
-          $exceptionHandlerArgs->api = $this;
+        // A Response from the handler continues to after hooks.
+        $handled = $this->callExceptionHandler($e, $request, $event, $result);
 
-          $exceptionHandlerResult = call_user_func(
-            $this->exceptionHandler,
-            $exceptionHandlerArgs,
-          );
-
-          if ($exceptionHandlerResult instanceof Response) {
-            $response = $exceptionHandlerResult;
-          } elseif ($exceptionHandlerResult instanceof ApiException) {
-            throw $exceptionHandlerResult;
-          } else {
-            throw $e;
-          }
+        if ($handled instanceof Response) {
+          $response = $handled;
+        } elseif ($handled instanceof ApiException) {
+          throw $handled;
         } else {
+          $unhandledException = $e;
           throw $e;
         }
       }
+
+      $response->_addHeaders($headers);
 
       // After hooks
       $afterHooks = [
@@ -248,36 +294,106 @@ class Api
         }
       }
     } catch (ApiException $e) {
-      // Error hooks
-      $errorHooks = [
-        // Endpoint with services
-        ...$result->resolveErrorHooks(),
+      $this->runErrorHooks($e, $headers, $request, $event, $result);
+      throw $e;
+    } catch (\Throwable $e) {
+      // Exceptions thrown outside the endpoint handler (hooks,
+      // authenticators, authorizers and plugins). A Response from the
+      // exception handler is returned as is, without after hooks.
+      if ($e === $unhandledException) {
+        throw $e;
+      }
 
-        // API
-        ...$this->getRequestHooks(RequestHookKey::OnError),
-      ];
+      $handled = $this->callExceptionHandler($e, $request, $event, $result);
 
-      if (!empty($errorHooks)) {
-        $hookReturnError = new ErrorHookReturn();
-        $hookReturnError->request = $request;
-        $hookReturnError->user = $this->wire->user;
-        $hookReturnError->event = $event;
-        $hookReturnError->endpoint = $result->endpoint;
-        $hookReturnError->service = $result->service;
-        $hookReturnError->services = $result->endpoint->services;
-        $hookReturnError->api = $this;
-        $hookReturnError->exception = $e;
-        $hookReturnError->response = $e->response;
+      if ($handled instanceof Response) {
+        return $handled->_addHeaders($headers);
+      }
 
-        foreach ($errorHooks as $hookFn) {
-          call_user_func($hookFn, $hookReturnError);
-        }
+      if ($handled instanceof ApiException) {
+        $this->runErrorHooks($handled, $headers, $request, $event, $result);
+        throw $handled;
       }
 
       throw $e;
     }
 
     return $response;
+  }
+
+  /**
+   * Pass an exception to the custom exception handler, if defined
+   *
+   * Returns null if there is no handler, or it did not return
+   * a Response or an ApiException.
+   */
+  private function callExceptionHandler(
+    \Throwable $exception,
+    Request $request,
+    HookEvent $event,
+    ApiSearchEndpointResult $result,
+  ): Response|ApiException|null {
+    if (!is_callable($this->exceptionHandler)) {
+      return null;
+    }
+
+    $exceptionHandlerArgs = new ExceptionHandlerArgs();
+    $exceptionHandlerArgs->exception = $exception;
+    $exceptionHandlerArgs->request = $request;
+    $exceptionHandlerArgs->user = $this->wire->user;
+    $exceptionHandlerArgs->event = $event;
+    $exceptionHandlerArgs->endpoint = $result->endpoint;
+    $exceptionHandlerArgs->service = $result->service;
+    $exceptionHandlerArgs->services = $result->endpoint->services;
+    $exceptionHandlerArgs->api = $this;
+
+    $handled = call_user_func($this->exceptionHandler, $exceptionHandlerArgs);
+
+    return $handled instanceof Response || $handled instanceof ApiException
+      ? $handled
+      : null;
+  }
+
+  /**
+   * Add on-request headers to the error response and run error hooks
+   *
+   * @param array<string, string> $headers
+   */
+  private function runErrorHooks(
+    ApiException $exception,
+    array $headers,
+    Request $request,
+    HookEvent $event,
+    ApiSearchEndpointResult $result,
+  ): void {
+    $exception->response->_addHeaders($headers);
+
+    $errorHooks = [
+      // Endpoint with services
+      ...$result->resolveErrorHooks(),
+
+      // API
+      ...$this->getRequestHooks(RequestHookKey::OnError),
+    ];
+
+    if (empty($errorHooks)) {
+      return;
+    }
+
+    $hookReturnError = new ErrorHookReturn();
+    $hookReturnError->request = $request;
+    $hookReturnError->user = $this->wire->user;
+    $hookReturnError->event = $event;
+    $hookReturnError->endpoint = $result->endpoint;
+    $hookReturnError->service = $result->service;
+    $hookReturnError->services = $result->endpoint->services;
+    $hookReturnError->api = $this;
+    $hookReturnError->exception = $exception;
+    $hookReturnError->response = $exception->response;
+
+    foreach ($errorHooks as $hookFn) {
+      call_user_func($hookFn, $hookReturnError);
+    }
   }
 
   /**
@@ -290,8 +406,6 @@ class Api
   {
     $this->_initPlugins();
     $this->_lock();
-
-    $isOptions = ($_SERVER['REQUEST_METHOD'] ?? null) == 'OPTIONS';
 
     /** @var string[] */
     $serviceNames = [];
@@ -314,7 +428,21 @@ class Api
       }
 
       $path = (function () use ($result) {
-        $out = $result->resolvePath($this->getBasePath());
+        $preserve = $this->config->preservePathCase;
+        $out = $result->resolvePath($this->_getBasePath($preserve), $preserve);
+
+        // Lowercasing changes the path
+        if (
+          !$preserve &&
+          $out !== $result->resolvePath($this->_getBasePath(true), true)
+        ) {
+          // Suppressed with @ so the notice never ends up in the response
+          // output. Error handlers and deprecation tooling still receive it.
+          @trigger_error(
+            "Endpoint path '{$out}' contains uppercase characters, which are lowercased. Set the preservePathCase option to true to use paths as defined. This will be the default in 3.0.",
+            E_USER_DEPRECATED,
+          );
+        }
 
         if ($this->config->trailingSlashes === null) {
           return $out . '/?';
@@ -346,48 +474,45 @@ class Api
       $result->endpoint->_lock();
 
       // Add listener for the endpoint path
-      $this->wire->addHook($path, function (HookEvent $event) use (
-        $result,
-        $isOptions,
-      ) {
-        // Handle OPTIONS requests with Allow header
-        if ($isOptions) {
-          $methods = $result->endpoint->getAllowedMethods();
-
-          $response = (new Response())->header(
-            'Allow',
-            implode(', ', ['OPTIONS', ...$methods]),
-          );
-
-          header('Content-Type: application/json');
-          foreach ($response->getHeaders() as $name => $value) {
-            header("{$name}: {$value}");
-          }
-          http_response_code($response->code);
-          die($response->toJson($this->config->jsonFlags, false));
-        }
-
+      $this->wire->addHook($path, function (HookEvent $event) use ($result) {
         try {
-          $response = $this->handleRequest($result, $event);
-
-          header('Content-Type: application/json');
-          foreach ($response->getHeaders() as $name => $value) {
-            header("{$name}: {$value}");
-          }
-          http_response_code($response->code);
-          echo $response->toJson($this->config->jsonFlags);
-          die();
+          $this->send($this->handleRequest($result, $event), true);
         } catch (ApiException $e) {
-          // Output error
-          header('Content-Type: application/json');
-          foreach ($e->response->getHeaders() as $name => $value) {
-            header("{$name}: {$value}");
-          }
-          http_response_code($e->response->code);
-          echo $e->response->toJson($this->config->jsonFlags, false);
-          die();
+          $this->send($e->response, false);
         }
       });
     }
+  }
+
+  /**
+   * Output response as JSON and end the request
+   *
+   * If the response cannot be encoded as JSON, a 500 error is sent instead.
+   */
+  private function send(Response $response, bool $withData): never
+  {
+    $code = $response->code;
+
+    try {
+      $body = (string) $response->toJson(
+        $this->config->jsonFlags | JSON_THROW_ON_ERROR,
+        $withData,
+      );
+    } catch (\JsonException) {
+      $code = 500;
+      $body = (string) json_encode(
+        ['error' => 'Failed to encode response'],
+        $this->config->jsonFlags,
+      );
+    }
+
+    $response->_addHeaders(['Content-Type' => 'application/json']);
+
+    foreach ($response->getHeaders() as $name => $value) {
+      header("{$name}: {$value}");
+    }
+    http_response_code($code);
+    echo $body;
+    die();
   }
 }

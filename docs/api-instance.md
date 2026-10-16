@@ -28,8 +28,16 @@ $api->configure(function ($config) {
   // if (wire()->config->debug) {
   //   $config->jsonFlags |= JSON_PRETTY_PRINT;
   // }
+
+  // Use paths exactly as defined, without lowercasing
+  // (default: false, will be true in 3.0)
+  $config->preservePathCase = false;
 });
 ```
+
+:::tip <Badge type="tip" text="^2.5" />
+If a response cannot be encoded as JSON — for example, it contains invalid UTF-8 or a `NAN` value — a `500` response with the error `Failed to encode response` is returned instead. To replace invalid UTF-8 characters instead of failing, add `JSON_INVALID_UTF8_SUBSTITUTE` to `jsonFlags`.
+:::
 
 ## Base path
 
@@ -107,6 +115,12 @@ You can access the following properties via the `$args` parameter of the handler
 | `api`       | `Api`                    | API instance                 |
 
 You need to return either a `Response` or an `ApiException` from the handler.
+
+The handler receives exceptions thrown at any point of the request handling: in the endpoint handler, in request hooks, in authenticators and authorization callbacks, and in plugins. <Badge type="tip" text="^2.5" />
+
+- **`ApiException`** — handled like any other `ApiException`: [error hooks](/error-hooks) are executed and an error response is returned.
+- **`Response`** — returned to the client. If the exception was thrown in the endpoint handler, after hooks are executed as usual. Otherwise the response is returned as is.
+- **Anything else** — the original exception is passed to ProcessWire. The same happens if no exception handler is defined.
 
 ```php
 $api->handleException(function ($args) {

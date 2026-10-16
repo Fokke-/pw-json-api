@@ -27,14 +27,14 @@
 
 ## Hooks
 
-- [Request hooks](https://pwjsonapi.fokke.fi/request-hooks): Add before and after hooks at the API, service, or endpoint level to validate requests and modify responses.
+- [Request hooks](https://pwjsonapi.fokke.fi/request-hooks): Add on-request, before, and after hooks at the API, service, or endpoint level to set headers, validate requests, and modify responses.
 - [Error hooks](https://pwjsonapi.fokke.fi/error-hooks): Customize error responses with API-level and service-level error hooks when exceptions are thrown.
 
 ## Plugins
 
 - [Plugins](https://pwjsonapi.fokke.fi/plugins/plugins-overview): Extend API, service, or endpoint behavior with reusable plugins built on the ApiPlugin base class.
 - [CSRF protection](https://pwjsonapi.fokke.fi/plugins/csrf): Protect state-changing requests with CSRF token validation using ProcessWire's built-in session tokens.
-- [Rate limiting](https://pwjsonapi.fokke.fi/plugins/rate-limit): Limit API request rates per client using a fixed-window algorithm backed by ProcessWire's WireCache.
+- [Rate limiting](https://pwjsonapi.fokke.fi/plugins/rate-limit): Deprecated plugin for limiting API request rates per client using a fixed-window algorithm backed by ProcessWire's WireCache.
 
 ## Tools
 

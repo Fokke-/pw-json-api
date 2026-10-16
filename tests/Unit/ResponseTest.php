@@ -61,3 +61,19 @@ test('toJson()', function () {
   expect($response->toJson())->toBe('{"data":{"foo":"bar"},"foo":"bar"}');
   expect($response->toJson(0, false))->toBe('{"foo":"bar"}');
 });
+
+test('_addHeaders() keeps headers already set', function () {
+  $response = (new Response())->header('X-Foo', 'response');
+
+  expect(
+    $response->_addHeaders([
+      'X-Foo' => 'added',
+      'X-Bar' => 'added',
+    ]),
+  )->toBe($response);
+
+  expect($response->getHeaders())->toBe([
+    'X-Foo' => 'response',
+    'X-Bar' => 'added',
+  ]);
+});

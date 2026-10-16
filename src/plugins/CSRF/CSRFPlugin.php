@@ -23,6 +23,37 @@ class CSRFPlugin extends ApiPlugin
   /** Endpoint path for retrieving the current token */
   public string $endpointPath = '/csrf-token';
 
+  /** Replace the token after every successful state-changing request */
+  public bool $rotateToken = false;
+
+  /**
+   * Setup function for the token service
+   *
+   * @var (callable(CSRFPluginService): void)|null
+   */
+  private $serviceSetup = null;
+
+  /**
+   * Configure the service providing the token endpoint
+   *
+   * Must be called before the plugin is initialized, e.g. in the setup
+   * function of addPlugin().
+   *
+   * @param callable(CSRFPluginService): void $setup
+   * @throws WireException If the plugin is already initialized
+   */
+  public function setupService(callable $setup): static
+  {
+    if ($this->context !== null) {
+      throw new WireException(
+        'Cannot set up service: CSRFPlugin is already initialized.',
+      );
+    }
+
+    $this->serviceSetup = $setup;
+    return $this;
+  }
+
   /** Initialize plugin */
   public function init(Api|Service|Endpoint $context): static
   {
@@ -36,7 +67,7 @@ class CSRFPlugin extends ApiPlugin
 
     $context
       // Add service for retrieving a token
-      ->addService(new CSRFPluginService($this))
+      ->addService(new CSRFPluginService($this), $this->serviceSetup)
 
       // Add hooks for validating the token
       ->hookBeforePost(function () {
@@ -52,18 +83,18 @@ class CSRFPlugin extends ApiPlugin
         $this->checkToken();
       })
 
-      // Add hooks for rotating the token
+      // Add hooks for returning the token, rotated if enabled
       ->hookAfterPost(function ($args) {
-        $args->response->with($this->getToken(true));
+        $args->response->with($this->getToken($this->rotateToken));
       })
       ->hookAfterPut(function ($args) {
-        $args->response->with($this->getToken(true));
+        $args->response->with($this->getToken($this->rotateToken));
       })
       ->hookAfterPatch(function ($args) {
-        $args->response->with($this->getToken(true));
+        $args->response->with($this->getToken($this->rotateToken));
       })
       ->hookAfterDelete(function ($args) {
-        $args->response->with($this->getToken(true));
+        $args->response->with($this->getToken($this->rotateToken));
       });
 
     return $this;
